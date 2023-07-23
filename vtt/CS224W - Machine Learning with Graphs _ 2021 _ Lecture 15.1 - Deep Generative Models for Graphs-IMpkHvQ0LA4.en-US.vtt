@@ -1,0 +1,1198 @@
+WEBVTT
+Kind: captions
+Language: en-US
+
+00:00:04.950 --> 00:00:06.450
+Welcome to the class.
+
+00:00:06.450 --> 00:00:09.090
+Today we are going to
+discuss deep generative
+
+00:00:09.090 --> 00:00:10.740
+models for graphs.
+
+00:00:10.740 --> 00:00:14.380
+So let me explain
+that in more detail.
+
+00:00:14.380 --> 00:00:19.530
+So, so far we talked about how
+to classify nodes and edges
+
+00:00:19.530 --> 00:00:21.750
+and perhaps entire graphs.
+
+00:00:21.750 --> 00:00:24.720
+But now we are going to
+talk about a new task, which
+
+00:00:24.720 --> 00:00:27.120
+is the task of
+generating the graph.
+
+00:00:27.120 --> 00:00:30.240
+The idea is that we want to
+have a generative model that
+
+00:00:30.240 --> 00:00:33.870
+is going to generate
+a synthetic graph that
+
+00:00:33.870 --> 00:00:38.310
+will be similar to
+the real-world graph.
+
+00:00:38.310 --> 00:00:42.030
+An application of this
+type of graph generation
+
+00:00:42.030 --> 00:00:44.400
+happens in many
+different places.
+
+00:00:44.400 --> 00:00:48.480
+You can imagine that you can
+represent molecules as graphs
+
+00:00:48.480 --> 00:00:51.420
+of bonds between the atoms.
+
+00:00:51.420 --> 00:00:54.060
+And then in this case,
+you want to generate
+
+00:00:54.060 --> 00:00:59.400
+novel molecular structures
+based on this generative model.
+
+00:00:59.400 --> 00:01:01.540
+Or for example in
+material design,
+
+00:01:01.540 --> 00:01:05.550
+you may want to generate
+optimal material structures
+
+00:01:05.550 --> 00:01:06.870
+and this is what you can do.
+
+00:01:06.870 --> 00:01:08.610
+In social network
+modeling, you may
+
+00:01:08.610 --> 00:01:11.530
+want to generate
+synthetic social networks
+
+00:01:11.530 --> 00:01:14.760
+so that you can then use
+them for various kinds
+
+00:01:14.760 --> 00:01:16.020
+of downstream tasks.
+
+00:01:16.020 --> 00:01:18.460
+And even in some other
+applications for example,
+
+00:01:18.460 --> 00:01:21.930
+if you think about generating
+realistic road layouts.
+
+00:01:21.930 --> 00:01:23.820
+If you want to think
+about generating
+
+00:01:23.820 --> 00:01:27.585
+realistic layouts of cities,
+all these types of things
+
+00:01:27.585 --> 00:01:32.100
+you can model as a graph
+generation process.
+
+00:01:32.100 --> 00:01:35.190
+And even for example, some
+combinatorial problems
+
+00:01:35.190 --> 00:01:38.820
+like the satisfiability problem
+or the Boolean satisfiability
+
+00:01:38.820 --> 00:01:42.930
+problem, you can generate
+artificial instances
+
+00:01:42.930 --> 00:01:47.040
+of that problem by representing
+the satisfiability instance
+
+00:01:47.040 --> 00:01:51.190
+as a graph and then learning
+how to generate those graphs.
+
+00:01:51.190 --> 00:01:54.370
+So in all of these
+cases basically,
+
+00:01:54.370 --> 00:01:56.130
+the goal is that
+we want to learn
+
+00:01:56.130 --> 00:01:59.910
+how to generate a
+graph that is somehow
+
+00:01:59.910 --> 00:02:04.280
+similar to the underlying
+real-world graph.
+
+00:02:04.280 --> 00:02:07.370
+And the field of
+graph generation
+
+00:02:07.370 --> 00:02:09.919
+has a rich tradition.
+
+00:02:09.919 --> 00:02:11.990
+And the way this
+started, it started
+
+00:02:11.990 --> 00:02:15.470
+with the study of properties
+of complex networks
+
+00:02:15.470 --> 00:02:18.290
+like real-world networks.
+
+00:02:18.290 --> 00:02:21.620
+And identifying what are
+the fundamental properties
+
+00:02:21.620 --> 00:02:23.510
+that these real-world
+networks have
+
+00:02:23.510 --> 00:02:28.550
+like power or scale-free
+degree distributions
+
+00:02:28.550 --> 00:02:31.160
+and also like the
+small world property
+
+00:02:31.160 --> 00:02:32.750
+and so on and so forth.
+
+00:02:32.750 --> 00:02:35.870
+Based on these fundamental
+properties of complex networks,
+
+00:02:35.870 --> 00:02:39.470
+then there have been
+a lot of development
+
+00:02:39.470 --> 00:02:42.170
+of generative models
+for graphs, which
+
+00:02:42.170 --> 00:02:45.440
+generally fell into two camps.
+
+00:02:45.440 --> 00:02:49.430
+One camp was very
+mechanistic generative models
+
+00:02:49.430 --> 00:02:53.780
+like the preferential attachment
+model, that basically allowed
+
+00:02:53.780 --> 00:02:56.240
+us to explain how could
+certain properties
+
+00:02:56.240 --> 00:02:58.160
+like the scale-free
+property of networks
+
+00:02:58.160 --> 00:03:01.790
+arise from this microscopic
+preferential attachment type
+
+00:03:01.790 --> 00:03:02.780
+model.
+
+00:03:02.780 --> 00:03:06.530
+Another set of models
+for generating graphs,
+
+00:03:06.530 --> 00:03:10.070
+came mostly from the statistics
+and the social networking
+
+00:03:10.070 --> 00:03:12.950
+literature where basically, the
+idea was that there is maybe
+
+00:03:12.950 --> 00:03:16.190
+some, that there might be
+some latent social groups
+
+00:03:16.190 --> 00:03:19.520
+and based on those
+latent social groups,
+
+00:03:19.520 --> 00:03:21.650
+edges of the social
+network get created.
+
+00:03:21.650 --> 00:03:24.020
+And then the question is,
+how can you take that model,
+
+00:03:24.020 --> 00:03:27.990
+fit it to the data and
+perhaps discover the groups?
+
+00:03:27.990 --> 00:03:31.260
+However, today and
+in this lecture,
+
+00:03:31.260 --> 00:03:33.170
+we are going to
+use deep learning
+
+00:03:33.170 --> 00:03:35.420
+and representation
+learning to learn
+
+00:03:35.420 --> 00:03:37.020
+how to generate the graphs.
+
+00:03:37.020 --> 00:03:43.050
+So in contrast to prior work in
+some sense that either assumed
+
+00:03:43.050 --> 00:03:45.180
+some mechanistic
+generative process
+
+00:03:45.180 --> 00:03:48.780
+or assumed some statistical
+model that was motivated
+
+00:03:48.780 --> 00:03:51.210
+by the-- let's say
+social science, here
+
+00:03:51.210 --> 00:03:56.220
+we want to be kind of
+agnostic in this respect.
+
+00:03:56.220 --> 00:04:00.240
+And the goal will be that,
+can we basically given a graph
+
+00:04:00.240 --> 00:04:03.660
+or given a couple of graphs,
+can we learn how to gene--
+
+00:04:03.660 --> 00:04:05.820
+what the properties
+of those graphs are,
+
+00:04:05.820 --> 00:04:08.580
+and how can we
+generate more instances
+
+00:04:08.580 --> 00:04:09.970
+of those types of graphs?
+
+00:04:09.970 --> 00:04:12.010
+So we'll be kind of
+completely general,
+
+00:04:12.010 --> 00:04:15.270
+we'll just learn from the data
+in this kind of representation
+
+00:04:15.270 --> 00:04:17.440
+learning framework.
+
+00:04:17.440 --> 00:04:21.180
+So this is one way how
+we can look into this.
+
+00:04:21.180 --> 00:04:22.920
+Another way how we
+can look into this
+
+00:04:22.920 --> 00:04:25.080
+is that, so far in
+this class we've
+
+00:04:25.080 --> 00:04:27.990
+been talking about the deep
+graph encoders, where basically
+
+00:04:27.990 --> 00:04:32.160
+the idea was that, we have a
+complex network, complex graph,
+
+00:04:32.160 --> 00:04:34.470
+complex relational
+structure on the input
+
+00:04:34.470 --> 00:04:37.530
+and you want to pass it
+through several layers
+
+00:04:37.530 --> 00:04:42.150
+of this representation and
+a deep learning network that
+
+00:04:42.150 --> 00:04:45.570
+at the end produces-- let's
+say node embeddings, edge
+
+00:04:45.570 --> 00:04:48.230
+embeddings, entire
+graph embeddings, right?
+
+00:04:48.230 --> 00:04:50.700
+So this is what we call
+a deep graph encoder
+
+00:04:50.700 --> 00:04:52.500
+because it takes the
+graph as the input
+
+00:04:52.500 --> 00:04:55.860
+and encodes it into some
+kind of representation.
+
+00:04:55.860 --> 00:04:58.380
+The task of graph
+generation actually
+
+00:04:58.380 --> 00:05:00.600
+goes in the other direction.
+
+00:05:00.600 --> 00:05:02.880
+It wants to start on
+the right-hand side
+
+00:05:02.880 --> 00:05:06.270
+and then through a series of
+complex nonlinear transforms
+
+00:05:06.270 --> 00:05:09.190
+wants to output the
+entire graph, right?
+
+00:05:09.190 --> 00:05:12.588
+So our input perhaps will be
+a little small noise parameter
+
+00:05:12.588 --> 00:05:14.130
+or something like
+that and we'll want
+
+00:05:14.130 --> 00:05:17.190
+to kind of expand
+that until we have
+
+00:05:17.190 --> 00:05:19.370
+the entire graph on the output.
+
+00:05:19.370 --> 00:05:23.040
+So we will be kind of decoding
+rather than encoding, right?
+
+00:05:23.040 --> 00:05:25.080
+We'll take a small
+piece of information
+
+00:05:25.080 --> 00:05:27.060
+and expand it into
+the entire graph
+
+00:05:27.060 --> 00:05:29.670
+rather than taking
+a complex structure
+
+00:05:29.670 --> 00:05:33.820
+and compress it into or
+into its representation.
+
+00:05:33.820 --> 00:05:37.410
+So we are talking about
+deep graph decoders,
+
+00:05:37.410 --> 00:05:42.190
+because on the output we want
+to generate an entire network.
+
+00:05:42.190 --> 00:05:45.240
+So in order for us to do
+that, I want to first tell you
+
+00:05:45.240 --> 00:05:50.370
+about kind of how are we going
+to set up the problem in terms
+
+00:05:50.370 --> 00:05:52.270
+of its set up, in
+terms of its kind
+
+00:05:52.270 --> 00:05:54.780
+of mathematical
+statistical foundation.
+
+00:05:54.780 --> 00:05:59.070
+And then I'm going to talk
+about what methods allow
+
+00:05:59.070 --> 00:06:03.330
+us to achieve the goal
+of graph generation
+
+00:06:03.330 --> 00:06:05.410
+using representation learning.
+
+00:06:05.410 --> 00:06:08.640
+So let's talk about
+graph generation.
+
+00:06:08.640 --> 00:06:12.030
+Generally, we have two
+tasks we will talk about
+
+00:06:12.030 --> 00:06:12.880
+in this lecture.
+
+00:06:12.880 --> 00:06:16.232
+First, is what we will call
+realistic graph generation,
+
+00:06:16.232 --> 00:06:17.940
+where we want to
+generate the graphs that
+
+00:06:17.940 --> 00:06:20.160
+are similar to a
+given set of graphs.
+
+00:06:20.160 --> 00:06:22.920
+And I'm going to define
+this much more rigorously
+
+00:06:22.920 --> 00:06:23.920
+in a second.
+
+00:06:23.920 --> 00:06:25.650
+And then the second
+task, I'm also
+
+00:06:25.650 --> 00:06:28.710
+going to talk about is what
+we call goal-directed graph
+
+00:06:28.710 --> 00:06:29.490
+generation.
+
+00:06:29.490 --> 00:06:31.440
+What basically you want
+to generate a graph
+
+00:06:31.440 --> 00:06:33.600
+that optimizes a
+given constraint
+
+00:06:33.600 --> 00:06:35.080
+or a given objective.
+
+00:06:35.080 --> 00:06:37.290
+So if you are generating
+a molecule you could say,
+
+00:06:37.290 --> 00:06:40.830
+I want to generate molecules
+that have a given property,
+
+00:06:40.830 --> 00:06:42.900
+maybe the property
+is solubility,
+
+00:06:42.900 --> 00:06:46.110
+maybe the property is that
+these molecules are non-toxic.
+
+00:06:46.110 --> 00:06:48.870
+And you say I want to generate
+molecules that are non-toxic.
+
+00:06:48.870 --> 00:06:51.735
+So how do I generate the
+most non-toxic molecule?
+
+00:06:51.735 --> 00:06:56.070
+Or how do I generate the
+molecule that is most soluble
+
+00:06:56.070 --> 00:06:58.500
+and still looks like drugs?
+
+00:06:58.500 --> 00:07:00.900
+Imagine another case
+I was giving example
+
+00:07:00.900 --> 00:07:03.690
+before if I want to generate a
+road network-- a realistic road
+
+00:07:03.690 --> 00:07:06.600
+network of a city, that is
+a graph generation problem.
+
+00:07:06.600 --> 00:07:09.000
+I could say, I want to
+generate the optimal road
+
+00:07:09.000 --> 00:07:11.400
+network of a city,
+right, whatever
+
+00:07:11.400 --> 00:07:16.590
+the optimality constraint is
+that is kind of, we assume
+
+00:07:16.590 --> 00:07:17.850
+it is given to us, right?
+
+00:07:17.850 --> 00:07:21.665
+So that's what we mean by
+goal-directed graph generation
+
+00:07:21.665 --> 00:07:24.240
+where you want to generate
+a graph with a given--
+
+00:07:24.240 --> 00:07:28.080
+with a given goal that optimizes
+a given black box objective
+
+00:07:28.080 --> 00:07:28.900
+function.
+
+00:07:28.900 --> 00:07:32.540
+So that's the two parts
+of the lecture today.
+
+00:07:32.540 --> 00:07:35.310
+But first, let's
+talk about how do we
+
+00:07:35.310 --> 00:07:39.540
+set up this graph generation
+task as a machine learning
+
+00:07:39.540 --> 00:07:40.080
+task?
+
+00:07:40.080 --> 00:07:43.800
+So we are going to proceed
+in the following way.
+
+00:07:43.800 --> 00:07:47.820
+We are going to assume that the
+graphs are sampled from this p
+
+00:07:47.820 --> 00:07:49.060
+data distribution.
+
+00:07:49.060 --> 00:07:52.200
+So basically nature is
+sampling from p data
+
+00:07:52.200 --> 00:07:53.800
+and is giving us graphs.
+
+00:07:53.800 --> 00:07:58.860
+Our goal will be to learn
+a distribution p model
+
+00:07:58.860 --> 00:08:03.750
+and then be able to learn how
+to sample from this p model.
+
+00:08:03.750 --> 00:08:07.050
+So basically, given
+the input data,
+
+00:08:07.050 --> 00:08:10.620
+we are going to learn a
+probability distribution p
+
+00:08:10.620 --> 00:08:12.540
+model over the
+graphs, and then we
+
+00:08:12.540 --> 00:08:15.540
+are going to sample new
+graphs from that probability
+
+00:08:15.540 --> 00:08:16.170
+distribution.
+
+00:08:16.170 --> 00:08:17.760
+And right, and our
+goal somehow will
+
+00:08:17.760 --> 00:08:21.930
+be, that we want this p model
+distribution to be as close as
+
+00:08:21.930 --> 00:08:26.130
+possible to this unknown
+p data distribution
+
+00:08:26.130 --> 00:08:29.850
+that we don't have access to,
+that only nature has access to,
+
+00:08:29.850 --> 00:08:32.760
+right, the data set creator
+has access to this p data.
+
+00:08:32.760 --> 00:08:36.120
+We want to approximate
+p data with p model.
+
+00:08:36.120 --> 00:08:39.730
+And then as we have approximated
+p data with p model,
+
+00:08:39.730 --> 00:08:41.850
+we want to draw
+additional instances,
+
+00:08:41.850 --> 00:08:43.770
+we want to generate
+additional graphs,
+
+00:08:43.770 --> 00:08:48.180
+we want to generate additional
+samples from the p model
+
+00:08:48.180 --> 00:08:51.830
+and those would be the graphs
+we will want to generate.
+
+00:08:51.830 --> 00:08:54.970
+So if we want to do
+this, then there are--
+
+00:08:54.970 --> 00:08:58.360
+this is an instance of what we
+call generative models, right?
+
+00:08:58.360 --> 00:09:01.540
+We assume we want to learn a
+generative model for graphs
+
+00:09:01.540 --> 00:09:05.530
+from a set of input graphs,
+let's call them x i.
+
+00:09:05.530 --> 00:09:09.790
+Here, as I said before p data
+is the data distribution which
+
+00:09:09.790 --> 00:09:12.430
+is not known to us and we
+don't have access to it,
+
+00:09:12.430 --> 00:09:15.580
+all we have access
+to it are samples
+
+00:09:15.580 --> 00:09:19.040
+x that are sampled from
+this unknown p data.
+
+00:09:19.040 --> 00:09:23.770
+We also will have another family
+of probability distributions,
+
+00:09:23.770 --> 00:09:27.280
+let's call them p model
+that are defined by theta,
+
+00:09:27.280 --> 00:09:31.180
+theta are parameters
+of our model.
+
+00:09:31.180 --> 00:09:33.520
+And we will want to use
+this p model distribution
+
+00:09:33.520 --> 00:09:35.830
+to approximate p data.
+
+00:09:35.830 --> 00:09:37.910
+And then, what
+would be our goal?
+
+00:09:37.910 --> 00:09:39.250
+We have two-step goal.
+
+00:09:39.250 --> 00:09:44.140
+First goal is to find parameters
+theta so that p model closely
+
+00:09:44.140 --> 00:09:47.740
+approximates p data, and this
+is called a density estimation
+
+00:09:47.740 --> 00:09:48.430
+task.
+
+00:09:48.430 --> 00:09:53.460
+And then we also want to be
+able to sample from p model.
+
+00:09:53.460 --> 00:09:56.110
+Basically means, we want to
+be able to generate new graphs
+
+00:09:56.110 --> 00:09:59.110
+from this now p model
+distribution to which we
+
+00:09:59.110 --> 00:10:00.730
+have access to, right?
+
+00:10:00.730 --> 00:10:04.750
+We want to generate new
+samples, new graphs from it.
+
+00:10:04.750 --> 00:10:07.090
+So let me give you
+more details, right?
+
+00:10:07.090 --> 00:10:11.650
+Our goal is to make p model be
+as close to p data as possible.
+
+00:10:11.650 --> 00:10:13.830
+And the key principle we
+are going to use here,
+
+00:10:13.830 --> 00:10:16.990
+is the principle of maximum
+likelihood estimation,
+
+00:10:16.990 --> 00:10:20.190
+which is a fundamental approach
+to modeling distributions.
+
+00:10:20.190 --> 00:10:23.120
+Basically the way you can
+think of it is the following,
+
+00:10:23.120 --> 00:10:27.720
+we want to find parameters
+theta star of our p model
+
+00:10:27.720 --> 00:10:33.090
+distribution such that the
+log likelihood of the data
+
+00:10:33.090 --> 00:10:36.810
+points x of the graphs x that
+are sampled from this p data
+
+00:10:36.810 --> 00:10:41.670
+distribution, their log
+likelihood under our model--
+
+00:10:41.670 --> 00:10:45.090
+under p model that is basically
+defined or parameterized
+
+00:10:45.090 --> 00:10:47.740
+by theta, is as large
+as possible, right?
+
+00:10:47.740 --> 00:10:50.160
+So our goal is to
+find parameters theta
+
+00:10:50.160 --> 00:10:53.460
+star, such that the
+observed data points x.
+
+00:10:53.460 --> 00:10:56.580
+So basically, the
+observed graphs
+
+00:10:56.580 --> 00:11:00.840
+have the highest log likelihood
+among all possible choices
+
+00:11:00.840 --> 00:11:02.695
+of theta, right?
+
+00:11:02.695 --> 00:11:04.320
+And of course here,
+the important thing
+
+00:11:04.320 --> 00:11:07.080
+will be that p model needs
+to be flexible enough
+
+00:11:07.080 --> 00:11:09.060
+that it's able to model p data.
+
+00:11:09.060 --> 00:11:12.240
+And then the question
+is, how do we search over
+
+00:11:12.240 --> 00:11:17.310
+all the instances of probability
+distributions captured
+
+00:11:17.310 --> 00:11:18.750
+by this p model?
+
+00:11:18.750 --> 00:11:23.520
+So we actually kind of capture
+by these parameters theta, so
+
+00:11:23.520 --> 00:11:26.520
+that the likelihood of
+the data that we observe
+
+00:11:26.520 --> 00:11:29.190
+is as high as possible, right?
+
+00:11:29.190 --> 00:11:31.380
+And in other words,
+the goal is to find
+
+00:11:31.380 --> 00:11:34.500
+the model that is most likely
+to have generated the observed
+
+00:11:34.500 --> 00:11:36.060
+data x, right?
+
+00:11:36.060 --> 00:11:38.700
+Find the p model that
+is most likely to have
+
+00:11:38.700 --> 00:11:41.700
+generated the observed data x.
+
+00:11:41.700 --> 00:11:43.680
+Now, this is the
+first part, which
+
+00:11:43.680 --> 00:11:45.300
+is the density estimation.
+
+00:11:45.300 --> 00:11:47.700
+The second part
+is also important,
+
+00:11:47.700 --> 00:11:50.290
+because once we have the
+density that's not enough.
+
+00:11:50.290 --> 00:11:52.800
+We need to be able to draw
+samples from it, right?
+
+00:11:52.800 --> 00:11:56.520
+We want to create samples from
+this complex distribution.
+
+00:11:56.520 --> 00:12:01.770
+And a common approach how
+you can generate samples
+
+00:12:01.770 --> 00:12:05.160
+from a complex distribution
+would be the following.
+
+00:12:05.160 --> 00:12:08.220
+Is that first, you start with
+the simple noise distribution
+
+00:12:08.220 --> 00:12:12.270
+just like a simple,
+let's say a scalar value
+
+00:12:12.270 --> 00:12:15.780
+that's a normally distributed
+0 mean unit need to variance.
+
+00:12:15.780 --> 00:12:18.330
+And then you want to have
+this complex function that
+
+00:12:18.330 --> 00:12:20.520
+will take this
+little noise kernel
+
+00:12:20.520 --> 00:12:24.540
+and is going to expand it
+until you have the sample x.
+
+00:12:24.540 --> 00:12:27.690
+So in our case, we'll start
+with a little random seed,
+
+00:12:27.690 --> 00:12:32.430
+and we are going to expand
+it into a full graph x.
+
+00:12:32.430 --> 00:12:35.430
+Where of course, now the
+hope is that x will follow
+
+00:12:35.430 --> 00:12:37.930
+the distribution of p model.
+
+00:12:37.930 --> 00:12:41.190
+So in our case, how do we
+design this function f?
+
+00:12:41.190 --> 00:12:43.170
+We are going to use
+deep neural networks,
+
+00:12:43.170 --> 00:12:46.410
+and train them so that they can
+start with the little kernel
+
+00:12:46.410 --> 00:12:48.910
+and generate the graph.
+
+00:12:48.910 --> 00:12:52.630
+So that's how we are
+going to do this.
+
+00:12:52.630 --> 00:12:55.680
+So now in terms of
+deep generative models,
+
+00:12:55.680 --> 00:13:00.480
+our model will be an instance
+of an auto-regressive model.
+
+00:13:00.480 --> 00:13:04.440
+Where this p model will be used
+both for density estimation
+
+00:13:04.440 --> 00:13:08.310
+and sampling, right, because
+we have these two goals, right?
+
+00:13:08.310 --> 00:13:16.020
+And in general you don't have
+to use the same neural network
+
+00:13:16.020 --> 00:13:18.360
+to both do the
+density estimation
+
+00:13:18.360 --> 00:13:21.570
+and to do the sampling and
+there are other approaches
+
+00:13:21.570 --> 00:13:25.020
+that you could choose to do here
+like variational autoencoders
+
+00:13:25.020 --> 00:13:29.290
+or generative adversarial
+networks and so on.
+
+00:13:29.290 --> 00:13:32.590
+But in our case, we are going
+to use an auto-regressive model.
+
+00:13:32.590 --> 00:13:35.220
+And the idea is
+that, we are going
+
+00:13:35.220 --> 00:13:38.130
+to model this complex
+distribution as a product
+
+00:13:38.130 --> 00:13:39.990
+of simpler distributions.
+
+00:13:39.990 --> 00:13:41.970
+And the reason why
+we can do this,
+
+00:13:41.970 --> 00:13:46.180
+is of the chain rule in
+probability and Bayesian
+
+00:13:46.180 --> 00:13:46.680
+networks.
+
+00:13:46.680 --> 00:13:48.600
+So we're basically--
+which basically tells us,
+
+00:13:48.600 --> 00:13:52.980
+that any joint distribution
+on a set of variables
+
+00:13:52.980 --> 00:13:55.800
+can be exactly
+modeled or expressed
+
+00:13:55.800 --> 00:14:01.640
+as a product over the
+conditional distribution,
+
+00:14:01.640 --> 00:14:02.170
+right?
+
+00:14:02.170 --> 00:14:05.000
+So basically I'm
+saying this p model
+
+00:14:05.000 --> 00:14:10.950
+that is a complex
+distribution over my x, which
+
+00:14:10.950 --> 00:14:12.930
+may be a set of
+random variables,
+
+00:14:12.930 --> 00:14:16.680
+I can write it out as a product
+over all these random variables
+
+00:14:16.680 --> 00:14:18.840
+from the first one
+to the last one,
+
+00:14:18.840 --> 00:14:22.470
+where all I have
+to now express is
+
+00:14:22.470 --> 00:14:26.370
+this probability of a
+random variability t given
+
+00:14:26.370 --> 00:14:30.570
+the values instances of all
+the previous random variables,
+
+00:14:30.570 --> 00:14:31.540
+right?
+
+00:14:31.540 --> 00:14:34.750
+So in our case for example,
+if x would be a vector,
+
+00:14:34.750 --> 00:14:38.797
+then x sub t is the t-th
+coordinate of that vector,
+
+00:14:38.797 --> 00:14:40.230
+right?
+
+00:14:40.230 --> 00:14:43.810
+If x is a sentence, then x sub
+t would be the word, right?
+
+00:14:43.810 --> 00:14:46.200
+So I'm basically saying,
+rather than generating
+
+00:14:46.200 --> 00:14:50.020
+an entire sentence or to write
+out the probability of a given,
+
+00:14:50.020 --> 00:14:51.930
+let's say sentence,
+I'm going to--
+
+00:14:51.930 --> 00:14:53.850
+I can model that
+as a product where
+
+00:14:53.850 --> 00:14:56.760
+I say, given the words
+so far, how likely
+
+00:14:56.760 --> 00:14:58.800
+or what is the probability
+of the next word?
+
+00:14:58.800 --> 00:15:02.400
+And if I multiply this
+out, I have the probability
+
+00:15:02.400 --> 00:15:03.510
+of the entire sentence.
+
+00:15:03.510 --> 00:15:06.930
+And we can do this without
+any loss of generality
+
+00:15:06.930 --> 00:15:09.330
+or any approximation,
+if we really
+
+00:15:09.330 --> 00:15:12.480
+condition on all the
+previous words, all
+
+00:15:12.480 --> 00:15:14.460
+the previous elements, right?
+
+00:15:14.460 --> 00:15:18.000
+In our case, what this
+means is that the way
+
+00:15:18.000 --> 00:15:19.740
+we apply these two
+graphs is that, we
+
+00:15:19.740 --> 00:15:23.250
+are going to represent
+a graph as a sequence
+
+00:15:23.250 --> 00:15:24.690
+as a set of actions.
+
+00:15:24.690 --> 00:15:27.960
+And we are going to say, a-ha,
+the probability of next action
+
+00:15:27.960 --> 00:15:31.350
+is conditioned on all
+the previous actions.
+
+00:15:31.350 --> 00:15:35.460
+And now what will the actions
+be, it will be add a node,
+
+00:15:35.460 --> 00:15:36.280
+add an edge, right?
+
+00:15:36.280 --> 00:15:39.770
+That's the way we are
+going to think of this.
+

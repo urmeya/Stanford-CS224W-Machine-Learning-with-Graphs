@@ -1,0 +1,422 @@
+So for today's class,
+what we are going to talk about is generative models for graphs, right?
+So far we were working on the assumption,
+or we talked about methods where, uh,
+given- where we said the graph is given and we wanna do some modeling,
+learning, prediction, community detection on top of it.
+What we are going to, uh,
+look at for the next two lectures is a different problem.
+It is a problem about how do we,
+um, generate a graph, right?
+How would we generate a synthetic social network?
+How would we generate a synthetic economic network?
+How would we generate a synthetic communication network, right?
+How are- what are some of the processes that would
+allow us to generate these types of graphs, right?
+Um, and the way we can, uh,
+we can do this is that we wanna generate realistic graphs using generative models, right?
+So the idea will be that we are gi- given a,
+uh, graph generative model and, uh,
+we wanna be able then to, uh,
+generate a synthetic graph that is somehow similar or,
+uh, matches, uh, the real graph.
+So, uh, this is what we would,
+uh, like to do.
+So why do we wanna do graph generation? Why should we care?
+Uh, first is that we wanna understand how real graphs form, right?
+So these- these generative models can provide us insights
+about what kind of processes take place,
+let's say in social science, in- in humans,
+when we generate- when we create our own,
+uh, social networks and social connections.
+Uh, it allows us to make predictions in a sense, you know,
+how do we expect this graph to evolve, uh, in the future?
+Synthetic graphs are also very useful because they, um,
+allow us to understand, um,
+various kinds of processes,
+uh, that lead to, uh,
+generation of, uh, new graphs,
+and then we can use them as datasets for understanding corner cases
+and understanding the performance of various kinds of, uh, graph methods.
+Um, and the last is about anomaly detection in a sense that we,
+many times, require a null model,
+a model that would say, uh-huh,
+this is what I would expect.
+This is the network I would expect.
+Let me compare it now to the real world network and see what the differences are, right?
+So we want these type of null models to then be able
+to have a reference point for what is expected,
+and then whatever your data we have,
+we can kind of compare it to that, um,
+expected, the reference point to the,
+uh, to the- to the null model.
+So, uh, the road-map for graph generation and for the lecture today is the following.
+First, I'm actually going to talk to you about properties of real world graphs, right?
+Because when I generate a- a graph,
+I wanna feed some properties,
+I wanna match some properties of the real network,
+and the question is, what properties are
+interesting and what properties should we try to match?
+And then I'm going to talk about, uh,
+the second part of the lecture about traditional graph generative models,
+uh, where basically each comes with a different set of assumptions.
+These models are relatively simple,
+but they come up with a lot of insight and they really
+allow us to kind of understand the network formation.
+And then, uh, next week, Tuesday,
+I'm going to talk about,
+uh, deep graph generative models,
+where we wanna learn the graph formulation process from data,
+uh, and this is what we are going to cover in the next lecture.
+So today's lecture won't be kind of, uh, machine-learning flavored,
+it will be more about traditional graph generation and a lot of cool insights,
+and then next lecture we'll be thinking about
+graph generation as a purely machine learning process.
+And of course, there is valuing both.
+There is valuing formulating things as
+pure machine learning problems where you say I wanna predict the graph, um,
+and there is also valuing generating graphs through
+these traditional models because that comes up with a lot of theory,
+a lot of insights, and, uh,
+much more kind of inductive bias into
+underlying processes that could be taking place in these networks.
+So, uh, the plan is to ask first,
+what are some of the important properties of networks,
+uh, that, let's say,
+these generators should match or that we can
+compare the generated network and the real network?
+And in particular, we are going to characterize graphs,
+we are going to measure graphs according to these four different properties.
+First, we'll call degree distribution, clustering coefficient,
+connected components, and, uh,
+the shortest path lengths.
+Um, and, uh, we are- we have introduced some of
+these notions already at the beginning of the class,
+so let's do a quick, uh, recap.
+So first, degree distribution.
+Degree distribution simply says,
+what is the probability that a randomly chosen node will have a given degree?
+Um, and simply this is just a normalized count, right?
+You say, uh, it's,
+in some sense, a normalized, um,
+histogram where you say, uh-huh,
+for every degree k,
+I wanna ask what fraction of nodes has that degree?
+And I can simply plot degree versus fraction of nodes with that degree.
+And I can think of this as normalized histogram,
+or if I ignore this uh- uh- uh,
+factor N, then it's simply a histogram of the count versus degree, right?
+How many nodes have a dif- different- have a given degree.
+That's what is called degree distribution.
+The second thing we already talked about is clustering coefficient,
+which is all about trying to understand how connected are the neighbors of a given node?
+Um, and in particular,
+we say clustering coefficient of node i is simply defined twice the number of
+edges between its neighbors divided by
+the degree of the node times the degree of the node minus 1.
+So clustering coefficient will have value between 0 and 1,
+and the reason why it is this way is basically saying,
+I have k neighbors,
+so k times k minus 1 divided by 2 is k choose 2.
+It's number of possible pairs of neighbors you can select.
+So this is the- the total number of edges that is possible between a pair of nodes-
+a- a- a pair of neighbors of a given node with
+degree k_i and e_i is actually the actual number of,
+um, edges that- that occur, right?
+So if I have no edges between the neighbors,
+then clustering coefficient is 0, if I, let's say,
+have three out of six possible 1s,
+then clustering coefficient is,
+uh, one-half and if I have all the six,
+uh, edges between the four neighbors that are possible,
+then my clustering coefficient is 1.
+And this is now defined,
+uh, clustering coefficient of a given node.
+Now if you wanna do the clustering coefficient of an entire network,
+what people usually do is they simply compute
+the average clustering coefficient across all the nodes,
+or they define, uh- or they actually plot
+the distribution of clustering coefficient, uh, values.
+Um, so those are, uh,
+two ways how to characterize this notion of how many
+triangles- how often friend of a friend is also a friend, right?
+You can say basically, how likely am I to see this kind of edges between,
+uh, pairs of nodes that have a friend in common?
+And in social networks in particular,
+clustering coefficients tend to be very high because of
+this triadic closure that we have
+discussed in the last lecture about community detection.
+Um, so these were the first two,
+degree distribution, clustering coefficient.
+The third one we will look at is connectivity, and in lecture 1,
+we dis- we dis- defined this notion of the,
+uh, connected components in the graph.
+And we said that lets- one thing,
+how we can simply characterize connectivity is to ask,
+what is the largest connected component size, right?
+What- what fraction of nodes,
+um, belongs to the largest connected component?
+So if I have some graph that may not be connected,
+I'm asking what fraction of nodes are in the largest connected component,
+where connected component is simply a pair of- uh,
+a set of nodes that can reach each other,
+let's say, on an undirected network.
+Um, the way I find connected components is by simple, uh, breadth-first search.
+And I would say that, you know,
+giant component exists if- if this largest component is large.
+I know more than half of the nodes belong,
+uh, to this largest, uh, connected component.
+And then the last thing that- the way we are going to characterize networks is
+through what is called shortest path lengths or the notion of diameter.
+So mathematically, we define the diameter of the network as
+the maximum shortest path distance between any pair of nodes in the graph.
+So you take- essentially to compute it,
+it would- it would mean take any pair of nodes and find the shortest path between them.
+Um, now the problem with this maximum is that you can have
+a long string of edges somewhere and that will severely increase your,
+uh, diameter of the graph.
+So for real networks,
+you wanna use this- some more robust measure of the diameter,
+for example, average shortest path length, where you say,
+let me go over all pairs of nodes,
+i and j, that are connected,
+and let me, uh- let me compute the average,
+um, shortest path length between any pair of nodes.
+Um, and, uh, you know,
+many times if the graph is disconnected,
+then the shortest path length between two nodes that
+are in different components is infinite,
+so you would only do this over the largest connected component,
+or you would, uh,
+ignore the pairs of nodes that are not reachable from, uh, each other.
+But the idea is that you wanna get some sense of how many hops
+it takes to get from one node to another on average,
+uh, in this, uh, network.
+So these are the now four different ways,
+how do we mathematically, uh,
+empirically characterize properties of a given network.
+And just for the, uh,
+case- for the kind of- for the rest of the lecture,
+I'm going to use one realistic large-scale network that we are going to characterize,
+and then we will say, can we come up with
+a generative model that could generate this network?
+So for example, what we are going to use is we are going to use, um, uh,
+network coming from this chat application called Microsoft Instant Messenger.
+So this was like a WhatsApp plus Slack, uh, type
+application before all these- all these other services existed,
+you know, uh, it has- er,
+it had- at that time it had,
+uh, around 250, er,
+million, er, monthly active users,
+about 180 million actually exchange- engage in
+conversations that were more than 30- 30 billion conversations over a month,
+so about, uh, 1 billion conversations a day,
+and you know, uh,
+hundreds of billions of exchanged, uh, messages.
+So what we can do with this now is we can take this communication,
+um, data and we can represent this as a graph.
+So the way we are going to represent this as a graph is we're going to put, uh,
+we'll have people, um,
+and we will connect to people if they exchange at least one message, uh,
+and here is actually the dots,
+here it represent the geographic locations, uh,
+of the users of these Microsoft Instant Messenger,
+and basically what you see is that they come from or- all over the world,
+um, except from North Korea, right?
+It seems that, you know, there was no users in North Korea but everywhere else,
+uh, there are some users of this thing.
+Um, so in total,
+we'll now have a network of 180 million people with
+1.3 billion undirected edges, uh, between them.
+So now let's start characterizing this network.
+Let's start measuring it and say,
+how does this communication network of,
+you know, people all over the world exchanging,
+uh, short messages look like.
+So the first thing we can do is we can characterize the degree distribution.
+So what I'm plotting here is simply the degree of the node.
+This is number of different people
+a given node exchange of messages with in a given month,
+um, er, times and on the y-axis is the number of,
+uh, such nodes with such degree.
+So I- I plot the count,
+so it's probability times the total number of nodes,
+so it's kind of an unnormalized, uh, histogram, right?
+Um, what do you see?
+You see this super, funny, strange,
+however you wanna call it, uh,
+interesting, um, histogram, right?
+It seems that basically that is this huge number, right?
+Like notice these dots here of nodes that have the degree very close to 0.
+So basically we have a lot of people that only communicate with,
+I don't know, 1 to a couple of different nodes,
+and then it seems that we have
+all these other nodes here that have very large degrees but,
+you know, there's very,
+very few of them, right?
+For example, you know, you have maybe only one person with- that talks to 2,000
+other people and the- and the person or the bot or whatever this thing was,
+uh, that talks to the most people was about 6,000, right?
+So it means out of 180 million people,
+there is one node whose maximum degree is only 6,000, right?
+Out of 180 million possible people to talk to,
+these bot only talks to, uh, 6,000.
+So what is very interesting is that this histogram
+is kind of very much axis-aligned, right?
+It seems a lot of people or a lot of nodes with super small degrees and,
+you know, just one node, er,
+one- one count for every degree that is- that is,
+you know, higher than just, you know,
+this, uh, super small number.
+Um, so this does not seem- kind of this plot does not reveal too much,
+but what you can do is you take the same data,
+but you just plot it differently.
+The way we are going now to replot this data is we
+are going to replot it on- on logarithmic,
+uh, scales, on logarithmic axis.
+So what we did now it's exactly the same data,
+the same counts, the same degrees,
+but now this axis is logarithmic.
+Right here is 10, here is 100,
+here is 1,000, and now all of a sudden you see this very nice shape, right?
+You see that basically I have majority of the nodes.
+Yeah, this is 10^7,
+so that's, you know, 10 million,
+um, 50 million nodes that, you know,
+have degree 1, 2, 3.
+So large majority of the nodes have degree less than 10,
+and then you see how here at the end we have very few nodes.
+You know, maybe 1, 2 nodes,
+um, for each degree above,
+uh, several hundreds and you know,
+the largest degree here I said is, uh, 6,000.
+So now you see this beautiful pattern appeared that before it was not obvious at all.
+Like when I plot this on linear scales,
+just the histogram, it's just axis-aligned.
+I- I don't even know how to interpret it.
+So right here, now on same data,
+just the axis are different,
+I'm basically plotting log degree versus log count.
+I see this, uh, very nice, uh, shape, uh,
+this kind of what is called a heavy-tailed or a power law, uh,
+distribution that, uh, people like to,
+uh, call this types of shapes.
+So the second thing is how about clustering coefficient?
+If we take this network and compute clustering coefficient,
+we find out that the clustering coefficient of this network is, uh, 0.11.
+So it means that, you know,
+11 percent of the,
+uh, of the neighbors,
+uh, are connected with each other, um,
+and that may seem a little,
+but it's actually a lot,
+and the reason why this is a lot is because you have
+these super large degree nodes, um, right?
+That have a lot of possible connections between the friends, um,
+and the- um, actually it turns out that 0. 11,
+uh, is- is quite a lot.
+Right now, it seems like, "Oh, you know,
+the clustering coefficient is between 0 and 1."
+You know, 0.11 is kind of closer to 0 than closer to 1,
+so it seems that clustering of this MSN network is low,
+but because we will have null models,
+we are actually able to establish that the clustering is actually quite high,
+so let me now tell you why- why 0.11 is high and,
+you know, why is it not low even though it seems kind of a tiny number.
+So this is what we are going to, uh, figure out.
+So this was clustering.
+Now, uh, this- the third metric was connectivity, right?
+How big is the largest connected component?
+And what I'm plotting here is the, uh,
+size of the connected components: how many nodes belong to
+a given component versus number of components of such a size.
+What you see is that
+the largest connected component has about 200 over more than- uh, right?
+This is 10 to the 8th is,
+uh, 100 million, um,
+so this is, you know, uh,
+almost like close to 200 million,
+so pretty much 99.9% of all the nodes belong to the largest connected component,
+so the network is connected,
+and of course then we have, you know,
+some small number of very small components of, you know, 20,
+30 nodes all the way to, uh,
+let's say 1 million of nodes of- that are isolated,
+so connected components of size 1.
+So this means that our graph is well connected with a- with a very small number of,
+uh, small- small- very small isolated islands,
+but the giant component is definitely there and 99.9% of all the nodes, uh,
+belong to, and then the last thing I want to mention is the shortest path length.
+So here is the distribution of, uh,
+shortest path lengths between different pair- uh,
+be- across pairs of nodes.
+So I ask here how many pairs of nodes,
+uh, are at shortest path Distance 5.
+You know, how many are at shortest path Distance 10 and so on,
+uh, and here the y-axis is logarithmic.
+So notice that most pairs of nodes are reachable, uh,
+with each other in around, um,
+5, 6, uh, 7 hops.
+So it means actually that the average shortest path length of
+this giant network of 180 million people living all over the world, uh,
+is only 6.6, and it turns out that you can reach
+90% of the nodes of this network on average in less than eight hops.
+So it takes you eight friendships to get to,
+uh, 90% of the nodes,
+and just to give you another way,
+how you can think of this is to say,
+"Let's start breadth-first search at a given node."
+Right? So at zero steps,
+it is one node.
+Now this node has degree 10,
+so at Step 1, there's 10 other nodes I can reach, right?
+Then these 10 nodes have further connect to other nodes,
+so at Step 2, I am at 75 nodes,
+and notice how the-, uh,
+how the number- how the number of reachable nodes increases,
+and here for example at Steps, uh,
+6, 7, and 8,
+I'm- I- I can reach, you know,
+28 millions, 80 million,
+52 million, and then again,
+you see how this quickly, uh,
+decays down where, you know,
+the- the- at hop Distance 25,
+I can still reach, uh, three more nodes.
+So notice again basically this kind of shape here
+demonstrated by this single node, uh, example.
+So this is, um,
+what I wanted to show in terms of the shortest path length, right?
+It's even though our network is massive,
+the- the amount of, um,
+the- the shortest path length tend to be very, very,
+very small, and this is what is called,
+uh, the small world phenomena, right?
+That basically, even though the network is large,
+the diameter, the shortest path lengths are actually quite small in this networks.
+So what we have seen so far is that there are,
+uh, key properties of this messenger network, right?
+The degree distribution is heavily skewed.
+Average degree is- degree is about 14,
+clustering coefficient is 0.11, um,
+connectivity has one giant component with 99.9% of the nodes,
+and the average shortest path length is 6.6,
+and as I give you these numbers, right?
+You should be asking yourself,
+are these values expected, are they surprising.
+You know, is there- should I make fuss about it or,
+you know, we just forget about it.
+Like is it interesting?
+What does this teach us, right?
+And in order for us to determine whether- whether this is
+interesting is that we need- we need a null model.
+So basically what we are going to look at next is
+different null models on which we can
+make these same measurements and then be able to say,
+"Ah-ha, you know, messenger network has high clustering coefficient.
+Messenger network has I don't know,
+um, low- low- low,
+uh, average path length."
+Or something like that because we will have this reference point.
+So what we are going to talk about next is talk about this reference points,
+uh, these, uh, types of models.

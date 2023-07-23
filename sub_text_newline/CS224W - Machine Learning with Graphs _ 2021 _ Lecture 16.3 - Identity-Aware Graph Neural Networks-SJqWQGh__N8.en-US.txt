@@ -1,0 +1,376 @@
+So now we are going to move forward and we are going to move to the next topic,
+which is called identity-aware graph neural networks, right?
+So in the previous part of the lecture, we talked about,
+how does the node encode its position in the network?
+How does the node know where in the network, the node is?
+Now in the second part,
+we are going to develop a more expressive graph neural network that is
+going to take care of
+all these different symmetries that can account- that can appear in the network and uh,
+in the underlying graph,
+and it - it will make the graph neural network more expressive.
+So what we have learned so far is that
+classical GNNs would fail for position-aware tasks.
+And we said, let's use, um,
+let's use anchors to improve graph neural network performance on position-aware tasks.
+Now, we are going to switch back and to- and focus more on structure-aware tasks.
+And say, can GNNs perform perfectly on structure-aware tasks?
+And as we have seen before,
+the answer here is unfortunately no.
+Uh, and the issue is that
+GNNs exhibit kind of three levels of failure cases in, uh structure-aware tasks.
+And I'm going to show you some,
+you know, failure cases.
+And of course, all these failure cases are kind of worst-case scenarios uh,
+that are very intricate in a sense that uh,
+due to the symmetries,
+the GNN is going to fail.
+So perhaps they don't necessarily appear in practice uh, too often,
+but they may appear in some parts of the data,
+and they are still very useful uh, to study.
+So here is the first uh, failure case.
+Uh, this is for the Node-level tasks.
+Imagine you wanna do a Node-level classification,
+you want to do Node-level prediction.
+Here, different inputs from the same, uh,
+basically different inputs, but at
+the same computational graph will result in the same embedding.
+So if I have these two nodes,
+v_1 and v_2, uh,
+you know, residing in these types of connected components, as we said before,
+their computational graphs, um,
+if you work it out are exactly the same because they have
+two neighbors and each of their neighbors has two neighbors and so on and so forth.
+So this means that these nodes v_1 and v_2 will be embedded into
+exactly the same point in the embedding space
+and we won't be able to assign them different labels.
+Now, the same type of things can happen also, for example,
+for link prediction, where for example,
+you can have this type of input graph.
+And you want to decide whether you know,
+v_0 should link to v_1 or should it link to v_2?
+And again, if you look at the computation graphs,
+um, the -the computation graphs are the same.
+So nodes v_1 and v_2 are going to have the same embedding.
+And because they have the same embedding,
+the neural network will give the same probability to- to edge A as well as to edge B.
+And perhaps that is not uh, the most realistic.
+So that's our failure case again for a different type of uh, input graph.
+And then, you know,
+for graph level tasks,
+there are also uh,
+well-known failure cases because
+different input graphs will still
+result in the same graph neural network based embedding.
+Um, and why- why is that the case?
+It's because if you, for example,
+uh, in these types of- in these types of networks,
+all the nodes have the same degree, um,
+but you notice that these two graphs are different because
+here the nodes link to exactly the immediate nodes.
+Here the- the nodes link kind of a bit farther out.
+But if you look at the computation graphs,
+the two computation graphs uh, will be the same.
+So again, uh, these two- these two entire graphs will get the same embedding.
+So again, this is, um,
+a very kind of highly symmetric uh, input graph.
+But still these two graphs are different.
+They are non-isomorphic.
+But you know, this is kind of a corner case for
+WL test and it is also a corner case for graph neural networks.
+So here again, uh, graph,
+A and graph neural network without
+any useful node features will always classify nodes A and B,
+uh, or graphs A and B into the same position, into the same class.
+So now, how are we going to resolve this?
+What is the big idea here?
+And the big idea in this second part of the lecture,
+is that we can assign a color to the node we want to embed.
+And that's why we call this identity-aware,
+because the neural network,
+as we unroll it,
+will know what is the starting node,
+what is the node where we started?
+So the idea is, if I want to embed nodes v_1- v_1,
+I'm going to color it.
+And if I go, um,
+and because I'm going to give it a color,
+um, now, the graph, the computational, uh,
+graph will be different because I will remember whenever I unroll uh,
+the computational graph, I will remember the color of this colored node.
+Right? So this means that, uh,
+now our computational graph,
+will- will- will remember whenever it hits the node of interest v_1.
+So it we'll have these colors um, and you know,
+why- why is this,
+um, uh, why is this useful?
+This is useful because it is inductive.
+Right? It is invariant to the node ordering, um,
+or identities of the nodes because the only node we color is the node where we started.
+And then we just look,
+how often does this node,
+where we start appear in the computation graph, right?
+So eventually, right, like if- if
+our graph is- is connected as- as we go deeper into more layers of a graph neural network,
+there will be some cycle that will lead us back to the starting node,
+and we will remember that and have that
+node colored in the computation graph, uh, as well.
+And the important point here is because- because the node coloring is inductive,
+even though I- I have these two,
+let's say, different input graphs,
+but I have labeled, uh,
+or numbered the nodes differently, right?
+I have 1, 2,
+3 versus 1, 2,
+3, the underlying computational graphs will be the same,
+which is good because they don't change under, uh,
+permuting the IDs or identities, uh, of the node.
+So this is a great feature to have because it
+means our models are able to generalize better.
+So let's now talk more about this, uh,
+inductive capability of node coloring.
+And let's look at the node level task.
+Um, and the point is that
+this inductive node coloring helps us with node classification tasks.
+For example, I have here,
+um, the case, we have already,
+uh, looked at before.
+I have the node on a triangle,
+I have a node on a square,
+um, I colored the root.
+And now I say, let's create the computation graphs.
+Here I create the computation graphs and you, um,
+very quickly see that the computation graphs,
+um, are quite- are quite different.
+And in particular they- they become different at, uh,
+at the bottom level,
+where in the- in the part B here,
+when I go to two hops- when I go two hops out,
+I only hit these nodes while in the- in the first case,
+um, I actually get- go and hit again the starting node.
+So now these two computation graphs are different because we also consider colors.
+So we will be able to successfully differentiate between nodes v_1 and nodes v_2.
+So, uh, this is a very elegant solution to the- to- to this, uh,
+to this, uh, uh problem that where
+a classical graph neural network, uh, would fail.
+Um, and similarly, we can do the same thing,
+uh, for- um, for graph classification, right?
+If I take my two input graphs, uh,
+the way I created the- aga- the embedding of the graph is to create an embedding,
+uh, of nodes and then aggregate those.
+So if I look at node-specific, um, uh,
+computation graphs, uh, structurally,
+they might be the same,
+but- but- but because I have labeled the starting node and
+now I- I know whenever my computation graph returns back to the starting node,
+you'll notice that now the coloring pattern between these two graphs,
+uh, is different- these two nodes is different,
+which means their embeddings will be
+different which means that when we aggregate the embeddings,
+the embeddings for the graphs will be different,
+which means we'll be able to take these two input graphs,
+A and B, um,
+and embed them into,
+um, different points and assign them different classes.
+So this is exactly what we want.
+And then, you know,
+for the edge level tasks,
+again, ah, if, you know,
+I start with V_0 and I say,
+you know I want to assign a different, uh, uh,
+probability to, um, uh, to nodes,
+V_1- to the edges A and B,
+I can say what will be the embedding of V_1, uh, here?
+What will be embedding of V_2?
+And I see that their corresponding computation graphs, uh,
+will be different because, uh,
+V_1 is going to hit V_0 sooner than, uh, V_2.
+So, um, here, the point is that when I'm embedding nodes for link prediction,
+I'm given a pair of nodes and here,
+I'm going to color,
+um, both- both nodes,
+the- the- the left node and the right node and this way,
+I'll be able to distinguish, um,
+uh, the two computational, ah, graphs.
+So this means it will allow us to, uh,
+assign a different probability to the node- to the edge A versus,
+uh, the edge B, which is, uh, what we want.
+So what you- what I have demonstrated so far is that
+this node coloring where we color the identity of the- uh,
+of the starting node or in link prediction of the- of this- of these both, uh,
+nodes in involving the link prediction task
+allows us to differentiate and distinguish, uh,
+these types of symmetric, uh,
+corner cases that make classical neural network- graph neural networks, uh, fail.
+So now, the question is,
+how do you build a- a GNN that uses this node coloring and that you- it will allow us,
+uh, to distinguish these different colored, uh, computation graphs.
+The idea is the following and the model is called identity aware, uh,
+graph neural network and what we wanna do
+is you've wanna utilize inductive node coloring in
+the embedding computation and the key idea
+is that you want to use heterogeneous message passing, right?
+Normally in a GNN,
+we apply the same message aggregation computation
+to all the children in the computation graph, right?
+So whenever we- we are, uh, aggregating, uh,
+masters and transporting messages,
+we apply the same aggregation in the same neural network operator, right?
+So, um, this is what we classically do.
+In our graph neural- identity aware graph neural network,
+we are going to do heterogeneous message passing.
+So we are going to use different types of aggregation, um,
+different types of message passing applied to different nodes based on their color.
+So it means that in an IDGNN,
+we are going to use, um,
+different message and aggregation, uh,
+functions, uh, for nodes with different, uh, colors.
+So it means that for example,
+whenever we are aggregating into a color node,
+we are going to use one type of, uh,
+transformations and message passing operator
+and whenever we are aggregating into a non-colored node,
+we are going to use a second type of,
+uh, aggregation and transformation.
+So this means that in a given layer,
+different message and aggregation, uh,
+functions would be used to nodes based on the color,
+uh, of the node and this is the key, right?
+Because if the node- nodes is color and it
+can use a different aggregator, this means that,
+uh- that the- the- the message will get transformed differently,
+which means the final results will be different depending on whether
+the nodes with colors were involved in aggregation versus nodes without colors,
+uh, uh, being involved in aggregation.
+So um, you know why does this heterogeneous message-passing work?
+Right? Suppose that two nodes,
+V_1 and V_2 have the same computational graph structure,
+but they have different node coloring, right?
+Um, and since we apply different neural network embedding computation,
+right- different, um, uh,
+message passing and different aggregation, right,
+we have different parameters for nodes with one,
+uh, color versus the nodes with the other color,
+this means that the final result, uh,
+will be different and this means that the final output-
+the final embedding between V_1 and V_2 is going to be, uh, different.
+So, you know, what is the key, uh,
+difference between GNN and identity aware GNN?
+If we look at this,
+uh, you know- uh, use, uh,
+this case- uh, this example we have looked so far,
+if I have nodes V_1 and V_2 I wanna distinguish them,
+in the classical GNN computation,
+the two computation graphs are the same,
+uh, all the nodes are the same,
+there is no differentiating node features,
+so the aggregations across these two, uh,
+trees will be the same,
+so we won't be able to distinguish A and B.
+In the case when we actually color
+the starting node and now the two computation graphs are different,
+so all we have to account for now that- is
+that when we aggregate the information from the- um, uh,
+from the leaves to the root of
+the graph neural network that this information about the color is preserved
+or somehow accounted for so that the final message will have
+a different value depending on one, uh, versus the other.
+And this is exactly,
+um, the case what is happening,
+and this is why IDGNN allows us,
+uh, to make this distinction.
+Um, another thing to think about it,
+what is G- IDGNN really doing?
+IDGNN is really counting cycles of different lengths,
+uh, uh starting at a given,
+uh, given the root node, right?
+So if I start here,
+IDGNN will now able to count or realize that there is a cycle of length 3, right?
+So here- this is now basically a cycle.
+You get off- you go from yourself to the- uh,
+to the neigh- to the neighbor, uh,
+and then to another neighbor,
+and you'll come back to the node, right?
+So this is a cycle of three hops.
+While- while in this case you- we- we'll
+reali- graph neural network is going to realize that this is a cycle of length 4,
+because you have to go to the node,
+to the neighbor, um,
+to the first neighbor, to the second neighbor,
+to the third neighbor, and from here,
+you only arrive, uh,
+to the starting node itself, right?
+So here we'll real- the- the computational graph will be able to capture
+that- or be able to compute that- that node is part of a cycle of length,
+uh, 4, but no cycles of length 3.
+While here, these will be able to capture that
+the node is a part of cycle of length o- uh,
+3 but not, uh, let's say 4.
+So this is what IG- IDGNN is able to do.
+It's able to count cycles and it's able to learn and count- count them through the,
+uh, uh, message passing of the graph neural network.
+So, um, how do you now,
+uh, uh, how do you do this now?
+So as I said, one is to use,
+uh, heterogeneous message passing.
+Um, and, uh, and the second way how you can do this is that,
+um, we can- based on the intuition we have, uh, just proposed,
+you can also use a simplified version of the IDGNN,
+where basically the idea is to include identity information
+as an augmented node feature, um, and, uh,
+sidestep the- the heterogenous node, uh, uh,
+message passing and the idea here is basically you can augment the node feature,
+by using the cycle counts in each layer
+as an- as an augmented node feature and then apply,
+a simple GNN, right?
+So basically, you want to use cycle counts in each layer as
+an augmented feature for the root node and then simply apply het- uh,
+homogeneous message-passing, basically drop the colors, right?
+So the idea would be that every node gets now,
+um, ah, uh, gets a description that simply says,
+how many cycles of length 0 are you part of,
+how many cycles of length 2- like- cycles of length 3s,
+and, uh, and so on.
+And this way, you will be able to, um, uh, uh,
+to distinguish the node- uh,
+the two computational graphs,
+and be able to distinguish the two nodes, uh,
+into two different, uh, classes.
+So let's summarize the identity aware graph neural networks.
+Uh, the- this is a general and powerful extension to graph a neural network framework.
+Um, it makes graph neural networks more expressive.
+Uh, the IDGNN, this idea of inductive node coloring and
+heterogeneous message passing can be applied to any graph neural network architecture,
+meaning, um, gra- graph convolutional neural network,
+GraphSAGE, um, GIN,,
+so graph isomorphism network and- and any other, uh, architecture.
+Um, and IDGNN will provide a consistent performance gain in many node-level, um, er,
+as well as edge and graph-level tasks,
+because it allows us to break the symmetries and allows
+us to the- basically identify how the node,
+uh, belongs to different, uh, cycles.
+This means that IDGNNs are more expressive than their, uh,
+graph- kind of classical graph neural network, uh, counterparts.
+Um, and this means that IDGNN is kind of this- the, uh,
+uh, the simplest model that is more expressive than 1-WL test.
+Um, and it can be easily implemented because it's basically just you color the root node,
+and that's all the information,
+uh, you need to, uh, worry about.
+So, uh, this is quite cool because it allows us now to
+distinguish this node on a triangle versus node on a square.
+Um, this was the first and the key idea is here to have this inductive node coloring,
+and then we also talked about position aware graph neural networks,
+where the idea is that you want to distinguish the position of the node in the graph,
+and the key idea there was to use the notion of
+anchors and characterize the location- the position of the node,
+by the location, uh,
+by the distance of the node to the anchors.
+And we talked about we want to have anchors- anchors of different sizes.
+And we wanna have a lot of anchors of size 1,
+we wanna have a lot- uh,
+fewer anchors of size 2,
+even fewer of size 4 and so on and so forth.
+Um, and the- the distance of a node to the anchor
+is the distance of the node to the- any node that is part of this,
+uh, anchor or, uh, anchor set.
+[NOISE]

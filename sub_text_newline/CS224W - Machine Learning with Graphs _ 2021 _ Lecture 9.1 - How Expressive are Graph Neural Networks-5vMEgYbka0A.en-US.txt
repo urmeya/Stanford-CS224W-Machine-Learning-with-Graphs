@@ -1,0 +1,481 @@
+So now we are shifting gears and we are talking about theory of graph neural networks.
+And we are in particular going to ask ourselves how expressive are graph neural networks,
+what are graph neural networks able to learn,
+and what are they not uh, able to learn?
+This is really the question for uh,
+this part of the lecture.
+So we talk about deep uh,
+neural networks applied to graphs,
+where through several um,
+layers of non-linear propagation,
+we are trying to come up with the embeddings of nodes, embeddings of networks.
+So we can do various kinds of machine learning prediction tasks.
+The key idea that graph neural networks have is this idea of aggregating
+local neighborhoods around a given node
+of interest to generate the embedding for that node.
+Right, So this is kind of the classical picture we've been showing
+several times in our discussions so far.
+Right, so the intuition is that nodes
+aggregate information from their neighbors using neural networks.
+And so far we discussed what kind of design choices you have when deciding how to,
+how to operationalize or how to design
+this message transformation and aggregation operations.
+So today, right now we are going to talk about the theory of graph neural networks.
+And in particular, we are going to ask how powerful are graph neural networks.
+How expressive are they?
+What can they learn and what can they not learn?
+This is especially important because there are many different and GNN models.
+Right, we talked about the GCN, graph convolution neural network.
+We talked about that, the graph attention network.
+We talked about the GraphSAGE network and we talked about
+the entire design space of these types of models.
+So the question is, what is their expressive power?
+Which basically means what is their ability to distinguish different nodes,
+different graph structures, and how
+expressive are they in learning different types of patterns?
+And then what would be super cool today is that we will be actually able
+to design the maximally expressive GNN models.
+So in some sense, we'll be able to design
+the most powerful graph neural network there is which is super cool.
+So that's the- that's the plan.
+So background is, we have many graph neural network models,
+they all have different,
+they all differ in terms of how they propagate,
+aggregate, and transform messages.
+And the question is,
+can we understand what is their expressive power and how these different design choices
+actually lead to different type of models.
+So for example, in a graph,
+convolutional neural networks, GCN.
+It's using what is called mean pooling.
+Right, so basically when,
+when we aggregate information from neighbors,
+we use  element-wise mean pooling.
+And then we use a linear transformation plus a ReLU, nonlinearity.
+That's for example, what a GCN is.
+For example, GraphSAGE uses a multi-layer perceptron plus element-wise,
+let say maximum pooling which is- which is different.
+And the question is, what is better?
+Is max better than, than average?
+Or what's the difference between the two in terms of,
+let's say, theoretical properties and expressive power?
+Um, there is an important note I wanna- I wanna make so that we don't get confused later.
+In graph neural networks,
+we have two aspects.
+We have the aspect of node features,
+node properties, and we have the aspect of a graph structure.
+And for the purpose of this lecture,
+I'm going to use colors of nodes to represent their feature vectors.
+What I mean by this, if two nodes are of the same color,
+then they have the same feature vector,
+they have the same feature representation.
+Right? So for example,
+in this graph here,
+numbers represent node IDs.
+So I can say I'm talking about node 1,
+I'm talking about node 2,
+but the features these nodes have are all the same.
+So there is no featured information that would
+allow me to distinguish nodes from one another, right?
+So we don't, the color means what is the feature vector of the node.
+So now for example, the question would be,
+how well can a GNN distinguish different graphical structures, right?
+Because if every node has
+its own unique feature vector then it's easy to distinguish the nodes.
+You just look at their feature vectors.
+But if all the feature vectors are the same, like in this case,
+all nodes are yellow,
+then the question is, can you still distinguish the nodes?
+Can you learn that node 5 is different than node 4,
+for example, in this case.
+So and in graph neural networks,
+we are particularly interested in this notion of local neighborhood structures.
+Where basically we are interested in quantifying
+the local network neighborhood around each node in the graph.
+So for example here,
+let's say I'm interested in nodes 1 and 5 and I
+say could I learn to distinguish nodes 1 and 5?
+Distinguishing them would be quite easy
+because they have different neighborhood structures,
+even if you look at the number of edges that is adjacent to each of them,
+you know, node 1 has degree 2 and node 5 has degree 3.
+So it'll be very easy to distinguish them.
+If you can capture the degree of the node in a graph neural network,
+then you can differentiate between nodes 1 and 5.
+Let's look now at the second example.
+How about nodes 1 and 4?
+Are they distinguishable?
+Right? If you look at it from the single layer,
+single hop neighborhood, then node 1 has degree 2.
+And node 4 has degree 2.
+So if I only am able to capture the degree of the node itself,
+I cannot differentiate between 1 and 2, right?
+They have the same feature vector and they have the same degree.
+However, 1 and 2 are still different because if I look at,
+let's say the second-degree neighborhood.
+Right? You could say, ah-ha,  node 1 has two neighbors.
+One has degree 2 and 1 has degree 3.
+While node 4 also has two neighbors,
+but one has degree 1 and the other one has degree 3.
+So if I'm able to capture the degree of the node
+4 of the node itself plus the degrees of the neighbors,
+then 1 and 4 are distinguishable because their neighbors have different degrees.
+Right? So now you see how maybe immediately two- two nodes look the same.
+But if you go deeper into the network here,
+I go to the neighbors,
+then the two nodes become distinguishable.
+And that is very interesting.
+So now let's continue this investigation and look at another pair of nodes.
+Let's look at nodes 1 and 2.
+What is interesting is that 1 and 2- actually, um,
+in this graph neural,
+in this network are indistinguishable from one another.
+Because they are kind of symmetric in the graph, right?
+They both have degree 2, um, uh,
+their neighbor, um, they both have two neighbors.
+Uh, one of degree- of degree 2 and one of degree 3.
+Um, if you go to the second hop neighborhood,
+it's, uh, the node number 4,
+uh, that has degree 2.
+So basically their- their, uh,
+network neighborhood is identical
+regardless how deep or how far do we explore the network.
+Because in- in both cases,
+you know, they have,
+each- each of them has one node of degree 2,
+one node of degree 3.
+At two-hop neighborhood, um,
+they both have one neighbor of degree 2.
+Three hops away they both have one neighbor of degree 1.
+So you cannot distinguish one and two unless somebody gives you
+some feature information that would allow you to s- tell 1 from 2.
+But based on the graph structure,
+you cannot distinguish them because they're kind of symmetric.
+Their- their positions are isomorphic,
+uh, in the graph, right?
+So that's an exa- an- an example,
+kind of trying to build up intuition how this,
+uh, will all, uh, work out.
+So the key question we wanna,
+uh, look at is,
+can a GNN node embedding distinguish different local neighborhood structures, right?
+Local meaning neighborhoods structures around a given node.
+And if it can, the question is when and if not,
+what are the failure cases of graph neural networks?
+So- so what we'll do next is we need to understand
+how a GNN captures local neighborhood structures.
+And we are going to understand this through this key concept of a computational graph.
+So let me now talk about, uh,
+what is a computational graph, right?
+The way you think of this is that each, uh,
+layer, uh, a GNN aggregates,
+uh, neighborho- neighboring embeddings.
+So in a GNN, uh,
+we generate an embedding through
+a computational graph defined on the node neighborhood structure.
+So for example, if I say here is node 1,
+the computational graph- let's say if I do
+a two-layer GNN for node 1 is created here, right?
+Node 1 aggregates information from nodes 2 and 5. Here they are.
+Node 5- node 5 aggregates information from its neighbors,
+5 has neighbors 1, 2, and 4.
+And node 2 here,
+aggregates information from its neighbors,
+node 1 and node 5.
+So this is what we call a computation graph.
+It simply shows us how the messages gets- get aggregated from level,
+uh, level 0 to level 1 to level 2.
+And this is now the computation graph that describes
+the two-layer graph neural network for,
+uh, node, uh, node ID, uh, 1.
+That's the idea here.
+And what is interesting is that now if I take, for example, uh,
+node I- node, uh,
+number 2 and I create a computation graph for itself,
+uh, here it is, right?
+Two aggregates from nodes 1 and 5, uh,
+5 again aggregates from,
+uh, uh, 1, 2 and 4.
+And, uh, node number 1 aggregates from 2 and 5, right?
+What you notice is that computational graphs for nodes 1 and 2 are actually identical.
+They both have, uh,
+two children at- uh,
+at level 1 and they have,
+you know, one- one has 2,
+and one has fi- uh,
+one has 3, uh,
+at level, uh, 0.
+So what this means is,
+because a GNN is only doing message-passing information,
+uh, without any node IDs,
+it only uses node feature vectors.
+This means that, you know,
+if you look at these propagation,
+uh, trees, these computation graphs,
+right now they are different because you say, oh,
+obviously here is node number 1 and here is node number 2.
+So obviously these trees are different.
+But if you only look at the colors- if you only look at the node feature information,
+then this is how these trees look like.
+They look identical and there is no way to tell nodes apart from each other.
+So in all cases,
+all the graph neural network can do,
+can aggregate, you know,
+the information from these nodes.
+They all have yellow color and here it can aggregate yellow color.
+So all it can do it is to say,
+oh, I have three yellow children.
+This guy can say I have two yellow children.
+And then this- here we can say, uh-huh you know,
+I have two children an- and one of them has two and
+the other one has three, uh, further children.
+And that's how we can describe this computation graph.
+But the point is that for two different nodes,
+1 and 2, the computation graphs are the same.
+So without any feature information,
+without any node attribute information, uh,
+these two- these two nodes,
+these two computation graphs are the same.
+So these two nodes will be embedded into the same point in the embedding space.
+And what this means is that they will overlap so the graph neural network won't be able,
+uh, to distinguish them,
+uh, and won't be able to classify node 1 into a different class than node 2,
+because their embeddings will be exactly the same.
+They will overlap because the- the computation graphs are the same,
+and there is no distinguishable, uh,
+node feature information because that's kind of our assumption, uh, going in.
+So if there is an important slide of this lecture,
+this is the most important slide,
+is that basically we- GNNs capture
+the local neighborhood structure through the computation graph.
+And if computation graph of two nodes are the same,
+then the two nodes will be embedded exactly into the same point in the embedding space,
+which means that we are not able to classify one into one class,
+and the other one into the other because they are- they are identical,
+they are overlapping, so we cannot distinguish, uh, between them.
+So this means just kind of to summarize,
+is that in this simple example,
+a GNN will generate the same embedding for nodes 1 and 2 because of two facts.
+First is that because the computational graphs are the same, they are identical.
+And the second important part is that
+node feature information in this case is identical, right?
+All- all nodes the assumption of this lecture
+is that node features are not useful in this case,
+so all nodes have the same feature.
+They are all yellow, right?
+And because GNN does not care about node IDs,
+it cares about the attributes,
+features of the nodes and aggregates them.
+This means that this GNN is not able to distinguish nodes 1 and 2.
+So 1 and 2 will always have
+exactly the same embedding so they will always be put into the same class,
+or they will be assigned,
+uh, the same label.
+Which, uh, which is interesting and, uh,
+which now seems, uh,
+quite- uh, quite daunting,
+a bit disappointing, right?
+That we so quickly found a corner case,
+or a- or a failure case for graph neural networks
+where they basically cannot, uh, distinguish nodes.
+So the important point that I wanted to make here is that in general,
+different local neighborhoods define different computation graphs, right?
+So, uh, here are computation graphs,
+uh, for different nodes.
+These are computation graphs for nodes 1 and 2, uh,
+computation graphs for nodes 3 and 4,
+as well as computation graph,
+uh, for node 5.
+So now we already know that we won't be able to
+distinguish 1 and 2 because they have the same computation graphs.
+That's- that's some- that's fact of life.
+There's not much we can do.
+But the question still remains,
+how about 3 and 4?
+Or 3 and 5?
+Will our graph neural network be able to distinguish these nodes,
+because obviously they have different computational graphs.
+So perhaps the graph neural network is able to remember,
+or capture the structure of the computation graph,
+which means that nodes 3 and 4 will get a different embedding,
+because their computation graphs are different, right?
+That's the- in some sense,
+the big question, right?
+So basically what I'm- what is the point is?
+The point is that computational graphs are identical to
+the rooted subtree structures around each node, right?
+So we can think of this rooted subtree as it defines
+the topological structure of the neighborhood around, uh,
+each node and two nodes will be able to distinguish
+them in the best case if they have different rooted subtree structures,
+if they have different computation graphs.
+Of course, maybe our graph neural network is so imperfect that is
+not even able to distinguish nodes that have different computation graphs,
+meaning that the structure of these rooted trees is different.
+And what we are going to look at next is under what cases,
+you know, can 2 and 3 be distinguished,
+and in what cases 2 and 3 will simply be lumped
+together into the same, uh, embedding. So-
+Kind of to continue on this, right?
+GNN's node embeddings capture rooted subtree structures.
+They basically cap- they wanna capture the structure of the graphing- of the,
+uh, computational graph of the network neighborhood around a given node.
+And the most possible expressive graph neural network will map different, uh,
+rooted subtrees into different node embeddings,
+uh, here, for example,
+represented by different, uh, colors, right?
+So one and two,
+because they have exactly identical computation graphs and exactly identical features,
+will be mapped to the same point.
+There is nothing we can do about
+that with the current definition of graph neural networks.
+Um, but for example,
+nodes 3, 4 and 5,
+they don't have identical computation graph structures,
+so they should be mapped into different,
+uh, points in the embedding space, right?
+So the most expressive graph neural network will basically be
+able to learn or capture what is the structure of the computation graph,
+and based on the structure of the computation graph assign
+a different embedding for each computation graph.
+Um, that's the main, uh,
+uh, premise, uh, that,
+uh, we are making here.
+So we wanna ensure that if two nodes have different computation graphs,
+then they are mapped to different points in the embedding space.
+And the question is,
+can graph neural networks, uh, do that?
+There is an important concept for mathematics that will allow us, uh,
+to make further progress in understanding whether
+a graph neural network can take two different computation graphs,
+two different, um, rooted subtrees
+and map them into different points in the embedding space.
+And that is this notion, uh,
+or definition of what an injective function is.
+And a function that maps from the- the- from the domain X,
+uh, to domain Y is called injective.
+If it maps different elements into the different outputs.
+So what this basically means that f retains the information of the input, right?
+It means that whatever- whatever inputs you get,
+you'll always map them into distinct,
+um, distinct points, sort of distinct outputs.
+Meaning, for example, it's not that 2 and 3 would
+collide and you would give the same output A.
+So every input maps to a different output.
+That's a definition of an injective function.
+And we will- this is a very important concept because we will use it,
+uh, for the lo- rest- rest of the lecture, uh, quite heavily.
+So we wanna know how expressive is a graph neural network.
+And most expressive graph neural network should map these subtrees,
+these, uh, computation graphs to node embeddings injectively,
+meaning that for every different subtree,
+we should map it into a different point in the embedding space,
+um, and if this mapping is not injective,
+meaning that two different inputs,
+two different subtrees get mapped to the same point,
+then, um, this is not an
+injective mapping and that is, uh, the issue.
+So we wanna have and show that graphed- what we wanna develop
+a graph neural network that has this injective mapping where
+different subtrees get mapped into different points,
+uh, in the embedding space.
+So the key observation, uh,
+that will allow us to make progress is that trees of
+the same depth can be recursively characterized,
+uh, from the leaf nodes,
+uh, to the root nodes.
+So what I mean by this is if we are able to distinguish one level of the tree,
+then we can recursively,
+uh, take these, uh,
+levels and aggregate them together into a unique description of the tree.
+So what I mean by this is, for example, um,
+the way you can characterize the tree is simply by the number of
+children each node has, all right?
+So for example, here you could say, aha,
+at the lower level one node has three neighbors,
+three children, and the other node has two children.
+Um, and then you can say a-ha and then the node, uh, uh,
+the- the- the- the root has,
+uh, has, uh, um, has,
+uh, two children as well.
+So I can characterize this by saying, aha, um,
+you know, uh, we have,
+uh, two neighbors at, uh,
+level 0, we have three neighbors at level 0, and, uh,
+we have, uh, two neighbors,
+uh, at level, uh, at level 1.
+While for example, for this particular computation graph,
+I have one child here, uh,
+three- three children here,
+and then, again, two children here.
+So this description is different than their description.
+So it means I'm able to separate out, um,
+or to distinguish between these two- these two different, uh, uh trees.
+Uh, the important thing is that trees can be decomposed level by level,
+so if I'm able to capture the structure of a single level of the tree,
+perhaps even just this level,
+then I can recursively do this,
+uh, level by level.
+So what I mean is, um,
+we only need to focus on how do we characterize one level of this, uh,
+computation graph or this, uh,
+rooted subtree around a given node, uh, of interest.
+So, um, let's continue thinking and setting up the problem.
+So if each step of GNN, uh,
+aggregation process can fully retain the neighborhood information,
+meaning how many children,
+uh, neighbors does a given node have?
+Then, uh, the generated node embeddings can distinguish different,
+uh, subtree structures, right?
+If I can say, um,
+at level, uh, 1, uh,
+in- in one tree I have two- two children in the other one I have three.
+Um, and if I can kind of capture
+this information and propagate it all the way up to the node 1.
+And in this other tree I can kind of capture the information that one,
+uh, one node has one child and the other node has, uh, three children.
+And again, I'm able to retain this information, uh,
+all the way to the top layer,
+then obviously the- the number of children, um, is different.
+So these two, uh, these two trees, uh,
+we are able to, uh, distinguish them, right?
+So the point is, in some sense,
+are we able to aggregate information from the children and somehow
+store it so that when we pass it on to our parent in the tree,
+this information, uh, gets retained?
+As in this case, the information that
+two and three got retained all the way up to the root of the tree.
+That's, uh, the question, uh, we wanna answer.
+So in other words,
+what we wanna do is we wanna say that
+the most expressive graph neural network would use
+an injective neighborhood aggregation for each step,
+for each layer of the or for each level of the computation graph.
+So this means that it will map
+different neighborhoods into different, um, embeddings, right?
+So we want to be able to capture the number of children at level 1,
+oh sorry, at level 0, at level 1,
+and then aggregate this- kind of retain this information as we are pushing it
+up the tree so that the tree knows how many children each of its,
+um, each of its, uh,
+uh, inner nodes, uh, have.
+So that's essentially the idea.
+So the summary so far is the following.
+To generate a node embedding,
+GNN uses a computational graph that
+corresponds to a rooted subtree structure around each node.
+So if I have a node,
+I have this notion of a computational graph that is simply a-
+a rooted subtree structure that describes
+the local neighborhood structure around this node.
+And then different rooted subtrees,
+different computation graphs will be distinguishable
+if we are using injective neighborhood aggregation,
+meaning we are able to distinguish different subtrees.
+And GNNs can- as we are going to see, um,
+GNNs can fully distinguish different subtree structures
+if at every level its neighborhood aggregation,
+meaning it's aggregation for the children, is injective,
+which means that no information, uh, gets lost.
+So then we can fully characterize, uh,
+the computation graph and distinguish one computation graph, uh, from the other.

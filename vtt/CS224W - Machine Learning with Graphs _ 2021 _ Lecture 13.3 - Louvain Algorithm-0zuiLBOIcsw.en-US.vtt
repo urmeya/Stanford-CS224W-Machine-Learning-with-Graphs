@@ -1,0 +1,919 @@
+WEBVTT
+Kind: captions
+Language: en-US
+
+00:00:04.190 --> 00:00:07.950
+So the algorithm that allows us to identify
+
+00:00:07.950 --> 00:00:11.145
+high modularity score communities is- it's called uh,
+
+00:00:11.145 --> 00:00:13.485
+the Louvain Algorithm, from the
+
+00:00:13.485 --> 00:00:16.665
+University Louvain in Belgium.
+
+00:00:16.665 --> 00:00:18.465
+That's why, uh, this name.
+
+00:00:18.465 --> 00:00:24.555
+So it is a very scalable and very popularly- very popular algorithm.
+
+00:00:24.555 --> 00:00:27.165
+Kind of it's a de facto thing you would use if you want to
+
+00:00:27.165 --> 00:00:30.210
+partition the network into a set of clusters.
+
+00:00:30.210 --> 00:00:36.360
+So Louvain algorithm is a greedy community detection algorithm that uh, scales uh, um,
+
+00:00:36.360 --> 00:00:38.330
+ah, n log n,
+
+00:00:38.330 --> 00:00:41.610
+where n is the number of nodes in the network so it can uh,
+
+00:00:41.610 --> 00:00:43.665
+um, scale to large networks.
+
+00:00:43.665 --> 00:00:45.945
+It supports weighted graphs, uh,
+
+00:00:45.945 --> 00:00:48.514
+and it provides us hierarchical communities.
+
+00:00:48.514 --> 00:00:51.680
+So it doesn't only provide us clustering at one level,
+
+00:00:51.680 --> 00:00:54.425
+but it provides us kind of clustering of clusters.
+
+00:00:54.425 --> 00:00:57.335
+So we get this notion of a tree or a dendrogram,
+
+00:00:57.335 --> 00:01:00.260
+how individual nodes join into groups and how
+
+00:01:00.260 --> 00:01:04.915
+these groups can then be further joined into the super groups uh, and so on.
+
+00:01:04.915 --> 00:01:06.350
+Um, and as I said,
+
+00:01:06.350 --> 00:01:08.315
+it is very widely used,
+
+00:01:08.315 --> 00:01:10.850
+there are fast implementations available, uh,
+
+00:01:10.850 --> 00:01:12.860
+It works very quickly,
+
+00:01:12.860 --> 00:01:15.200
+ah, and works well in practice.
+
+00:01:15.200 --> 00:01:16.820
+It finds uh, clusters,
+
+00:01:16.820 --> 00:01:19.645
+communities that have a high modularity.
+
+00:01:19.645 --> 00:01:23.345
+The algorithm operates in two phases,
+
+00:01:23.345 --> 00:01:28.220
+where basically we wanna greedily assign the nodes to communities to maximize modularity.
+
+00:01:28.220 --> 00:01:30.110
+Ah, and each uh,
+
+00:01:30.110 --> 00:01:34.045
+iteration, each pass contains two phases.
+
+00:01:34.045 --> 00:01:35.780
+So in phase 1,
+
+00:01:35.780 --> 00:01:41.660
+modularity is optimized by allowing only local changes of nodes to communities,
+
+00:01:41.660 --> 00:01:45.365
+so basically nodes get a chance to change community memberships.
+
+00:01:45.365 --> 00:01:49.370
+And in phase 2, these identified communities are aggregated into
+
+00:01:49.370 --> 00:01:54.900
+the super-nodes to build a new super-node network so that then another- um,
+
+00:01:54.900 --> 00:01:58.415
+another part of community detection can be run.
+
+00:01:58.415 --> 00:02:01.660
+So the idea is the following, the input network.
+
+00:02:01.660 --> 00:02:03.585
+Uh, we start with an input network,
+
+00:02:03.585 --> 00:02:06.510
+we optimize in phase 1 the modularity of it,
+
+00:02:06.510 --> 00:02:08.240
+so we find clusters,
+
+00:02:08.240 --> 00:02:14.540
+then we join these clusters into super-nodes to create this aggregate network.
+
+00:02:14.540 --> 00:02:20.900
+Now we have a new network over which we can again run phase 1 to cluster it further.
+
+00:02:20.900 --> 00:02:23.990
+In this way, we find clusters, clusters of clusters,
+
+00:02:23.990 --> 00:02:27.900
+and so on, and we hierarchically uh, cluster the network.
+
+00:02:27.900 --> 00:02:31.995
+Um, so now let me explain how phase 1 works.
+
+00:02:31.995 --> 00:02:37.850
+Phase 1, we start by putting each node in the graph into a distinct community.
+
+00:02:37.850 --> 00:02:39.035
+So each node says,
+
+00:02:39.035 --> 00:02:40.745
+I am my own cluster,
+
+00:02:40.745 --> 00:02:43.875
+I am my own community and each node i,
+
+00:02:43.875 --> 00:02:47.970
+for each node i, the algorithm performs two calculations.
+
+00:02:47.970 --> 00:02:50.780
+It computes the modularity when putting
+
+00:02:50.780 --> 00:02:54.425
+this i into a community with some other neighbor j.
+
+00:02:54.425 --> 00:02:56.360
+So basically we take the node i and say,
+
+00:02:56.360 --> 00:03:01.235
+what if I put node i and put it into the community of node j?
+
+00:03:01.235 --> 00:03:03.594
+Would that increase modularity?
+
+00:03:03.594 --> 00:03:05.515
+And the idea is that i,
+
+00:03:05.515 --> 00:03:07.145
+now for a given node i,
+
+00:03:07.145 --> 00:03:10.115
+I try to put it into the commu- the same community
+
+00:03:10.115 --> 00:03:14.330
+as every single of its neighbors is already a member of,
+
+00:03:14.330 --> 00:03:17.385
+um, and whatever increases the modularity the most,
+
+00:03:17.385 --> 00:03:22.115
+that's where I put i,- that's the community I put i into.
+
+00:03:22.115 --> 00:03:25.070
+Um, and this phase 1 uh,
+
+00:03:25.070 --> 00:03:27.965
+would kind of iterate all of the nodes until
+
+00:03:27.965 --> 00:03:31.405
+no movement is possible that increases modularity.
+
+00:03:31.405 --> 00:03:36.695
+So, th- the first phase stops when the local maxima in modularity is obtained.
+
+00:03:36.695 --> 00:03:39.470
+Basically means no individual nodes can
+
+00:03:39.470 --> 00:03:42.830
+move to a different community to improve modularity.
+
+00:03:42.830 --> 00:03:45.950
+Um, note that the output of
+
+00:03:45.950 --> 00:03:49.805
+the algorithm depends on the order in which we consider the nodes,
+
+00:03:49.805 --> 00:03:53.390
+uh, in practice, it turns out that the ordering is not important.
+
+00:03:53.390 --> 00:03:57.440
+So you fix some random ordering and that's how you process nodes.
+
+00:03:57.440 --> 00:03:58.910
+And then for every node, you say,
+
+00:03:58.910 --> 00:04:02.150
+what if I join you with the community with neighbor 1, neighbor 2,
+
+00:04:02.150 --> 00:04:06.580
+neighbor 3, see which of these joinings increases the modularity the most,
+
+00:04:06.580 --> 00:04:08.180
+and you move the node there.
+
+00:04:08.180 --> 00:04:10.880
+If none of the moves increases modularity,
+
+00:04:10.880 --> 00:04:14.980
+then you just don't move i to the community of node j.
+
+00:04:14.980 --> 00:04:19.400
+So, um, what is elegant is that this modularity gain, right?
+
+00:04:19.400 --> 00:04:21.320
+This Delta modularity where you say,
+
+00:04:21.320 --> 00:04:23.570
+what if I take node i and move it from
+
+00:04:23.570 --> 00:04:27.185
+the current community D to the new community C. Um,
+
+00:04:27.185 --> 00:04:29.270
+this can be computed very efficiently.
+
+00:04:29.270 --> 00:04:32.750
+And the way you can compute it is that you split it out into two terms.
+
+00:04:32.750 --> 00:04:36.740
+One term is how will modularity change when I take node i and I
+
+00:04:36.740 --> 00:04:40.680
+take it out from the cu- current community D?
+
+00:04:40.680 --> 00:04:43.520
+And then how is the modularity going to change when I take
+
+00:04:43.520 --> 00:04:47.080
+the same node i and put it into the new community C?
+
+00:04:47.080 --> 00:04:50.165
+So the way you can think of picture is that, you know,
+
+00:04:50.165 --> 00:04:52.415
+I'm right now looking- looking at node i,
+
+00:04:52.415 --> 00:04:55.255
+let's say node i is assigned to some community D,
+
+00:04:55.255 --> 00:04:56.940
+I pick some of its neighbors,
+
+00:04:56.940 --> 00:04:59.260
+maybe I pick this uh, node uh,
+
+00:04:59.260 --> 00:05:02.630
+here that belongs to the community C. So I say what happens if I
+
+00:05:02.630 --> 00:05:06.060
+take i and kind of move it to the community C?
+
+00:05:06.060 --> 00:05:12.140
+So first is, I have to compute the Delta modularity by taking i and moving it out of D,
+
+00:05:12.140 --> 00:05:18.380
+and then I need to compute the Delta modularity for merging i back into the community uh,
+
+00:05:18.380 --> 00:05:22.820
+C. And summing these two terms will give me the Delta modularity,
+
+00:05:22.820 --> 00:05:27.180
+the increase or decrease in modularity when I move D uh, from uh,
+
+00:05:27.180 --> 00:05:31.920
+when I move i from D to C. So let's derive
+
+00:05:31.920 --> 00:05:37.670
+this Delta modularity when I move i into the community C. First,
+
+00:05:37.670 --> 00:05:40.790
+we need to derive the modularity of uh,
+
+00:05:40.790 --> 00:05:42.170
+community C as it is.
+
+00:05:42.170 --> 00:05:44.760
+Let's call this Q of C. And the way we
+
+00:05:44.760 --> 00:05:47.580
+derive this is we need kind of two sufficient statistic.
+
+00:05:47.580 --> 00:05:52.910
+One is the sum Sigma inside which is the sum of the links, number of links,
+
+00:05:52.910 --> 00:05:56.025
+or some of the link weights between the members of C,
+
+00:05:56.025 --> 00:05:57.445
+um, and then um,
+
+00:05:57.445 --> 00:06:02.820
+Sigma_tot will be the total number of links that all these nodes have, right?
+
+00:06:02.820 --> 00:06:05.285
+So this is only inside the members,
+
+00:06:05.285 --> 00:06:08.630
+and this is inside plus outside, right?
+
+00:06:08.630 --> 00:06:12.440
+So here, I'm only summing degrees, uh, uh,
+
+00:06:12.440 --> 00:06:16.680
+I'm only summing edge- counting edges that are inside the members of the C,
+
+00:06:16.680 --> 00:06:18.050
+and when I compute the total,
+
+00:06:18.050 --> 00:06:19.910
+I also account for all the edges.
+
+00:06:19.910 --> 00:06:24.515
+So I just sum up the degrees of the- of wherever the edges go.
+
+00:06:24.515 --> 00:06:28.405
+So now I have these two quantities, Sigma_in and Sigma_tot,
+
+00:06:28.405 --> 00:06:34.970
+so uh, now I can rewrite modularity in terms of Sigma_in and Sigma_tot, right?
+
+00:06:34.970 --> 00:06:37.910
+So here is modularity of a given community C,
+
+00:06:37.910 --> 00:06:40.475
+it's this 1 over 2m we had before,
+
+00:06:40.475 --> 00:06:43.925
+double summation over all pairs of nodes in C,
+
+00:06:43.925 --> 00:06:48.160
+whether they are connected minus the normalized product of their degrees.
+
+00:06:48.160 --> 00:06:51.155
+Um, if I distributed the summation inside,
+
+00:06:51.155 --> 00:06:55.490
+I see here that this is basically now the number of edges between the uh,
+
+00:06:55.490 --> 00:06:57.280
+members of the- of the group.
+
+00:06:57.280 --> 00:06:59.850
+So this is Sigma_in divided by 2m,
+
+00:06:59.850 --> 00:07:04.580
+and what I have here is a summation of the degrees of the nodes uh,
+
+00:07:04.580 --> 00:07:10.285
+in C. Another summation of the degrees of nodes in C divided by 2m squared.
+
+00:07:10.285 --> 00:07:11.460
+So that is uh,
+
+00:07:11.460 --> 00:07:15.360
+Sigma_tot divided by 2m uh, squared.
+
+00:07:15.360 --> 00:07:19.430
+Right? So uh, this is a- and- and this square
+
+00:07:19.430 --> 00:07:23.575
+here comes because I take this 2m and distribute it inside.
+
+00:07:23.575 --> 00:07:26.630
+So this means now that QC is large uh,
+
+00:07:26.630 --> 00:07:30.710
+when most of the total links are within the community um,
+
+00:07:30.710 --> 00:07:37.050
+and uh, um, very few cross to other uh, communities.
+
+00:07:37.050 --> 00:07:39.565
+So now that we have defined, ah,
+
+00:07:39.565 --> 00:07:41.500
+computed the modularity of C,
+
+00:07:41.500 --> 00:07:44.470
+now we need to say how does this modularity change,
+
+00:07:44.470 --> 00:07:48.145
+when we take this node I and put it into C. And, uh,
+
+00:07:48.145 --> 00:07:50.260
+here we are going to use this, ah,
+
+00:07:50.260 --> 00:07:53.410
+notion of, ah, um, uh, k_i,
+
+00:07:53.410 --> 00:07:57.685
+in which is the number of edges node- that node i has,
+
+00:07:57.685 --> 00:08:02.080
+to other members of C. And k_i is now the total,
+
+00:08:02.080 --> 00:08:03.850
+uh, degree of node i, right?
+
+00:08:03.850 --> 00:08:05.350
+So basically these two, um, uh,
+
+00:08:05.350 --> 00:08:08.200
+these two, ah, terms, uh, are, ah,
+
+00:08:08.200 --> 00:08:12.610
+equivalent or analogous to a Sigma in and a Sigma tot, right?
+
+00:08:12.610 --> 00:08:17.890
+Is the total degree versus degree to oth- or the number of edges to other members,
+
+00:08:17.890 --> 00:08:20.230
+uh, of C. And now,
+
+00:08:20.230 --> 00:08:22.570
+ah, if I write this out, right,
+
+00:08:22.570 --> 00:08:25.285
+so the, uh, the, uh, the,
+
+00:08:25.285 --> 00:08:27.985
+the modularity I had before was,
+
+00:08:27.985 --> 00:08:30.790
+um, uh, modularity of, of C,
+
+00:08:30.790 --> 00:08:34.180
+that we have already defined plus the modularity of this,
+
+00:08:34.180 --> 00:08:37.420
+let's say, ah, isolated community i so, ah,
+
+00:08:37.420 --> 00:08:40.510
+it has- i doesn't have an edge with itself,
+
+00:08:40.510 --> 00:08:43.180
+so with 0 minus, ah,
+
+00:08:43.180 --> 00:08:45.430
+k_i times k_i with 2m,
+
+00:08:45.430 --> 00:08:47.020
+so it's k_i squared.
+
+00:08:47.020 --> 00:08:49.075
+Uh, and now after I have moved, uh,
+
+00:08:49.075 --> 00:08:50.470
+in to the community,
+
+00:08:50.470 --> 00:08:52.855
+see this node i, what do I get is the, uh,
+
+00:08:52.855 --> 00:08:57.175
+sum of- number of edges inside Sigma in increases by k_i,
+
+00:08:57.175 --> 00:08:59.290
+in, and the, uh,
+
+00:08:59.290 --> 00:09:00.865
+total number of edges,
+
+00:09:00.865 --> 00:09:06.085
+now increases bu- or total sum of the degrees now increases for the degree of node i.
+
+00:09:06.085 --> 00:09:08.635
+So this is how I can write it, ah,
+
+00:09:08.635 --> 00:09:10.210
+write it all, ah, all,
+
+00:09:10.210 --> 00:09:12.385
+all, ah, all together now.
+
+00:09:12.385 --> 00:09:18.490
+And then, right here is we said Delta modularity after I move i into community C is,
+
+00:09:18.490 --> 00:09:20.290
+you know, after minus before.
+
+00:09:20.290 --> 00:09:22.480
+Ah, this was- this is after, right?
+
+00:09:22.480 --> 00:09:24.115
+I have the sum of the, uh,
+
+00:09:24.115 --> 00:09:29.050
+the in deg- the degrees inside the community is increased by this theorem,
+
+00:09:29.050 --> 00:09:33.295
+the total number of degrees is increased by the degree of node i,
+
+00:09:33.295 --> 00:09:35.275
+so this is the after modularity.
+
+00:09:35.275 --> 00:09:38.320
+This is the before modularity we have defined,
+
+00:09:38.320 --> 00:09:40.195
+and now if I simplify this,
+
+00:09:40.195 --> 00:09:42.925
+I basically- this is the- this is the expression,
+
+00:09:42.925 --> 00:09:44.530
+um, the expression I get.
+
+00:09:44.530 --> 00:09:49.480
+And what is nice, it depends on this sufficient statistic Sigma in and Sigma tot,
+
+00:09:49.480 --> 00:09:52.030
+as well as the degree of node i,
+
+00:09:52.030 --> 00:09:54.820
+and the number of edges that i has, ah,
+
+00:09:54.820 --> 00:09:57.760
+to the nodes of community C. So this was the,
+
+00:09:57.760 --> 00:10:00.535
+the term that we have just derived is this one.
+
+00:10:00.535 --> 00:10:03.115
+Um, and then we can analogously determine,
+
+00:10:03.115 --> 00:10:05.425
+er, derive a similar expression that says,
+
+00:10:05.425 --> 00:10:09.955
+how does modularity change when I take node i outside community D,
+
+00:10:09.955 --> 00:10:13.509
+sum these up together and I get a Delta modularity.
+
+00:10:13.509 --> 00:10:17.710
+So, now that I know how to compute Delta modularity quickly, ah,
+
+00:10:17.710 --> 00:10:20.110
+I basically iterate between,
+
+00:10:20.110 --> 00:10:22.120
+ah, for every node I try to see,
+
+00:10:22.120 --> 00:10:25.750
+is there an opportunity to increase modularity if I move it, uh,
+
+00:10:25.750 --> 00:10:27.790
+to the, to a different community,
+
+00:10:27.790 --> 00:10:30.460
+I compute this Delta modularity, um,
+
+00:10:30.460 --> 00:10:35.140
+and I move the node into some new community, C prime, ah, based on,
+
+00:10:35.140 --> 00:10:37.285
+uh, based on the- in a greedy way,
+
+00:10:37.285 --> 00:10:40.750
+based on how the overall modularity, ah, is increased.
+
+00:10:40.750 --> 00:10:43.660
+And this is essentially how the first phase of this,
+
+00:10:43.660 --> 00:10:46.345
+ah, Louvain algorithm will operate.
+
+00:10:46.345 --> 00:10:48.970
+So now, ah, now that I have,
+
+00:10:48.970 --> 00:10:51.190
+ah, reached a local, ah, optimum,
+
+00:10:51.190 --> 00:10:52.510
+I have moved, ah,
+
+00:10:52.510 --> 00:10:56.350
+nodes to different communities until the modularity stopped increasing.
+
+00:10:56.350 --> 00:10:59.800
+Then I moved to phase 2 which is called the restructuring, right?
+
+00:10:59.800 --> 00:11:03.700
+So now, I wanna take these clusters communities obtained in phase 1.
+
+00:11:03.700 --> 00:11:06.415
+And I can- I wanna contract them into a super-node,
+
+00:11:06.415 --> 00:11:08.875
+ah, and, uh, create a new network,
+
+00:11:08.875 --> 00:11:10.000
+a next level network,
+
+00:11:10.000 --> 00:11:14.050
+where super-nodes are connected if there is at least one edge between the nodes,
+
+00:11:14.050 --> 00:11:15.879
+ah, of the corresponding communities,
+
+00:11:15.879 --> 00:11:17.920
+um, and the, ah, weights,
+
+00:11:17.920 --> 00:11:20.800
+ah, of the edges between two super-nodes is
+
+00:11:20.800 --> 00:11:26.380
+the sum of the edge weights across all edges between their corresponding communities.
+
+00:11:26.380 --> 00:11:28.645
+And now I will have a super graph.
+
+00:11:28.645 --> 00:11:30.760
+And I simply go and run,
+
+00:11:30.760 --> 00:11:32.755
+ah, phase 1, ah, again.
+
+00:11:32.755 --> 00:11:34.255
+All right, so the idea is,
+
+00:11:34.255 --> 00:11:35.980
+I have my original network,
+
+00:11:35.980 --> 00:11:38.515
+I run phase 1 to identify clusters.
+
+00:11:38.515 --> 00:11:42.325
+Now I contract each cluster into a super-node.
+
+00:11:42.325 --> 00:11:44.499
+I connect two clusters,
+
+00:11:44.499 --> 00:11:47.155
+if there is at least one edge, ah, between them.
+
+00:11:47.155 --> 00:11:50.215
+And now this will be a weighted network where the,
+
+00:11:50.215 --> 00:11:51.910
+the edge weights are denoted here,
+
+00:11:51.910 --> 00:11:55.735
+so this will be the total number of edges between C_1 and C_2.
+
+00:11:55.735 --> 00:11:58.120
+And this would be the total number of edges, ah,
+
+00:11:58.120 --> 00:12:00.160
+between the members of,
+
+00:12:00.160 --> 00:12:02.170
+ah, C_2 ah, and so on.
+
+00:12:02.170 --> 00:12:03.775
+And now that I have the super graph,
+
+00:12:03.775 --> 00:12:06.610
+I simply apply my,
+
+00:12:06.610 --> 00:12:09.370
+ah, phase 1 algorithm again.
+
+00:12:09.370 --> 00:12:11.740
+So the way this will work is,
+
+00:12:11.740 --> 00:12:13.480
+ah, you know, to summarize,
+
+00:12:13.480 --> 00:12:15.055
+I have my original network,
+
+00:12:15.055 --> 00:12:17.110
+I pick a node and, ah,
+
+00:12:17.110 --> 00:12:20.110
+initially I put every node into its own community.
+
+00:12:20.110 --> 00:12:22.585
+Um, and then I ask, ah, a node,
+
+00:12:22.585 --> 00:12:27.940
+what if I move you to the same community as your member node 2 is up.
+
+00:12:27.940 --> 00:12:29.950
+How would that change modular- modularity?
+
+00:12:29.950 --> 00:12:32.995
+What if I move you to the community of node 3,
+
+00:12:32.995 --> 00:12:34.390
+how would modularity change?
+
+00:12:34.390 --> 00:12:36.475
+What if I move it to a community of node 5?
+
+00:12:36.475 --> 00:12:39.655
+How would, ah, modularity, ah, change?
+
+00:12:39.655 --> 00:12:42.730
+So, as I, ah, as I do this, ah,
+
+00:12:42.730 --> 00:12:47.515
+moves, um, I then decide to move it to wherever the modularity changes the most.
+
+00:12:47.515 --> 00:12:50.365
+And after the pas- the, the phase 1, ah,
+
+00:12:50.365 --> 00:12:54.145
+finishes, this is the assignment of nodes to communities.
+
+00:12:54.145 --> 00:12:55.855
+Now, I create this, ah,
+
+00:12:55.855 --> 00:12:57.955
+phase 2 where I create a super graph,
+
+00:12:57.955 --> 00:13:02.319
+where I contract all the nodes of the same community into a super-node,
+
+00:13:02.319 --> 00:13:04.330
+and then this the, ah,
+
+00:13:04.330 --> 00:13:07.345
+the edge, ah, the self loop is the,
+
+00:13:07.345 --> 00:13:11.440
+the to- the total number of- twice the number of edges inside, ah,
+
+00:13:11.440 --> 00:13:17.605
+the cross edges are how many edges from one cluster point to, ah, another cluster.
+
+00:13:17.605 --> 00:13:19.585
+This gives me a super, super network,
+
+00:13:19.585 --> 00:13:22.960
+super-node network, and now I simply apply, ah, phase, ah,
+
+00:13:22.960 --> 00:13:25.540
+1 again, by clustering this, you know,
+
+00:13:25.540 --> 00:13:27.475
+here I would get the following two clusters,
+
+00:13:27.475 --> 00:13:29.425
+again I contract into super-nodes.
+
+00:13:29.425 --> 00:13:30.970
+So here I have now basically,
+
+00:13:30.970 --> 00:13:32.230
+ah, the two communities.
+
+00:13:32.230 --> 00:13:37.120
+So what this means is that this original graph can be first split into two communities,
+
+00:13:37.120 --> 00:13:39.055
+the violet and green one.
+
+00:13:39.055 --> 00:13:40.810
+And then, you know, the,
+
+00:13:40.810 --> 00:13:42.700
+the green one can be super,
+
+00:13:42.700 --> 00:13:43.960
+ah, ah, ah, ah,
+
+00:13:43.960 --> 00:13:46.675
+again split into two more communities and the violet,
+
+00:13:46.675 --> 00:13:48.415
+into two more communities.
+
+00:13:48.415 --> 00:13:51.790
+And then each of these four communities is denoted in this network.
+
+00:13:51.790 --> 00:13:54.820
+So we get this, ah, hierarchical, ah, structure.
+
+00:13:54.820 --> 00:13:56.950
+Um, and just to give you an example,
+
+00:13:56.950 --> 00:13:57.970
+if you look, for example,
+
+00:13:57.970 --> 00:13:59.500
+at a, ah, Belgian,
+
+00:13:59.500 --> 00:14:01.210
+ah, mobile network, right?
+
+00:14:01.210 --> 00:14:02.440
+Eh, Belgium is a,
+
+00:14:02.440 --> 00:14:03.550
+is a place where,
+
+00:14:03.550 --> 00:14:04.975
+uh, there are two, ah,
+
+00:14:04.975 --> 00:14:06.220
+people speak two languages,
+
+00:14:06.220 --> 00:14:07.720
+there's a strong French community,
+
+00:14:07.720 --> 00:14:10.720
+and there's a, a strong Dutch speaking community.
+
+00:14:10.720 --> 00:14:12.280
+And if you look at the social network,
+
+00:14:12.280 --> 00:14:13.870
+ah, of phone calls,
+
+00:14:13.870 --> 00:14:15.940
+you see very nicely how the- basically the,
+
+00:14:15.940 --> 00:14:18.100
+the country splits into two, uh,
+
+00:14:18.100 --> 00:14:20.050
+separate parts where, you know,
+
+00:14:20.050 --> 00:14:21.460
+French speak to French,
+
+00:14:21.460 --> 00:14:22.720
+Dutch speak to Dutch,
+
+00:14:22.720 --> 00:14:26.650
+and there is relatively little connections, ah, between the two.
+
+00:14:26.650 --> 00:14:29.065
+So to summarize, uh,
+
+00:14:29.065 --> 00:14:31.480
+we have defined the notion of modularity,
+
+00:14:31.480 --> 00:14:36.805
+which, ah, gives me the overall quality of the partitioning of a graph into communities.
+
+00:14:36.805 --> 00:14:39.925
+Um, and now, ah, then we talked about, ah,
+
+00:14:39.925 --> 00:14:43.540
+the Louvain algorithm for modularity maximization,
+
+00:14:43.540 --> 00:14:45.880
+where basically it is a greedy strategy,
+
+00:14:45.880 --> 00:14:49.525
+where we start with every node belonging into its own cluster,
+
+00:14:49.525 --> 00:14:52.090
+and then we merge- we remove nodes between
+
+00:14:52.090 --> 00:14:55.375
+clusters so that the overall modularity keeps increasing.
+
+00:14:55.375 --> 00:14:58.120
+After no moves are possible anymore,
+
+00:14:58.120 --> 00:15:00.805
+we join the clusters into super-nodes,
+
+00:15:00.805 --> 00:15:02.500
+and again, repeat the clustering,
+
+00:15:02.500 --> 00:15:05.350
+and this way we get this kind of nice hierarchical,
+
+00:15:05.350 --> 00:15:07.690
+ah, community, ah, structure.
+
+00:15:07.690 --> 00:15:10.480
+Um, Louvain works really well in practice,
+
+00:15:10.480 --> 00:15:12.325
+scales to large networks and, ah,
+
+00:15:12.325 --> 00:15:15.410
+people, ah, really like, ah, to use it.
+

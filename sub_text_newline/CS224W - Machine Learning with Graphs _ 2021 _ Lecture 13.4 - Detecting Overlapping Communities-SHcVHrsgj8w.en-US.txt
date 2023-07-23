@@ -1,0 +1,465 @@
+So now I wanna talk about the second method about, uh, community structure,
+and we'll call this, uh, BigCLAM,
+is the name of the method and this is for detecting
+overlapping communities in networks, right?
+So so far we made assumption about this type of structure of the network.
+So like we have these clusters,
+each one has a lot of connections and then a few connections across.
+But in many cases, you know,
+people- humans, we belong to multiple social communities at once.
+So you can have these social groups,
+uh, that overlap, right?
+So how could we extract this type of overlapping community structure?
+To give you an example,
+this is actually a Facebook network of one of the students,
+uh, uh, in my group.
+These are his friends and these are collection- connections between his friends.
+Um, and you can ask, you know,
+what is the community structure of this network?
+What kind of communities does this PhD student of- uh,
+uh, from my group, uh, belong to?
+Um, and you know, if you look at this, perhaps you say,
+there is- I see one big group here,
+maybe I see another one here,
+maybe there is something down here.
+What is actually interesting if you look at it and you ask the student to- to, uh,
+put his friends into different social groups,
+uh, here are the social groups he came up with.
+He basically said, I- I- I have friends from four different social groups,
+uh, and here are the social groups.
+And of course, some friends belong to multiple of these social groups.
+Um, and then you can ask the- the student to label these groups.
+And he said, "Oh, these are my friends from high school.
+These are the friends from an internship I did in a given company.
+These are the Stanford friends I play basketball with,
+and these are these other Stanford friends I play, uh, squash with."
+Uh, and of course there are some people here, right?
+That are both- that went to the student to the same high school,
+they are now at Stanford and they play both basketball and squash with him.
+And, you know, that have some from the same high school
+who only- who did the internship with him at this company,
+but are not currently at Stanford, right?
+So we see how these, um, communities overlap differently.
+Another thing that I wanna notice you in this picture is that
+nodes are either solid or they are kind of gray.
+Um, and the point here is what I'm trying to show is that for- for a given- uh,
+for a given network,
+uh, we can- for this given input,
+we can ask our community detection method,
+our BigCLAM to identify the clusters.
+And the big- BigCLAM identifies these four clusters,
+and then we, uh, color the nodes.
+The node is full if it was assigned to the correct cluster,
+and it is gray if it- if it was not assigned to the great- to the correct cluster.
+Uh, and what is amazing here is basically that only on the network structure alone,
+only on this unlabeled network structure,
+we can assign nodes to the correct clusters,
+to the correct social communities without knowing anything about them.
+Which is remarkable and super impressive, right?
+It's a super hard task.
+So, uh, this was one example,
+another example I wanna show you is in, uh, biological networks.
+This is a protein-protein interaction network,
+and if you identify functional modules here,
+you see how these functional modules,
+uh, overlap with each other.
+So this is, um, very interesting to think
+about overlapping community structure in networks.
+So just to contrast what we have been talking about so far,
+we talked about networks having
+this kind of clustering structure where dense clusters, few connections across.
+If we think about this in terms of the graph adjacency matrix,
+then the adjacency matrix would look like this,
+where basically you have one cluster, you know,
+the orange one, you have the green cluster,
+a lot of connections.
+And then these areas of the adjacency matrix means, you know,
+an orange node linking to a green node and there is, uh,
+less connections here because we assume there is less connections across the two clusters.
+In the overlapping case,
+it actually- the situation gets much more tricky.
+If you have two overlapping clusters,
+then these red nodes here are in the overlap.
+And if you think of it from the, um,
+um, adjacency matrix point of view, this is the picture, right?
+You have one cluster,
+you have the other cluster.
+And here in the overlap,
+you have even more connections because these connections kind of,
+uh, come either from one cluster or,
+uh, the other cluster.
+And the point here wouldn't be to say, oh,
+there is this set of people that are super strongly connected with each other.
+The point is to say, oh,
+there are two clusters that overlap in the set in the middle.
+So now, how are we going to detect,
+uh, this type of structure, uh, in the network?
+How we are going to extract communities.
+Um, our plan of action is the following.
+We are going in step 1,
+define a generative model for graphs that is based on node community affiliations,
+and we'll call this model Affiliation Graph Model.
+And then we are going to define an optimization problem that, uh, will, uh,
+optimize the log-likelihood of,
+uh, the model to generate, uh, the graph.
+So what we are going to learn today is an instance of, uh,
+generative modeling of networks and how to feed a generative model to a given graph.
+So this is, uh,
+kind of very useful and very fundamental.
+So first, let me define the model.
+The model will be the following.
+Uh, we will have a set of nodes at the bottom,
+and a set of communities at the top.
+And a node will be connected to a community if a given node belongs to a community.
+So in this case, you know,
+blue nodes belong to A alone, green nodes, uh,
+belo- uh, belong to B alone,
+and then the red nodes belong to both.
+So they are connected both to A and B, um,
+and this is how we are going to de- describe
+the community structure of the- of the network.
+Now, we wanna build a generative model which says, you- I'm given,
+uh, uh, an assignment of nodes to communities,
+I want to generate the edges of the network.
+How do I generate the edges?
+And we are going now to describe the generative process,
+how to turn the, uh,
+affiliations of nodes to communities into edges of the network.
+Our model will have a set of nodes,
+a set of communities,
+and a set of memberships of nodes to communities, right? Like this.
+And then we are going to assume that each community,
+C up here, has a single parameter,
+P sub C. And this parameter will have the following, uh, role, right?
+So basically we'll say given the- given our- our model,
+given affiliations in this community parameters,
+we wanna generate the edges of the underlying network.
+And we are going to say that nodes in community
+C will connect to each other by flipping a coin with, uh,
+bare ground with a probabili- that is going to create
+an edge with probability C. So the way to think of this is,
+you know, this pair of nodes says, oh,
+we belong to the same community A,
+let's flip this coin P sub A, and, uh,
+if the coin says yes,
+we are going to create a connection between us.
+Why? For example, these two nodes here,
+they belong both to A and B.
+So they are going to flip the first coin and if the coin says yes, they'll create a link.
+Um, then they'll flip the second coin and if the coin says yes,
+they are going to create a link.
+So basically if at least one of these two coins says yes,
+they are going to, uh, link to each other.
+So this means that long- nodes that belong to
+multiple communities get multiple coin flips,
+which means they are more likely to,
+uh, link to each other.
+So in some sense, if the- if they are unfortunate the first time,
+they might- might be luck in creating
+a connection next time for the second community they have in common.
+So one way you can write out the probability that U
+and V connect with each other is through this formula.
+And let me just explain it.
+So basically what this is saying is this is the probability that, um,
+at least one of these coin flips with biases,
+P sub C comes up heads, right?
+So basically we are saying, let's go over to
+all the communities that nodes U and V have in common,
+for each community we flip a coin of each probability C. So 1 minus,
+uh, P sub C is the probability that, uh,
+the coin says, let's not create an edge.
+Now multiplying this says,
+what if you are super unlucky and for every coin flip,
+the coin flip comes up and saying no edge.
+So this is now the total probability that all the coin flips say no edge
+and 1 minus that is that at least one of these coin flips came up,
+uh, uh, positively and the edge is created.
+So basically we say a pair of nodes is connected if at least one of these coin flips,
+uh, was successful, and that's kind of the formula for this.
+So what did we learn so far?
+We learned that if you give me the model,
+uh, specified by the nodes,
+communities, the memberships, uh,
+and the parameters, uh,
+then we know how to generate a- a network.
+Um, this model is super flexible because it allows, uh,
+us to- to, uh,
+express a variety of community structures.
+We can create this type of traditional one that's- two dense clusters.
+Um, with this type of structure.
+We can create overlaps by saying this orange nodes belong to both communities,
+so they are in the overlap or we could even have a hierarchical structure,
+where we say, you know, ah,
+um, violet nodes belong to A,
+uh, green nodes belong to, uh, C, ah,
+and then all the nodes belong to B so that there is this kind of A and B are
+embedded or included are subgroups of the bigger group, ah, B.
+So, uh, that's the way, ah,
+the flexibility of this model to give you some, uh, intuition.
+So what we know to do so far is,
+how do we go from the model to generate the network?
+What we'd like to do next is to go the other way around, right.
+Given the network, we'd like to say, what is the model?
+So essentially this is called maximum likelihood estimation,
+where basically we'll say, we'll define the following reasoning.
+We say, assume there is some model that nature uses to generate graphs.
+And we will assume that AGM is the model that nature uses to generate graphs.
+Then we are going to say,
+let's assume that our real-world graph was generated by AGM.
+So we are going to say,
+what is the model F that is most likely to have generated my data?
+So in our case we say, given a graph,
+find the most likely, ah,
+model AGM, ah, that have generated the data.
+So what do we mean by model?
+It means, we need to decide that the number of communities,
+we need to assign- decide how nodes belong to communities,
+and what is every parameter P_C of every community?
+So we say, what are the values of these parameters such that
+this graph that I observe in reality
+would most likely have been generated by my model?
+So now, as I said,
+basically we want to fit our model to the underlying graph.
+And the way we do this is using maximum likelihood estimation.
+So basically given a real, uh, graph,
+we want to find the parame- the model parameters
+F which maximize the likelihood of our graph.
+So the way I wri- say this is to say,
+given some model parameters,
+I wanna generate a synthetic graph.
+And then I wanna, ah, ah, I wanna say, uh,
+what is the correspondence between the synthetic graph, uh, and the real graph?
+So in some sense, I wanna maximize the probability
+of my model F generating the real graph, right?
+So basically, I wanna be able to efficiently compute this, ah,
+likelihood that F generated my data G and then I need to- a way to,
+uh, optimize over F to maximize this probability,
+to maximize this likelihood.
+So let me now first tell you how likelihood is defined over a graph, right?
+So I'm given a real graph G and I'm given a
+model F that assigns a probability to every edge.
+And I want to genera- ah,
+compute the likelihood that my model F has generated the graph
+G. And the way I can do this is to say, that is a graph.
+Here's an adjacency matrix.
+This is my input data.
+I have my model and my model assigns a probability to every edge that can happen, right?
+Every- the model says,
+A has a self-loop with itself with,
+ah, you know, probability 0.25.
+Of what- node 1 links to node B,
+uh, to node 2 with probability 0.1.
+So now I can ask,
+what is the total probability that this kind of
+probabilistic adjacency matrix would generate a given graph G?
+I can simply do this as a- as a product.
+Uh, and I go, ah-ha,
+I wanna go- I wanna go over all the edges of G. I wanna go over
+all the entries of this adjacency matrix where there is a value 1.
+And I want these coin flips to land up heads.
+I want them to- I want to multiply these probabilities together because I want,
+uh, you know, this will be,
+uh, with, ah, will have value of 1 with probability 0.25 and so on and so forth, right.
+Then I also want to go over all the entries that are missing.
+So basically, over all the edges that don't exist in the network.
+And here I want the- the- the coin to land on the tail.
+I want no edge.
+So I go over all the non-edges of the network and I multiply 1
+minus the probability of edge occurring, right?
+And this is how likelihood of a graph under a given model is defined.
+Basically, I go over, ah, all,
+ah, all the, ah,
+all the edges of the graph.
+I see what is the probability that the model assigns to this edge.
+And I want the product of these probabilities to be as high as possible.
+And then I want to go over all the non-edges of the graph,
+over all the 0s.
+And I wanna multiply together 1 minus the probability that the edge is there.
+And again, I want these 1 minuses to be as high as possible.
+So our likelihood will be high,
+where the model will assign high probabilities to edges that appear in the graph.
+This is this part,
+and it will assign low probabilities to edges that don't appear,
+ah, in my, ah,
+graph, uh, G, right?
+Because this is- this goes over nodes and edges of the G. And this
+now gives me the likelihood that model F generated the graph,
+uh, G. So now, um,
+the- the question becomes,
+how do I find my model?
+How do I find parameters of F?
+And the way I'm going to find parameters of F is that I'm going to what we call,
+relax or extend my model a bit to account for membership strengths.
+So the way I'm going to do this now is rather than saying that every community C has a,
+um, has a parameter.
+I'm going to, uh,
+assign a membership to have a strength.
+So this would be the strength of our membership of node u to community A, okay?
+And, uh, if the strength is 0,
+this means, node is not a member of that community.
+Um, so now, how are we going to write out, ah, ah,
+the probability that node u and v link to each- to each other, ah,
+if they are a member of a common community
+C. And the way we are going to parameterize this is to say
+it is the strength- is a- it's a product of the strengths of memberships.
+And memberships can only be a non-negative,
+so 0 or more.
+So it's a product of the memberships.
+And, uh, I'll take the negative value of this,
+uh, exponentiate it, and take minus 1 of that.
+So this now means that this should be a valid probability,
+it will be between 0 and 1.
+Um, and the higher,
+the stronger the memberships,
+the bigger the number here will be.
+So E to the minus negative would be something close to 0.
+Which means the probability of link,
+uh, will be higher, right?
+So basically, if membership strengths are low,
+the probability of the edge is low.
+If membership strengths are both high,
+then the product is going to be high,
+which means the probability is going, ah, to be high.
+So this is how we parameterize it.
+So now, uh, nodes v and u can connect via multiple communities, right?
+They can have multiple, uh, communities in common.
+So the way we are going to do this is using the same formula as we had before.
+We are going to say the probability that u and v linked to each other is that they
+create- they link to each other
+through at least one of the communities they have in common.
+So this is again P_C that we have des- derived here.
+And but now I say, out of all these communities they have in
+common at least one of these coin flips has to come up,
+uh, heads, has to create a connection.
+And this is uh, very nice because it, uh,
+allows me to simplify this expression by quite- by quite a lot, right?
+So now this is what we had on the previous slide.
+Probability of a link is parameterized the following way,
+where P_C is, uh,
+parameterized this way by the product of the strands of, uh,
+node u and node v belonging to the common community
+C. So now if I write it- if I write is all out, it- this is, you know,
+it's 1 minus product or our common communities,
+1 minus- 1 minus,
+uh, e to the minus product of Fs.
+So here is how it simp- simplifies this to,
+1s kind of uh- uh,
+subtract each other out.
+Then what I can do, I can take this product and, um, uh,
+distribute it inside and the product of, uh,
+exponentials becomes a sum of the exponents.
+So here it is and why is this elegant?
+Because this now means that this is simply a dot product of- of- of vectors,
+of community memberships of nodes u and nodes v. So
+I can simplify this whole expression into simply saying probability is, uh,
+1 minus e raised to the dot-product of the community membership vector for node u times
+the community membership vector for node v. So
+this is super cool because it's a very nice type expression.
+So now that I have defined the probability of an edge between a pair of nodes
+based on their vector representations of the community memberships,
+now, you know, how will my graph likelihood look like?
+It's a product over the edges times the product of 1 minus,
+uh, probabilities of non-edges.
+And I simply, you know inserted this in, this is here.
+When I insert it here again, these, uh,
+1s will, um, cancel out and I just get the exponent.
+Now, if I take this,
+uh- uh likelihood and further simplify it a bit,
+I can write it in the following form, right?
+It's basically rather than directly optimizing the likelihood,
+we like to optimize the log-likelihood.
+And the reason why we optimize log-likelihoods is for numerical stability, right?
+Probabilities are small numbers,
+product of small numbers are even smaller numbers and then
+numerical instabilities and imprecisions started to play a role,
+so you never work with raw probabilities,
+you always work with logarithmic probabilities,
+a logarithm of the probability.
+So if I apply now, uh, a logarithm here,
+and it is a valid transform because logarithm is a monotonic transformation.
+So when I maximize the max- maximum is attained at the same position,
+regardless of whether I- whether I pass this through
+a logarithmic transformation because it's, um, monotonic.
+So if I apply a log and the log products become summations,
+so I get this summation over log 1 minus the first term plus a summation,
+over the log x- the second term and log and exponent again cancel each other out.
+So here only the summation survive.
+And this is now our objective.
+We'll call it the log-likelihood that we tried to, uh, optimize.
+So we have simplified it, uh, a lot.
+So how do we, uh,
+optimize, uh, this likelihood F?
+We simply start with random memberships, uh,
+Fs, and then we iterate until convergence.
+We basically, uh, update the membership F of
+node u while fixing the memberships of all other nodes.
+Um, and we can do gradient descent,
+where we take small changes in F that lead to the increase in the log-likelihood.
+Uh, and that is um- uh,
+all- all we do.
+And, uh, just to say one more is when we compute
+this derivative- partial derivative of log-likelihood,
+uh, here is the expression.
+What we find out is that this depends,
+it is a summation over the neighbors of node, uh, u.
+And, uh, you see how we're now multiplying the,
+uh- the- the- the,
+uh, community membership vectors.
+We multiply it with, uh,
+community membership vector of node v. But
+then the term that is very expensive to compute is
+the second term because here the summation goes over non neighbors of node u.
+And because usually nodes have small number of neighbors, uh,
+this means that this summation goes over- over the entire network, right?
+Basically this plus this is the entire network and this is too slow,
+uh, in practice to do.
+But we can efficiently approximate these, uh,
+computing this expression by realizing that this blue part,
+um, is, uh, slow to compute.
+But we can expand it, um,
+and uh- uh, make it,
+uh, to compute much faster.
+And basically the idea is very simple, right?
+If you wanna sum, over, um, uh,
+a set of nodes that are not neighbors of a given node,
+then you can write out this summation the following way.
+You say, let me sum up over all the nodes in the network,
+but then only subtract the contributions from
+the nodes that are actually neighbors of this node u. All right?
+So this now is the summation over all nodes that are non-neighbors of node u.
+It's basically all the nodes minus the u itself,
+minus the neighbors of node u.
+Uh, and the point is because mo- most of the nodes have low degree,
+you can cache this part,
+you just compute it once,
+and then you only have to update these terms.
+And this way, you can make your method, uh, scale, uh,
+much- much faster and run uh- uh,
+to be able to be applied to much bigger graphs.
+So let me summarize,
+uh, the part of this lecture- this part of the lecture.
+We talked about generative modeling of networks.
+We talked about how we can fit a generative model to
+the underlying network using log-likelihood and gradient descent.
+In our case, we have defined our generative model of networks,
+uh, that is based on node community memberships.
+So what this means is that by feeding our model to the underlying network structure,
+we can then, uh,
+get the co- node community memberships out of that model.
+So essentially we are doing community detection by
+fitting a generative model to the underlying,
+uh- to the underlying, uh, graph.
+So BigCLAM is a method that- that defines a model,
+uh- affiliation graph model based on the- based on
+the node community affiliations and then generates the underlying network structure.
+So what we then did is defined the fitting procedure that says,
+given that the underlying network structure and
+the assumption that the network was generated by the BigCLAM,
+what is the optimal assignment of nodes to communities such that,
+uh, we- we get the underlying,
+uh, real network.
+Um, in this procedure of model fitting,
+we defined the notion of log-likelihood, um,
+and then said, you know,
+what is the most likely model to have gen- generated this data?
+And we were able to feed the model, uh, to the data.

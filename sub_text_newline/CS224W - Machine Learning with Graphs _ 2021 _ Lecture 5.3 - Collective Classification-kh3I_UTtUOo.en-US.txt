@@ -1,0 +1,483 @@
+So to, uh, talk about the third method, uh,
+we discussed today, I'm going now to,
+uh, talk about belief propagation.
+So this is the final method around collective classification we are going to talk,
+um, in this, uh, in this lecture.
+And really this will be all about what is called,
+uh, no- uh, message passing, right?
+We can think of these methods that we have talked about so far,
+all in terms of kind of messages,
+beliefs being sent over the edges of the network,
+a node receiving these messages update- updating
+its own belief so that in the next iterations its neighbors are able to- to get this,
+uh, new information and update their own, uh, beliefs as well.
+So this is, um, basically what, uh,
+uh, what is, uh,
+the core intuition we are trying to explore today,
+which is all about passing information across the neighbors,
+either pushing it or receiving it,
+and updating the belief about, uh, oneself.
+And, uh, the algorithm that- that does this is also known as loopy belief propagation.
+Loopy because we will apply it to graphs that may have cycles, um,
+and belief propagation because these messages,
+these beliefs are going to be passed over the edges,
+uh, of the network.
+So let me give you a bit of context and where does this,
+uh, notion of loopy belief propagation come from.
+Belief propagation is a dynamic programming approach
+to- about answering the proba- probabilistic queries,
+uh, uh, in a graph, right?
+By probabilistic queries, I mean, you know,
+computing the probability that a given node belongs to a given class.
+And it's an iterative process in which
+the neighbor- neighboring nodes talk to each other by passing messages to each other.
+And, you know, the way you can,
+uh, think of this is really like, you know,
+if- if there wouldn't be COVID,
+we'd be nicely sitting in school and, you know,
+you can- you can pass messages between, uh,
+one another if you are, you know,
+seat close together or if you are connected in the network, right?
+So node v will say,
+"I, you know, I believe you,
+um, that you belong to this class 1 with the following, uh, likelihood."
+And then- and then a given node can
+then collect these beliefs from its neighbors and say,
+"This now makes me more sure,
+or less sure, I also belong to class 1."
+And when this consensus, uh,
+is reached as these messages are being, uh, passed around,
+we- we arrive to the optimum,
+we arrive to the kind of the final belief about the- the class or label,
+uh, of every node in the network.
+So let me show you some basics about message passing,
+and we are first going to do this on simple graphs.
+We're going to do this on a line graph,
+then we are going to generalize this to a,
+uh, tree-type graph, and then we are going to apply this to general graphs.
+And just for simplicity, uh,
+let's assume we want to count the number of nodes in
+a graph using message passing, right?
+So each node can only interact,
+meaning it can only pass messages,
+with its neighbors, right?
+Other nodes it is connected to.
+So, um, you know, as I said before,
+note that there might be issues when we- if the graphs contains cycles,
+but for now let's assume there are no cycles,
+or let's ignore the cycles, right?
+So the idea is I have a line graph,
+I have nodes 1-6 linked in this type of linear structure.
+So the task is that we want to compute,
+or count, the number of nodes in the graph.
+And the way how we can do this using message passing is that we define some ordering,
+uh, on the nodes, right?
+And this ordering, let's say,
+results in a path,
+and then edge directions, uh,
+we can think of them according to the ordering of the nodes, right?
+So, um, and this edge direction
+determines the- the order in which messages are being passed.
+So let's say we consider the nodes in order 1, 2, 3, 4, 5,
+6, so the messages will start at one and be passed to node 6.
+And the way these messages will go is that node i will compute the- the message and then,
+um, uh, you know, it will- the message will be sent from node i to node i plus 1.
+Um, and the idea will be that, um,
+as the message passes to the node,
+a node gets to look that message,
+may transform it, and pass it on.
+So if now we want to go back to this task of counting the number of nodes in the graph,
+uh, the idea here is,
+um, uh, simple, right?
+Uh, each node can only interact with its, uh, members,
+its neighbors can only pass messages,
+um, and the idea is that each node says,
+"What- however many nodes are in front of me,
+I also add myself to the count and pass on this message,
+uh, to the next node."
+So this means that each node listens to the messages from its incoming neighbors,
+updates the message and passes it forward.Uh,
+and we will use the letter M to denote the message, right?
+So for example, the way to think of this node 1 will say, "Oh,
+there is one of me," and then it will pass this message M to the neighbor, number 2.
+Neighbor number 2 is going to,
+uh, get the incoming message and say, "Oh,
+there is one node in front of me,
+but there is me here as well,
+so this means there are- there are two nodes so far."
+So it will update the belief that there are,
+you know, n plus 1 messages, uh,
+ahead of it, and then it's going to send
+this message forward with- the message will now have value 2.
+And then node 3 is going to collect this message with value 2,
+update it, it will say, "Oh,
+there is me as well," so it will add one plu- to it,
+so it will become a three,
+and it will send it on.
+And this way, you know,
+like when- when we arrive to node, uh, six,
+we will be counting the number of nodes, uh,
+on the path because every node increases the message value by one and passes it on.
+So at the end, you know,
+the final belief of node 6 will be that there are six nodes, uh, in the graph.
+And then the, you know,
+we could even like now take this message and pass it back to the beginning node, uh, 1,
+but the main idea here is that each node collects a message from its neighbor,
+updates it, and passes it forward.
+That's the core operation that I wanted to illustrate here.
+And you can see how this works nicely on a- on a line graph,
+um, with the proper, uh, ordering of the nodes.
+Now we can do the same algorithm also on a tree, right?
+If you have a graph that has this acyclic tree-like structure,
+then we can perform, uh,
+message passing not only on a path graph but also on a tree-structured graph.
+The important thing here is to propagate or do
+the message passing from the leaves to the root of the node- of the- of the tree.
+So the idea is, right,
+that first, uh, leaves, um, five,
+six and seven, um,
+will- and, uh, number 2 will say, "Oh,
+we are one- I'm one node,
+I'm the first node", and will set the message value to one,
+and then they will send messages to their,
+uh, to their parents, um, right?
+Who are- who are, uh,
+here, uh, above them.
+And then the parents are going to sum up the values of the messages from the children,
+add one to it and pass that message on.
+And then again recursively,
+the next level, you know,
+it is going to sum up the- the incoming here,
+it will be 2 plus 1 it's 3,
+plus 1 for itself,
+it's 4 to send it on,
+and then this here is going again to sum up 1, uh,
+plus 4 is 5 plus itself equals to 6, um,
+so and there should be, uh,
+six messages here, actually it should be seven,
+so I lost a count of one somewhere.
+But you get the idea, right?
+So the idea is to say,
+"I am one descendant,
+I send information on.
+I'm one descendant, I send it on."
+This one sums the messages,
+adds one to them, um, and says, "Oh,
+there is three of us,
+let me send this forward."
+Right? So there will be a value of three here.
+Um, there will be, um.
+Again, uh, similarly, here it will be a value of one,
+so that'll be, uh,
+1 plus 3 is 4 plus 1 is 5.
+So there'll be five here.
+There is one descendant here.
+So the two together will be 6 plus 1 for this node at the end,
+the final belief will be that,
+there is seven nodes, uh, in the graph.
+Again, the basic information in this algorithm is this local message computation,
+where messages come in,
+they get collected by the node,
+the node collects them, uh,
+processes the messages, creates a new message, and sends it on.
+So the loopy belief propagation, uh,
+algorithm, what it does,
+it, um, you know,
+if you say what message will be sent from node i to node j,
+it will depend on what node i hears from its neighbors, right?
+The content of this message here is going to depend on
+the incoming messages from its downstream, uh, neighbors.
+So each neighbor passes a message to i to, uh,
+i will now take these messages up,
+uh, collect them, compute them,
+update them, create a new message,
+and then send this new message to node, uh, j.
+And that's essentially what loopy belief propagation, uh, does.
+The way we can think of this a bit more formally, uh, is the following.
+We are going to have what is called label-label potential matrix.
+So here we are going to capture dependencies between,
+uh, a node and its neighbor in terms of labels.
+And you can think of this as a- as a- one way to say is, uh,
+what is the- if node, uh,
+i has label y and node j has,
+you know, some other label, uh,
+y sub j, then, um, um,
+the label-label potential matrix,
+the entry of that, uh, um, uh,
+cell will be the proportion, uh,
+or will be proportional to the probability that node j belongs to class, uh,
+Y sub j, given that its neighbor i belongs to class,
+uh, Y sub, uh, i.
+So this means that here,
+if homophily is present,
+this matrix will have high values on the diagonal.
+Meaning, if- if, uh,
+j belongs to Class 1,
+then i should also belong to Class 1.
+But given that we have this label-label potential matrix,
+if there are big values, um,
+off the diagonal, this will mean that, you know,
+if my neighbor is of Class 1,
+then I'm likely to be of class 0.
+So it also can capture the cases where the, actually,
+nodes that are connected are of the opposite labels,
+are of the opposite, uh, classes.
+So that this label-label potential matrix that tells us if a node j is of one label,
+how likely am I of- uh,
+of a different or of some,
+uh, other type of label, if I'm node i.
+Then we are also going to have this, uh, Phi,
+which is the prior belief about what is- what should be the label of node i, so right?
+So Phi of, uh,
+Y_i is proportional to the probability,
+prior probability of node i belonging to class Y_i.
+And then we have this notion of a message where message goes from node i to node j.
+And this means that it is i's message or estimate of
+node y being in class Y sub- Y sub j. Um,
+and L will be the set of all, uh, class labels.
+So to give you now the formula, firstly,
+in the initial iteration, in the utilization,
+we are going to initialize all messages to have Value 1.
+And then we are going to repeat for every node,
+uh, the following formula,
+where basically we are right now at node i
+and we'd like to compute the message that you are going to send to
+node j and we are in this message will be i's belief that j belongs to a given class.
+So the way we are going to do this is to say, okay,
+let's sum over all the states or over all the possible labels.
+Let's take the- the belief that i belongs to a given, uh, label.
+And, uh, this is the belie- this is the potential that
+the j will belong to the label Y sub j, right?
+So this is the label-label potential ma- matrix
+that I have introduced in the previous slide.
+Now, we are going to multiply that with a- with a, um,
+prior probability of node i,
+uh, belonging to class Y sub i.
+And now here, what we are doing is we are going to sum over all the neighbors, uh, uh,
+k of node i, um,
+omitting the j, j will- is the uh uh,
+the node to which we are sending the message.
+So we are summing over everyone but the j or multiplying go- everyone by j.
+Where now for every neighbor,
+uh, k here, these three neighbors, we are asking,
+what is your belief about node, um,
+Y being in class,
+uh, Y sub i, right?
+So now basically what this means is that node i
+collects beliefs from its downstream neighbors,
+um, aggregates the beliefs,
+multiplies with the- its pra- its- its belief what its own class should be.
+And then- and then applies the label potential, um,
+matrix to now send a message to node j about
+how i's label should influence j's, uh, label.
+And this is the core of, uh,
+loopy belief, uh, propagation, right?
+And, uh, we can keep iterating this, uh,
+equation until we reach,
+uh, some convergence, right?
+When basically we collect messages,
+uh, we transform them,
+and send that message onward to the next level, uh, neighbor, right?
+And after this approach,
+this iteration is going to converge.
+Um, we will have the belief about what
+is the- what is the likelihood or probability of node i,
+belonging to a given class or to a given label,
+uh, Y sub, uh, i.
+And essentially the way- the way this will look like
+is that our belief will be a product of
+the prior belief about what's the label of that node
+times the messages of what other nodes downstream,
+uh, here labeled as j.
+Uh, think about what the label of node, uh,
+i, uh, is, and this is encoded in these messages.
+So this is the idea how belief propagation algorithm works.
+Um, here, I call it loopy belief propagation,
+because in practice, people tend to apply this algorithm to, um,
+graphs that have cycles or loops as well,
+even though than any kind of convergence guarantees and this kind of
+probabilistic interpretation that I gave here, uh, gets lost.
+So, um, if you consider graphs with cycles, right,
+there is no- no longer a fixed ordering on- of the nodes which is, er,
+which, um, otherwise the fixed ordering exists in terms if the graphs are trees.
+But if a graph has a cycle,
+you cannot- you cannot, uh,
+sort, uh, the nodes, uh,
+in- in a- in a- in a nice order.
+And basically the idea is that we apply the same algorithm as in the previous slides,
+but we start from arbitrary nodes and then follow the edges to update the messages.
+So basically, we kind of propagate this in some kind of,
+uh, random order, again,
+until it converges or until, uh,
+some fixed number of, uh,
+iterations is, uh, is reached.
+So, uh, to give you an idea how this would look like,
+for example, on a - on a graph with cycles, um,
+the issue becomes that,
+if our graph has cycles,
+messages from different subgraphs,
+from different subbranches, are no longer independent, right?
+So it means that for example,
+when our graph was a tree, we could say, "Oh,
+let's collect information from the left child,
+from the right child,
+and add it up, and send it to our parents."
+So it means that, kind of,
+children don't talk to each other,
+and these messages really are coming from disjoint - disjoint parts of the tree.
+However, if there is a cycle, then this,
+uh- this idea of something being disjoint or independent,
+is no longer true, right?
+Like, for example, when node u would collect messages,
+it would collect message from i and k. But really,
+these messages are no longer independent because they
+both depend on the message they got from j.
+So in this sense, it comes- in some sense,
+j is talking to u twice,
+once through i and once through k. So this creates problems,
+uh, uh, in terms of, uh,
+theory and in terms of convergence.
+Um, but what people tend to do in practice,
+and not what works really well in practice,
+is that you still run this belief propagation,
+even though the graph has cycles, right?
+And here what tried to show you is that when- once you are in a cycle, kind of,
+the information will- uh,
+will- will amplify, um,
+artificially because it gets on a cycle.
+And this is similar,
+if you think about it to- when we talked about PageRank,
+and we talked about spider traps, right,
+that- where the random walker kind of gets- gets infinitely lost in this- uh,
+in this spider trap.
+It starts cycling.
+And- and the problem with cycles or with loops is that
+these messages start cycling, um, again, as well.
+So the problem, um,
+in this case, if the graph has cycles,
+is that the beliefs may not converge.
+Um, message is based on initial belief of i and not on separate,
+kind of, independent evidence coming from nodes of i.
+So the initial belief about i,
+uh, which could be incorrect,
+is reinforced, uh, let's say,
+uh, through the cycle in this case.
+Uh, however, as I said, in practice, uh,
+loopy belief propagation is still very good heuristic, uh,
+for complex graphs because, uh,
+complex real world networks tend to be more like trees,
+and they tend to have a relatively small number of cycles.
+So the cycles, in reality,
+are not such a big problem,
+as they might be in this kind of,
+wore ca- worse-case scenarios.
+Um, and to give you an example, right, imagine,
+we are doing belief propagation and we have two states.
+We have a state, or,
+a true or a false.
+And now, you know, this node here sends, uh,
+a message to the following node and says,
+"You know, I think you are true,
+with, you know- s- on a- with my belief about you
+being true is 2 and my belief about you being false is 1."
+So now this node will take this and s- and pass it on, and this is now,
+kind of, going to be,
+let's say, updated or,
+uh, passed on in a- in a cycle.
+But when it comes back to this node,
+this node is now going to collect messages from both- uh,
+from both of incoming, uh,
+messages, this message and that message.
+So now it will say, "Oh,
+my belief that I'm- I am in- uh,
+I am true is actually 4.
+And my belief that I'm- I'm false is,
+let say, only 1, or,
+uh, let's say only 2.
+And what this means is that now in this cycle,
+this is going, kind of,
+to an- uh, to amplify.
+Um, and the cycle is going to amplify our belief that the state is actually, uh, true.
+So this means that messages loop around and around and are more- more and more
+convinced that these variables actually have state true and not state false.
+And, uh, belief propagation, kind of incorrectly,
+will treat these messages as separate evidence,
+uh, that the variable T is true.
+Um, and the issue is that these messages
+are no longer independent because there is a- there is a cycle,
+uh, on the graph.
+Um, and this can cause- uh,
+this can cause problems.
+As I said, in practice,
+real graphs, uh, tend to look more like trees.
+So they don't- uh,
+the cycles are not, uh, a problem,
+uh, in- uh, in practice, right?
+This is, as I said, an extreme example.
+Often, in practice, the cycles- the influence of cycles is weak.
+Our cycles are long,
+or, uh, include, uh,
+at least one weak, uh, correlation,
+so that the message strength, uh, gets broken.
+So, um, what are some advantages of belief propagation?
+Advantages are- ea- that it's easy to- to code up,
+and it's easy to paralleli- parallelize.
+It is, uh, general.
+It means that we can apply any graph model with any form of potential.
+I showed you this label-label potential matrix,
+but you can also, uh,
+think of more complex, higher order potentials.
+Um, so this is nice because label propagation or belief propagation does not, uh,
+consider only homophily anymore,
+but can learn more complex patterns,
+where labels change, based on the labels of the neighbors, right?
+So far, in- in previous methods, we only said,
+"My label is- uh,
+depends on the label of my neighbors.
+So if- whatever my neighbor preference is,
+my- why a- whatever my label- my neighbor's label is,
+this is also my label."
+In belief propagation, the labels can flip because we have this notion of,
+uh, label-label, uh, affinity matrix.
+Um, the challenge in belief propagation is
+that convergence is not guaranteed so we generally don't know when to stop,
+um, especially if there are many, uh, closed loops.
+So the trick here would be to run a belief propagation for a short,
+uh, number of steps.
+Um, and of course, these potential functions,
+this label-label, uh, potential, uh,
+matrix, uh, this needs to be- um,
+it requires training, uh,
+data analysis to be able to, uh, estimate it.
+So to summarize, uh,
+we learned how to leverage correlations in graphs to make predictions of nodes.
+We talked about three techniques.
+Relational classification, where basically we say,
+my label is a sum of the labels from my neighbors,
+which basically means my label is, kind of,
+the label of my neighbors.
+Um, this uses the network structure but doesn't use feature information.
+Then we talked about iterative classification that use both node feature information,
+as well as the summary of the labels captured in the vector z around a given node.
+So this approach use both the feature information about the nodes, as well as,
+labels of the neighbors, but still,
+kind of, would depend on homophily-type principle.
+And then we talked about loopy belief propagation.
+That- that, um, included this label- uh,
+label-label potential matrix, uh, and,
+uh, thought about this as collecting messages,
+transforming messages, and sending a message to the upstream neighbor, as well.
+This process is exact and, uh,
+well-defined on, uh, chain graphs and on trees.
+But on graphs with cycles,
+um, it creates, uh, problems.
+However, as I said in practice,
+cycles tend to be, uh,
+few or tend to have weak connections,
+so that in practice, cycles don't, uh,
+cause, uh, too much problem,
+and loopy belief propagation is
+a very strong allegory or a very strong approach for semi-supervised,
+uh, labeling of nodes, uh, in the graph.
+So, um, with this, uh,
+we have finished the lecture for today.

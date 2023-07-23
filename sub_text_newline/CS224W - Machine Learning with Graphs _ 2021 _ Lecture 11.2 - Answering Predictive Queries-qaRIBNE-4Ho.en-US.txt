@@ -1,0 +1,259 @@
+So, how are we going to predict, uh,
+the answers to a given query on a knowledge graph?
+Uh, this is what we are going to discuss next.
+And the key idea we wanna do here is we wanna take advantage of
+the structure of the underlying- this embedding space.
+And the idea is that we wanna embed queries.
+Um, and the way you think of this is that really,
+this will be a generalization of the TransE method that we talked about,
+uh, last time, right?
+Last time, we said that the TransE knowledge graph completion method,
+the idea is you start with the head,
+um- you wanna go from head to tail and way you go from head
+to tail is to learn this vector r that moves you from h,
+uh, to t. So you say,
+what is the scoring function, right?
+What is, kind of the- the likelihood, the, you know,
+some kind of uh, probability if you like,
+that- that, uh, he- uh, that, uh,
+if you start with the he- that head and tail are related with the relationship r,
+then the way you've write the scoring function is- is
+head plus the vector rminus the point,
+uh, t, and now,
+this is the distance.
+Essentially what this is saying is,
+what is the distance between h and r,
+um, and the point, uh, t?
+So another way to interpret this,
+uh, TransE is to say,
+I will embed the query.
+The query is hat plus relation.
+And the goal now is that embedding of the query is
+close to the entity t that is the answer to the query, right?
+We wanna say the- the distance between the embedding of the query and
+the entity t is simply the distance between
+these two points where another way to think of it is,
+I'll start with the head,
+that's my anchor node.
+I'm going to traverse over this learned vector r that will,
+you know, lead me to some point.
+This is now the embedding of my query.
+And now, my goal is to minimize the distance between the,
+um, embedding of the query q and the, uh,
+uh, the point t. This is the embedding of the entity that is answer, uh, to this query.
+So for example, if I start I know with an entity called
+Barack Obama and I wanna move along this vector that corresponds to the,
+um, relationship called nationality,
+I add h plus, uh,
+vector for nationality, I end up at this point q.
+And my goal now is that, of course,
+there would be some other entities, uh, uh,
+embedded, uh, in this space.
+I want the distance between the q and American to be small.
+Uh, and I want it in some sense, and I want,
+let's say the distance between q and New York, uh,
+to be larger because the answer to nationality of Obama is- is,
+let's say American and it's not,
+uh, New Yorker, uh, right?
+So that's essentially the idea, right?
+So once I have embedded the query,
+uh, in this case, embedding the query is very easy.
+I start with the anchor entity and add,
+uh, uh, relation to it, a vector to it.
+Um, then I want the onset entity,
+the entity t, to be close- embedded very close to the embedding of the query.
+That's the idea of the TransE.
+So what we can do now, uh, with TransE,
+we can generalize it to multi-hop reasoning, right?
+So if I say, uh, starting with the query,
+er, defining the query q as, uh, er,
+anchor entity and a set of relations,
+then it's intuitive how I can generalize this using TransE.
+I can start with my embedding of my entity v and then I can simply move,
+uh, along the vector of, uh, relation 1,
+uh, move along another vector of- for relation 2 and I
+chain these vectors together to arrive at some point, uh, in space.
+And I will call this point q because this is now
+an embedding of this query that started with,
+uh, uh, entity and then traversed,
+uh, uh, a set of relations.
+Right? And why is this elegant is because now,
+creating this embedding for the, uh, for the,
+ah, query q simply involves a couple of vector additions, right?
+I start with a point and then I add,
+uh, these vectors, uh, to it.
+And now that I have identified the embedding of the- of the q,
+I only look at what are the entities embedded close to these points.
+Those are my answers that are- basically,
+those are my predicted answers, right?
+It's a, uh, now I formulate this as a prediction task where I say,
+whatever is close to the point q, that's my answer.
+Um, that's essentially, uh,
+the idea about, um, ah,
+how do we now generalize, uh,
+TransE to this kind of uh, multi-hop, uh, queries.
+To give you an idea, right?
+I could say what proteins are associated with adverse events,
+uh, events caused by, uh, Fulvestrant?
+Then basically, I have my, uh, Fulvestrant.
+I have my, uh, embedding space.
+Here's, you know, hypothetically,
+the- the embedding of the drug, a Fulvestrant,
+then I would traverse across, uh,
+across a vector that I have learned for the- co- to- for the causal relations- relation.
+And hopefully, you know,
+the goal is that all these side effects that are caused by
+Fulvestrant are embedded close to this, uh, point here.
+And now that I'm at this point,
+I wanna add the traverse along the relationship associated with,
+so I would add the associated with,
+uh, relation to it.
+Perhaps, you know, this vec- learning vector is like this.
+So this is now the embedding of my query and the goal
+is that the proteins that are the answer to this predictive query,
+uh, they are embedded close to this point,
+uh, q, and these would be my answers.
+So it simply just asking embed the query and find the entities that are close,
+uh- closest to the embedding,
+uh, of the query.
+So that's the, uh, idea for answering, uh,
+multi-path queries, uh, using,
+ah, a, uh, extension of TransE.
+So what are some,
+uh, things to discuss?
+Uh, what are some insights?
+First is that we can train TransE to optimize the knowledge graph,
+uh, completion objective, right?
+Uh, basically meaning we can, uh, uh, basically,
+learn TransE by learning the entity embeddings as well as the vectors are.
+Um, and because TransE can naturally ha- handle composition relations, right?
+Last- last, uh, week,
+we were discussing about, uh,
+different types of, um,
+properties of these different graph completion methods.
+And we talked about the TransE has
+this compositional property where you can- you can, um,
+uh, chain multiple, uh,
+predictions or multiple relations,
+uh, one- one after the other.
+And this really allows TransE to be- to,
+uh- to be able to answer path bath- based queries.
+Uh, for example, if you look at TransR, DistMult, or ComplEx,
+they are not able to be used in this kind of
+path settings because they cannot handle composition, uh, relations.
+So it means they cannot- they are not suitable for answering, uh, path queries.
+So the key here was this insight, but basically,
+we learn how to move around,
+uh, in the- in the embedding space.
+And the goal is to se- to embed the entities as well as learn these,
+uh, uh, vectors that allow us to kind of strategically move around, uh, given the,
+uh- given the query to embed the, uh,
+the query and then the entities that are closest to the embedding of the query,
+those are, uh, our answers.
+So this was now about answering path queries.
+The question then becomes,
+can we answer more complex, uh, queries,
+for example, that also include some logical operator like a conjunction?
+A conjunction is an and.
+So for example, maybe I get a query that is,
+what are drugs that cause the shortness of breath and treat
+diseases associated with protein- protein, uh, ESR2?
+So the way I think of this is that ESR2 and
+shortness of breath are my, uh, anchor entities.
+From ESR, I wanna go to as, ah,
+across associated with and then TreatedBy.
+Uh, from shortness of breath,
+I wanna say CausedBy and whatever are the drugs that do both,
+uh, I need to take the intersection here.
+And those are, uh, the entities that are predicted to be the answer,
+uh, to my query, right?
+So these are- what- drugs that cause shortness of
+breath and treat diseases associated with my,
+uh, protein of interest, uh, ESR2.
+Um, if you are, let's say a drug development,
+a medic- medicinal chemist,
+this is a real-world query,
+you would like to ask over your, uh, knowledge graph.
+So, um, how would we answer,
+uh, uh, this type of query?
+Let's say if the knowledge graph is complete and we can do knowledge graph traversal,
+the way we would do is we start with the first,
+uh, anchor entity, uh, ESR2.
+We traverse across the associated,
+uh, uh, uh, with, uh,
+relationship to get the- to the diseases associated with this, um, protein.
+Uh, from here, we then move to, uh,
+what are the drugs that are, uh,
+that treat, uh, these diseases.
+Again, we- we move, uh,
+we now traverse across the TreatedBy relationship,
+uh, to arrive to the set of drugs.
+And then we also have to start with a shortness of
+breath entity and move across, uh, CausedBy.
+These are now the, ah,
+drugs that, uh, cause shortness of breath.
+And now, we basically have to take an intersection between
+this set of entities and that set of entities.
+And whatever is- is in the intersection,
+that is the answer to our question.
+So in- our, um,
+the answer to our question would be, uh,
+Fulvestrant and, uh, uh,
+Paclitaxel, um, uh, drug, right?
+So the point is, um, that we have now, uh,
+two entities that are answer to our query,
+if we think of it as a knowledge graph,
+uh, uh, traversal, uh, type task.
+And of course, similarly to what I was saying before,
+is a given- if some of the links on the path are missing,
+which is usually the case,
+then the- then a given entity would not be,
+uh, will not be able to predict or identify that it is the answer to our query.
+So for example, if, uh, we don't know that,
+uh, ESR2 is associated with breast cancer,
+then the- then there is no way for us to discover
+that Fulvestrant is actually the answer,
+uh, to our question.
+So, uh, again, if the knowledge graphs are incomplete,
+knowledge graph traversal, um, won't work.
+So the question then becomes,
+how can we use embeddings to, uh,
+in some sense, implicitly impute these missing relations, um,
+and also, uh, how would we even be able to figure out that, you know,
+in this case, uh, you know,
+that there should be a link between ESR2 and breast cancer?
+And the hope is, right,
+that our method who will take a look
+at the entire knowledge graph will see that basically, uh,
+ESR2 here is also associated with, um, uh,
+ESR1 and, uh, uh, BRCA1, right?
+And we see that there are kind of these strong relations here.
+So what this would allow us to do is kind of be able to implicitly impute and say if
+breast cancer is associated with these two proteins
+who are strongly associated with this third protein,
+perhaps there is a missing relationship here, right?
+That's kind of what our algorithm,
+uh, needs to be able, uh,
+to do, uh, implicitly,
+uh, through, uh, node embeddings, right?
+The- the hope is that other contexts and other relationships in
+the graph will allow us to do this, uh, implicitly.
+So, uh, going back to our question about how would we now implement logical, uh,
+relations like intersection, uh,
+an and operator in this, uh,
+setting where we wanna answer more complex queries in a predictive way?
+The question then becomes,
+how do we- how do we in- how do we do this in the embedding space?
+And the first insight is that when we have this query plan that I showed it here,
+then this in- these, uh, starting nodes,
+these anchor nodes, they are single entities.
+But if you think about what are these gray nodes,
+what do they represent in my query plan?
+They actually represent a set of entities, right?
+So they represent, let's say, all the, um,
+all the diseases that are associated with ESR2
+or they represent all the drugs that are caused by,
+uh, that cause, uh, shortness of breath.
+So the question then becomes how do we repre- do this,
+uh, representation of entities in the embedding space because now these are sets?
+And how do we then define intersection operators in this, uh, latent space?

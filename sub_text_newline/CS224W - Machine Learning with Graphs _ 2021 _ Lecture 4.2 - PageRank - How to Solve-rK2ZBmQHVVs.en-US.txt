@@ -1,0 +1,413 @@
+So what I wanna talk next is,
+how do we solve the PageRank equation?
+How do we actually compute,
+uh, the vector r?
+The idea here is to use the method called, uh, power iteration.
+And what I would like to do is,
+we'd like to do the following.
+Right? Given a graph on n nodes,
+we want to use an iterate- we will use an iterative procedure that will, uh,
+update over time our rank vector r. Um,
+and the idea will be that we- we start the procedure by assigning
+each node some initial random, uh, PageRank score.
+And then we are going to repeat our iterative process until this,
+uh, vector r stabilizes.
+And the way we are going to measure whether it stabilizes,
+we'll say, "Here is our previous estimate."
+Now, t runs over the iteration of our algorithm,
+where we say this is our previous estimate in the vector r. This is
+our new estimating vector r. And if the coordinates,
+the entries in the vector don't change too much,
+they change less than epsilon, then we are done.
+And the equation we are going to iterate is written here.
+Basically, node j will say,
+"My new estimate of my importance is simply,
+take the estimate of the nodes i that point to me, uh,
+from the previous step, you know,
+divide each one by the out-degree of node i,
+sum them up, and that is my new importance.
+And we are just going to iterate this, um, you know,
+a couple of times and it's ah,
+it's guaranteed to converge to the,
+uh, to this- to the solution,
+which is essentially saying this is guaranteed to find
+me the leading eigenvector of- of the underlying,
+uh, matrix, uh, M. So, um,
+the method that do- does this, what I explained,
+is called power iteration, where,
+um, basically, the way we are going to do this,
+to just write it again in the very simple form,
+we initialize vector r, you know,
+let's call in- call it initialization to be times zero, to be simply,
+uh, you know, every node has,
+let's say the same importance or you can assign the random importances.
+And then we will simply iterate, you know,
+new estimate of r equals M times
+previous estimate of r. And we are going to iterate this equation, uh,
+for long enough until the- the, uh,
+ent- the entry wise differences between estimating
+the previous round and in the next round when the sum of these differences,
+uh, is, uh, less than epsilon.
+Again, notice that this equation is exactly this equation, right?
+This is just written in two different ways,
+but it's exactly the same thing.
+Um, one last thing to say is,
+you can use the- what is called L_1 norm,
+so the sum of the absolute differences here.
+You could also use, let's say, Euclidean norm.
+So sum of the squares of absolute differences, uh, if you like.
+Um, and generally, it takes about 50 iterations.
+You have to compute about 50, uh,
+50- you have to compute this product 50 times before you
+reach this stationary distribution or this, uh, limiting solution.
+So basically, you can compute PageRank by a couple of,
+uh, matrix vector multiplies, uh, and you are done.
+And this is important because, you know,
+Google is computing this PageRank every day over the entire web graph,
+write off tens of billions of- uh,
+of nodes, uh, and I know hundreds of billions of edges.
+All right? So this is really, really scalable and you can- you can compute
+it on the- on the graph that captures the entire web.
+So, uh, to give you an example, again, uh,
+power iteration method, you know,
+written again, in a different way.
+Our matrix M, our set of flow equations.
+Uh, and what I'm going to show you here is the iterations of the algorithm,
+where we set node importances to be simply, ah,
+1/3 at the beginning and now we multiply
+it with matrix M. And you know after we multiply once,
+here are the new values.
+We multiply the second time,
+here are the new values and,
+you know, the third time,
+and as we keep multiplying the- the- uh,
+the value of- values of vector r,
+then we'll converge to a stationary, uh,
+vector so that m equals - r equals N times r. Um,
+and the final importances would be 6/15, 6/15, and 3/15.
+It means y and a will have importance of 6/15,
+and m will have a lower importance of, uh, 3/15.
+So, um, this is- this is what PageRank is going to, uh, give us.
+So now that we, uh,
+have seen these equations and everything seems beautiful,
+uh, we need to ask a few questions.
+So first question is, does this converge?
+Second question is, does it converge to where we want?
+And the third question is,
+are the results reasonable?
+Right? So basically, what I said right now is create the, uh,
+graph represented as this matrix M around this uh, uh,
+uh, iterative- power iteration procedure,
+it will converge in about 50 steps and you will get your,
+uh, vector r out of it.
+Let's look at this, uh,
+a bit more, uh, carefully.
+So it turns out that with what I explained so far,
+there are two problems.
+The first problem is that some pages are what is called dead ends.
+They have no out links.
+And It turns out that for such web pages,
+the importance, the votes kind of leak out.
+I will tell you what I mean by that.
+And then there is also a second problem called a spid- spider traps,
+where all outlinks are within the same group
+and the- the spider traps eventually absorb all- all importance.
+So let me now give you an example and you will see what's happening.
+So, um, first, spider traps.
+Uh, here, in this case, right,
+we have a links to b,
+and then b has a self-loop.
+So if you run this, um, er,
+power iteration of what an adjacency matrix describing this graph,
+what will happen is that in the end, a will have,
+um, importance zero, and b will have importance 1.
+And if you think of this, why is this happening is
+because wherever the random walker starts,
+uh, you know, it will traverse this edge and get into b,
+and then it is going to- to- to be stuck here in b forever,
+so really, you know,
+after some number of time,
+the random walker is- is in node b with probability 1,
+and can never go back to a.
+So this is called a spider trap because the random walker gets trapped, and at the end,
+you know, this may be, uh, er,
+all the importance will be,
+uh, kept here in b.
+And you can imagine these that, you know,
+even if- if you have a super huge graph here, eventually,
+the random walker is going traverse over this edge and then
+be stuck forever in this, uh, self-loop.
+So that's the problem of spider traps.
+Um, and then here is the problem of dead ends.
+The problem of dead ends is now that node b has no outlink.
+And what this means that if you would simply create an adjacency matrix for this graph,
+run the power iteration,
+it will converge to all zeros.
+And intuitively, why is this happening is
+that as soon as the random walker gets to node b,
+the random walker has nowhere to go so it kind of falls off
+the cliff and the- and it gets lost.
+Right? And this way,
+the- the dead ends kind of this importance doesn't yet sum to one anymore,
+but it leaks out, uh, of the graph.
+So, um, this is- uh,
+these are two problems that we are going to address.
+And, um, you know, what is the solution?
+The solution is this notion of,
+uh, random jumps or teleports.
+So the solution for spider traps is that
+we are going to change the random walk processor.
+So basically saying at every time
+the random walker will not only choose a link at random,
+but can also decide to teleport itself.
+So let me explain what this means.
+So we are going to have one parameter beta
+that will allow random walker to do one of the two choices.
+With probability beta, you know,
+the random walker will decide and follow a link at
+random the same way as we discussed, um, so far.
+But with probability 1 minus beta,
+the random walker is going to jump teleport to a random page.
+And the common values of beta usually are between 0.8 to 0.9.
+So it means that, you know,
+if a random walker gets stuc- stuck in a spider trap,
+it will stay here for a few steps,
+but it's- eventually, it will- it will- it will be able to teleport out, right?
+Because with some smaller probability,
+the random walker will say,
+"Let me just randomly teleport to a random page."
+So it means that out of every webpage,
+out of every node, there is a way for you to teleport yourself somewhere else.
+So basically, randomly jump somewhere else.
+And this is, um,
+how now spider traps are no longer the problem because you don't get,
+er, trapped, you can always, uh, jump out.
+You can always teleport, you know,
+the [inaudible] can all you - always kind of give you up.
+That is kind of the idea.
+Um, how about the dead ends?
+The- the- the way you do this is also with teleports.
+Essentially, what you say,
+if you come to a dead end,
+if you come to node m and there's nowhere for you to go,
+what you- what you do is you simply teleport with probability 1.0, right?
+So, uh, you know,
+why were the dead- dead end is the problem?
+Dead ends were the problem because m has no outlinks,
+so our column of this, uh, matrix M,
+the column stochastic adjacency matrix is not- is the- the- the column stochasticity is,
+uh, violated because column for node m does not sum to 1 because m has no outlinks.
+So what do we do is,
+we fix this by basically saying,
+when you arrive to node m,
+you can- you can randomly teleport wherever you want,
+you can jump to any node.
+So this means in some sense,
+now- now m is connected to all other nodes in the network,
+including itself, and, um, you know,
+the random worker can choose any of these links with equal probability.
+And this, uh, solves the problem of dead ends.
+It essentially eliminates them.
+So why do teleports solve the problem, right?
+What are- why are dead ends and spider traps a problem,
+and why do teleports solve both of them, right?
+Spider traps, in some sense,
+are not a mathematical problem,
+in a sense that the eigenve- the eigenvector is still well defined,
+the power iteration is going to- to converge,
+everything is fine, uh, mathematically.
+But the problem is that the PageRank score is not what we want, right?
+We don't want to say there is one page on the web that is important,
+uh, has all the importance,
+and everyone else is zero important, right?
+So the solution here is to add teleports.
+This means the random walker never gets,
+uh, trapped in a spider trap, um,
+and it will be able to teleport itself out in a finite number of steps,
+which means that all the nodes on the web will now have some importance.
+So this basically is,
+um, solves us, uh, this particular issue.
+So spider traps are not a mathematical problem,
+but a problem that PageRank,
+uh, value is not- becomes not what we want.
+And then dead ends are a problem mathematically
+because our matrix M is not column stochastic anymore, uh,
+and our initial assumptions are not met, so power iteration,
+as a method, does not- does not, uh,
+does not work, uh, and does not converge.
+So the solution here is to make the column-
+the matrix column stochastic by always teleporting when there is nowhere to go, right?
+Whenever you come to a node without any outlinks,
+you always randomly teleport,
+um, and this is now means that basically,
+the same solution of teleports both give-
+gives us PageRank the way we want it to define intuitively,
+and also fixes the underlying mathematical problems
+that all these concepts that I discussed, um, are well-defined.
+So what is the final solution or the Google solution to this problem?
+Um, the solution is that at each step,
+the random walker has two options;
+you know, it flips a coin,
+and with some probability Beta,
+it's going to follow an outlink- outlink at random,
+and with the remaining probability,
+it's going to jump to a random page.
+So the way now our PageRank equation that was defined by,
+um, uh, Sergey and Brin, um,
+or Page and Brin, uh,
+back, uh, in, uh,
+1998, is the following: we say the importance of node j
+equals the Beta times the importances of node i that,
+uh, point to it, right?
+Divided by their outdegrees plus 1 minus Beta,
+1 over N. So the way you can think of this is to say,
+if a random if a- how likely is a random walker likely to be at node j right now?
+It- with probability Beta,
+it decided to follow on, uh,
+an outlink, and this means it was,
+at node i, with what- with some probability r_i,
+and it decided to follow an out- outlink towards,
+uh, node j, following, you know,
+picking the right outlink out of the d_i outlink has the probability 1 over d_i,
+so that's what's happening here.
+And then we say, oh, and also,
+the random walker could come to the node j,
+um, by basically teleporting,
+1 minus Beta is probability of teleporting.
+Now, how likely is the random walker to land at node j?
+Node j is just one out of N nodes,
+so the probability that it landed at specific node j is 1 over N. And uh, this is essentially,
+uh, the PageRank, uh,
+equation and iteration one can run.
+Uh, just note that this formulation here assumes M has no dead ends.
+The way you can do is you can pre-process matrix M to remove all the dead ends,
+um, and or- or explicitly follow random teleports with probability 1.0 out of dead-ends.
+So that's how you can, uh, fix this.
+But you can see again, this is very fast and very simple, uh, to iterate.
+So I just gave you the equation in this,
+um, the, uh, flow-based formulation in some sense.
+You can also write it in a matrix form,
+where you say my new matrix, uh, uh, G, right?
+So this should be G equals Beta times the stochastic matrix M plus 1 minus Beta,
+um, times the, uh,
+the matrix that has all the entries, uh,
+1 over N. So this is the random teleportation, uh, matrix,
+and this is the- the transition matrix over the edges of the graph.
+Um, and then you have this, again,
+recursive equation that r equals G times r,
+and you can iterate this, uh,
+power i- power iteration would still work, um,
+and if you ask what should be the Beta value that I- that I set, in practice,
+we take Beta to be between 0.8, uh, and 0.9,
+which means that you- the random walker takes
+about five steps on the average before it decides to jump.
+Uh, just to be very clear,
+the random walk is just the intuition,
+and we'd never simulate the random walk, right?
+In the previous lecture,
+we actually said, "Let's simulate the random walk."
+Here, we don't simulate the random walk,
+but, uh, in some sense,
+we think of it as being run infinitely long,
+and then we say- we show that actually,
+we can compute this infinitely long random walk
+by basically solving this recursive equation by basically
+computing the- the leading eigenvector of this graph-transformed matrix,
+uh, that I call,
+uh, G, uh, here.
+So the random walk is just an intuition because we never truly,
+um, we never truly, uh, simulated.
+So to show you how this works, here is my, uh,
+little graph on three nodes, uh,
+here's the matrix M. Notice that, uh,
+the node m is a- is a spider trap,
+so what do I do now is I add also these,
+um, random teleport, uh, links,
+so I have this matrix, uh, uh,
+1 over N. Let's say that my Beta is 0.8,
+so now, my new stochastic transition matrix G is written here, right?
+It's 0.8 times the, uh,
+matrix of link transitions plus point to the,
+uh, matrix of random jumps, where basically,
+you can think of this that every column says,
+if a no- if a random surfer is at a given node,
+then this is the probability distribution where the random surfer is going to jump.
+And if you add these two together,
+you get a new, um,
+transition matrix now that includes both traversing over the links of the graph,
+as well as randomly jumping.
+Uh, here is how you can think of this in terms of transition probabilities.
+These are now, in some sense,
+transition probabilities of a random walker,
+random surfer, um, and then you can multiply,
+uh, r with G multiple times.
+Here is the r_0, and now,
+we are multiplying it over and over and over again, and you know,
+after some number of iterations,
+it's going to converge,
+and it converges to 7 over 33,
+5 over 33, and 21 over 33.
+So it means that node m in this graph will be the most important,
+followed by y, followed by a, right?
+And the why m is so important is because it's kind of a spider trap,
+but we also are able to teleport out.
+Now, if intuitively, this is, uh, you know,
+node m kind of collects too much importance,
+you can increase, uh, value of beta,
+and the importance of node m is going to, uh, decrease.
+And just to show you an idea how this-
+how this looks like in- in a bit more interesting graph,
+this is a graph where node size corresponds to it's PageRank weight,
+and also, there is a number that tells you what's the PageRank score of the node?
+What do you notice?
+For example, why is PageRank so cool?
+It's cool because, for example, first,
+notice all nodes have non-zero importance.
+So even this nodes here,
+um, that have no inlinks,
+they still have some importance because a random jumper can always jump to them.
+Another thing to notice is that for example,
+node B has a lot of inlinks,
+and it- so that's why it has high importance, right?
+Notice that, for example, node E has, you know,
+it has five inlinks, six inlinks,
+and, uh, node B also has six inlinks.
+But because node E gets most of the inlinks from this unimportant pages,
+its importance is, you know,
+eighth, versus B, who is 38,
+so B is much more important because it gets, uh,
+inlinks from these other nodes that have higher importance than this,
+uh, little blue nodes.
+Um, another thing to notice is,
+for example, node C has only one inlink,
+but because it gets it from this super important node B,
+its importance is also very, very high, right?
+You see, for example,
+also that, uh, here,
+node E has some,
+uh, s- uh, you know, some importance,
+uh, D has less,
+uh, F has less, uh,
+they both have the same importance, D and F,
+because they both get one inlink from node E. So notice how these, uh,
+importances are very nuanced,
+and they take a lot of different considerations into account that all make sense,
+in a sense of I want a lot of inlinks,
+I want inlinks from, uh,
+important nodes, even if I have one inlink,
+but some were the very important links to me,
+that means I am very important,
+um, and so on- so on and so forth.
+So, uh, this is why this notion of PageRank is so,
+so useful, and also,
+there is a lot of mathematical beauty,
+um, uh, behind its, uh,
+its definition, and we can efficiently compute it,
+uh, for very large-scale, uh, graphs.
+So to summarize, we talked about how do we solve the PageRank, uh, scores.
+We solve them by iterating this, uh,
+equation, r equals G times r, um,
+and this can be efficiently computed using
+power iteration of the stochastic matrix G, um,
+and adding uniform teleportation solves both the issues with dead ends,
+as well as the issue with spider traps

@@ -1,0 +1,1132 @@
+WEBVTT
+Kind: captions
+Language: en-US
+
+00:00:04.550 --> 00:00:11.670
+So now we are going to move forward and we are going to move to the next topic,
+
+00:00:11.670 --> 00:00:15.630
+which is called identity-aware graph neural networks, right?
+
+00:00:15.630 --> 00:00:18.735
+So in the previous part of the lecture, we talked about,
+
+00:00:18.735 --> 00:00:22.410
+how does the node encode its position in the network?
+
+00:00:22.410 --> 00:00:26.610
+How does the node know where in the network, the node is?
+
+00:00:26.610 --> 00:00:28.185
+Now in the second part,
+
+00:00:28.185 --> 00:00:34.200
+we are going to develop a more expressive graph neural network that is
+
+00:00:34.200 --> 00:00:36.105
+going to take care of
+
+00:00:36.105 --> 00:00:40.880
+all these different symmetries that can account- that can appear in the network and uh,
+
+00:00:40.880 --> 00:00:41.975
+in the underlying graph,
+
+00:00:41.975 --> 00:00:45.955
+and it - it will make the graph neural network more expressive.
+
+00:00:45.955 --> 00:00:49.380
+So what we have learned so far is that
+
+00:00:49.380 --> 00:00:53.880
+classical GNNs would fail for position-aware tasks.
+
+00:00:53.880 --> 00:00:57.430
+And we said, let's use, um,
+
+00:00:57.430 --> 00:01:04.825
+let's use anchors to improve graph neural network performance on position-aware tasks.
+
+00:01:04.825 --> 00:01:10.445
+Now, we are going to switch back and to- and focus more on structure-aware tasks.
+
+00:01:10.445 --> 00:01:14.975
+And say, can GNNs perform perfectly on structure-aware tasks?
+
+00:01:14.975 --> 00:01:17.270
+And as we have seen before,
+
+00:01:17.270 --> 00:01:19.915
+the answer here is unfortunately no.
+
+00:01:19.915 --> 00:01:21.575
+Uh, and the issue is that
+
+00:01:21.575 --> 00:01:27.305
+GNNs exhibit kind of three levels of failure cases in, uh structure-aware tasks.
+
+00:01:27.305 --> 00:01:29.435
+And I'm going to show you some,
+
+00:01:29.435 --> 00:01:31.205
+you know, failure cases.
+
+00:01:31.205 --> 00:01:35.600
+And of course, all these failure cases are kind of worst-case scenarios uh,
+
+00:01:35.600 --> 00:01:38.390
+that are very intricate in a sense that uh,
+
+00:01:38.390 --> 00:01:39.770
+due to the symmetries,
+
+00:01:39.770 --> 00:01:41.330
+the GNN is going to fail.
+
+00:01:41.330 --> 00:01:46.115
+So perhaps they don't necessarily appear in practice uh, too often,
+
+00:01:46.115 --> 00:01:48.800
+but they may appear in some parts of the data,
+
+00:01:48.800 --> 00:01:52.495
+and they are still very useful uh, to study.
+
+00:01:52.495 --> 00:01:55.920
+So here is the first uh, failure case.
+
+00:01:55.920 --> 00:01:58.185
+Uh, this is for the Node-level tasks.
+
+00:01:58.185 --> 00:02:01.280
+Imagine you wanna do a Node-level classification,
+
+00:02:01.280 --> 00:02:03.295
+you want to do Node-level prediction.
+
+00:02:03.295 --> 00:02:07.695
+Here, different inputs from the same, uh,
+
+00:02:07.695 --> 00:02:09.830
+basically different inputs, but at
+
+00:02:09.830 --> 00:02:13.600
+the same computational graph will result in the same embedding.
+
+00:02:13.600 --> 00:02:15.710
+So if I have these two nodes,
+
+00:02:15.710 --> 00:02:16.985
+v_1 and v_2, uh,
+
+00:02:16.985 --> 00:02:21.470
+you know, residing in these types of connected components, as we said before,
+
+00:02:21.470 --> 00:02:23.580
+their computational graphs, um,
+
+00:02:23.580 --> 00:02:26.375
+if you work it out are exactly the same because they have
+
+00:02:26.375 --> 00:02:30.655
+two neighbors and each of their neighbors has two neighbors and so on and so forth.
+
+00:02:30.655 --> 00:02:34.385
+So this means that these nodes v_1 and v_2 will be embedded into
+
+00:02:34.385 --> 00:02:37.100
+exactly the same point in the embedding space
+
+00:02:37.100 --> 00:02:40.285
+and we won't be able to assign them different labels.
+
+00:02:40.285 --> 00:02:43.730
+Now, the same type of things can happen also, for example,
+
+00:02:43.730 --> 00:02:46.040
+for link prediction, where for example,
+
+00:02:46.040 --> 00:02:48.005
+you can have this type of input graph.
+
+00:02:48.005 --> 00:02:50.060
+And you want to decide whether you know,
+
+00:02:50.060 --> 00:02:53.695
+v_0 should link to v_1 or should it link to v_2?
+
+00:02:53.695 --> 00:02:56.930
+And again, if you look at the computation graphs,
+
+00:02:56.930 --> 00:03:00.410
+um, the -the computation graphs are the same.
+
+00:03:00.410 --> 00:03:04.760
+So nodes v_1 and v_2 are going to have the same embedding.
+
+00:03:04.760 --> 00:03:06.830
+And because they have the same embedding,
+
+00:03:06.830 --> 00:03:14.145
+the neural network will give the same probability to- to edge A as well as to edge B.
+
+00:03:14.145 --> 00:03:18.180
+And perhaps that is not uh, the most realistic.
+
+00:03:18.180 --> 00:03:24.110
+So that's our failure case again for a different type of uh, input graph.
+
+00:03:24.110 --> 00:03:25.450
+And then, you know,
+
+00:03:25.450 --> 00:03:27.100
+for graph level tasks,
+
+00:03:27.100 --> 00:03:28.660
+there are also uh,
+
+00:03:28.660 --> 00:03:31.390
+well-known failure cases because
+
+00:03:31.390 --> 00:03:34.180
+different input graphs will still
+
+00:03:34.180 --> 00:03:37.910
+result in the same graph neural network based embedding.
+
+00:03:37.910 --> 00:03:41.160
+Um, and why- why is that the case?
+
+00:03:41.160 --> 00:03:42.945
+It's because if you, for example,
+
+00:03:42.945 --> 00:03:46.765
+uh, in these types of- in these types of networks,
+
+00:03:46.765 --> 00:03:49.225
+all the nodes have the same degree, um,
+
+00:03:49.225 --> 00:03:51.700
+but you notice that these two graphs are different because
+
+00:03:51.700 --> 00:03:55.090
+here the nodes link to exactly the immediate nodes.
+
+00:03:55.090 --> 00:03:58.550
+Here the- the nodes link kind of a bit farther out.
+
+00:03:58.550 --> 00:04:00.615
+But if you look at the computation graphs,
+
+00:04:00.615 --> 00:04:03.475
+the two computation graphs uh, will be the same.
+
+00:04:03.475 --> 00:04:09.440
+So again, uh, these two- these two entire graphs will get the same embedding.
+
+00:04:09.440 --> 00:04:11.600
+So again, this is, um,
+
+00:04:11.600 --> 00:04:14.780
+a very kind of highly symmetric uh, input graph.
+
+00:04:14.780 --> 00:04:17.490
+But still these two graphs are different.
+
+00:04:17.490 --> 00:04:18.885
+They are non-isomorphic.
+
+00:04:18.885 --> 00:04:21.860
+But you know, this is kind of a corner case for
+
+00:04:21.860 --> 00:04:27.485
+WL test and it is also a corner case for graph neural networks.
+
+00:04:27.485 --> 00:04:29.900
+So here again, uh, graph,
+
+00:04:29.900 --> 00:04:32.390
+A and graph neural network without
+
+00:04:32.390 --> 00:04:36.430
+any useful node features will always classify nodes A and B,
+
+00:04:36.430 --> 00:04:41.935
+uh, or graphs A and B into the same position, into the same class.
+
+00:04:41.935 --> 00:04:45.190
+So now, how are we going to resolve this?
+
+00:04:45.190 --> 00:04:46.955
+What is the big idea here?
+
+00:04:46.955 --> 00:04:50.359
+And the big idea in this second part of the lecture,
+
+00:04:50.359 --> 00:04:54.500
+is that we can assign a color to the node we want to embed.
+
+00:04:54.500 --> 00:04:56.930
+And that's why we call this identity-aware,
+
+00:04:56.930 --> 00:04:58.790
+because the neural network,
+
+00:04:58.790 --> 00:04:59.945
+as we unroll it,
+
+00:04:59.945 --> 00:05:02.210
+will know what is the starting node,
+
+00:05:02.210 --> 00:05:03.965
+what is the node where we started?
+
+00:05:03.965 --> 00:05:08.505
+So the idea is, if I want to embed nodes v_1- v_1,
+
+00:05:08.505 --> 00:05:09.945
+I'm going to color it.
+
+00:05:09.945 --> 00:05:11.310
+And if I go, um,
+
+00:05:11.310 --> 00:05:14.485
+and because I'm going to give it a color,
+
+00:05:14.485 --> 00:05:18.180
+um, now, the graph, the computational, uh,
+
+00:05:18.180 --> 00:05:22.130
+graph will be different because I will remember whenever I unroll uh,
+
+00:05:22.130 --> 00:05:27.935
+the computational graph, I will remember the color of this colored node.
+
+00:05:27.935 --> 00:05:30.585
+Right? So this means that, uh,
+
+00:05:30.585 --> 00:05:33.435
+now our computational graph,
+
+00:05:33.435 --> 00:05:39.200
+will- will- will remember whenever it hits the node of interest v_1.
+
+00:05:39.200 --> 00:05:42.330
+So it we'll have these colors um, and you know,
+
+00:05:42.330 --> 00:05:43.830
+why- why is this,
+
+00:05:43.830 --> 00:05:46.095
+um, uh, why is this useful?
+
+00:05:46.095 --> 00:05:49.150
+This is useful because it is inductive.
+
+00:05:49.150 --> 00:05:52.030
+Right? It is invariant to the node ordering, um,
+
+00:05:52.030 --> 00:05:57.620
+or identities of the nodes because the only node we color is the node where we started.
+
+00:05:57.620 --> 00:05:59.315
+And then we just look,
+
+00:05:59.315 --> 00:06:00.620
+how often does this node,
+
+00:06:00.620 --> 00:06:04.260
+where we start appear in the computation graph, right?
+
+00:06:04.260 --> 00:06:08.070
+So eventually, right, like if- if
+
+00:06:08.070 --> 00:06:13.985
+our graph is- is connected as- as we go deeper into more layers of a graph neural network,
+
+00:06:13.985 --> 00:06:18.270
+there will be some cycle that will lead us back to the starting node,
+
+00:06:18.270 --> 00:06:20.420
+and we will remember that and have that
+
+00:06:20.420 --> 00:06:24.445
+node colored in the computation graph, uh, as well.
+
+00:06:24.445 --> 00:06:31.175
+And the important point here is because- because the node coloring is inductive,
+
+00:06:31.175 --> 00:06:33.035
+even though I- I have these two,
+
+00:06:33.035 --> 00:06:34.640
+let's say, different input graphs,
+
+00:06:34.640 --> 00:06:36.425
+but I have labeled, uh,
+
+00:06:36.425 --> 00:06:38.690
+or numbered the nodes differently, right?
+
+00:06:38.690 --> 00:06:40.070
+I have 1, 2,
+
+00:06:40.070 --> 00:06:41.780
+3 versus 1, 2,
+
+00:06:41.780 --> 00:06:46.085
+3, the underlying computational graphs will be the same,
+
+00:06:46.085 --> 00:06:49.550
+which is good because they don't change under, uh,
+
+00:06:49.550 --> 00:06:53.675
+permuting the IDs or identities, uh, of the node.
+
+00:06:53.675 --> 00:06:56.210
+So this is a great feature to have because it
+
+00:06:56.210 --> 00:06:59.905
+means our models are able to generalize better.
+
+00:06:59.905 --> 00:07:03.100
+So let's now talk more about this, uh,
+
+00:07:03.100 --> 00:07:06.500
+inductive capability of node coloring.
+
+00:07:06.500 --> 00:07:08.605
+And let's look at the node level task.
+
+00:07:08.605 --> 00:07:10.535
+Um, and the point is that
+
+00:07:10.535 --> 00:07:15.605
+this inductive node coloring helps us with node classification tasks.
+
+00:07:15.605 --> 00:07:17.990
+For example, I have here,
+
+00:07:17.990 --> 00:07:22.470
+um, the case, we have already,
+
+00:07:22.470 --> 00:07:23.685
+uh, looked at before.
+
+00:07:23.685 --> 00:07:25.370
+I have the node on a triangle,
+
+00:07:25.370 --> 00:07:26.720
+I have a node on a square,
+
+00:07:26.720 --> 00:07:28.355
+um, I colored the root.
+
+00:07:28.355 --> 00:07:30.815
+And now I say, let's create the computation graphs.
+
+00:07:30.815 --> 00:07:33.965
+Here I create the computation graphs and you, um,
+
+00:07:33.965 --> 00:07:37.265
+very quickly see that the computation graphs,
+
+00:07:37.265 --> 00:07:39.925
+um, are quite- are quite different.
+
+00:07:39.925 --> 00:07:43.260
+And in particular they- they become different at, uh,
+
+00:07:43.260 --> 00:07:44.510
+at the bottom level,
+
+00:07:44.510 --> 00:07:48.120
+where in the- in the part B here,
+
+00:07:48.120 --> 00:07:52.880
+when I go to two hops- when I go two hops out,
+
+00:07:52.880 --> 00:07:58.725
+I only hit these nodes while in the- in the first case,
+
+00:07:58.725 --> 00:08:02.710
+um, I actually get- go and hit again the starting node.
+
+00:08:02.710 --> 00:08:07.680
+So now these two computation graphs are different because we also consider colors.
+
+00:08:07.680 --> 00:08:13.470
+So we will be able to successfully differentiate between nodes v_1 and nodes v_2.
+
+00:08:13.470 --> 00:08:18.595
+So, uh, this is a very elegant solution to the- to- to this, uh,
+
+00:08:18.595 --> 00:08:21.115
+to this, uh, uh problem that where
+
+00:08:21.115 --> 00:08:24.220
+a classical graph neural network, uh, would fail.
+
+00:08:24.220 --> 00:08:27.535
+Um, and similarly, we can do the same thing,
+
+00:08:27.535 --> 00:08:30.520
+uh, for- um, for graph classification, right?
+
+00:08:30.520 --> 00:08:32.560
+If I take my two input graphs, uh,
+
+00:08:32.560 --> 00:08:37.510
+the way I created the- aga- the embedding of the graph is to create an embedding,
+
+00:08:37.510 --> 00:08:39.895
+uh, of nodes and then aggregate those.
+
+00:08:39.895 --> 00:08:42.955
+So if I look at node-specific, um, uh,
+
+00:08:42.955 --> 00:08:45.655
+computation graphs, uh, structurally,
+
+00:08:45.655 --> 00:08:46.750
+they might be the same,
+
+00:08:46.750 --> 00:08:51.160
+but- but- but because I have labeled the starting node and
+
+00:08:51.160 --> 00:08:56.035
+now I- I know whenever my computation graph returns back to the starting node,
+
+00:08:56.035 --> 00:08:59.620
+you'll notice that now the coloring pattern between these two graphs,
+
+00:08:59.620 --> 00:09:02.455
+uh, is different- these two nodes is different,
+
+00:09:02.455 --> 00:09:04.600
+which means their embeddings will be
+
+00:09:04.600 --> 00:09:07.480
+different which means that when we aggregate the embeddings,
+
+00:09:07.480 --> 00:09:09.745
+the embeddings for the graphs will be different,
+
+00:09:09.745 --> 00:09:12.700
+which means we'll be able to take these two input graphs,
+
+00:09:12.700 --> 00:09:13.900
+A and B, um,
+
+00:09:13.900 --> 00:09:16.795
+and embed them into,
+
+00:09:16.795 --> 00:09:19.885
+um, different points and assign them different classes.
+
+00:09:19.885 --> 00:09:21.965
+So this is exactly what we want.
+
+00:09:21.965 --> 00:09:23.550
+And then, you know,
+
+00:09:23.550 --> 00:09:25.110
+for the edge level tasks,
+
+00:09:25.110 --> 00:09:27.030
+again, ah, if, you know,
+
+00:09:27.030 --> 00:09:29.235
+I start with V_0 and I say,
+
+00:09:29.235 --> 00:09:32.355
+you know I want to assign a different, uh, uh,
+
+00:09:32.355 --> 00:09:36.435
+probability to, um, uh, to nodes,
+
+00:09:36.435 --> 00:09:38.565
+V_1- to the edges A and B,
+
+00:09:38.565 --> 00:09:42.325
+I can say what will be the embedding of V_1, uh, here?
+
+00:09:42.325 --> 00:09:44.185
+What will be embedding of V_2?
+
+00:09:44.185 --> 00:09:47.350
+And I see that their corresponding computation graphs, uh,
+
+00:09:47.350 --> 00:09:49.210
+will be different because, uh,
+
+00:09:49.210 --> 00:09:53.545
+V_1 is going to hit V_0 sooner than, uh, V_2.
+
+00:09:53.545 --> 00:09:59.005
+So, um, here, the point is that when I'm embedding nodes for link prediction,
+
+00:09:59.005 --> 00:10:01.165
+I'm given a pair of nodes and here,
+
+00:10:01.165 --> 00:10:02.890
+I'm going to color,
+
+00:10:02.890 --> 00:10:04.990
+um, both- both nodes,
+
+00:10:04.990 --> 00:10:08.245
+the- the- the left node and the right node and this way,
+
+00:10:08.245 --> 00:10:09.820
+I'll be able to distinguish, um,
+
+00:10:09.820 --> 00:10:13.495
+uh, the two computational, ah, graphs.
+
+00:10:13.495 --> 00:10:17.080
+So this means it will allow us to, uh,
+
+00:10:17.080 --> 00:10:21.790
+assign a different probability to the node- to the edge A versus,
+
+00:10:21.790 --> 00:10:25.400
+uh, the edge B, which is, uh, what we want.
+
+00:10:25.400 --> 00:10:29.700
+So what you- what I have demonstrated so far is that
+
+00:10:29.700 --> 00:10:35.135
+this node coloring where we color the identity of the- uh,
+
+00:10:35.135 --> 00:10:40.660
+of the starting node or in link prediction of the- of this- of these both, uh,
+
+00:10:40.660 --> 00:10:43.285
+nodes in involving the link prediction task
+
+00:10:43.285 --> 00:10:46.225
+allows us to differentiate and distinguish, uh,
+
+00:10:46.225 --> 00:10:48.550
+these types of symmetric, uh,
+
+00:10:48.550 --> 00:10:53.995
+corner cases that make classical neural network- graph neural networks, uh, fail.
+
+00:10:53.995 --> 00:10:55.525
+So now, the question is,
+
+00:10:55.525 --> 00:11:01.375
+how do you build a- a GNN that uses this node coloring and that you- it will allow us,
+
+00:11:01.375 --> 00:11:06.865
+uh, to distinguish these different colored, uh, computation graphs.
+
+00:11:06.865 --> 00:11:11.995
+The idea is the following and the model is called identity aware, uh,
+
+00:11:11.995 --> 00:11:14.650
+graph neural network and what we wanna do
+
+00:11:14.650 --> 00:11:17.380
+is you've wanna utilize inductive node coloring in
+
+00:11:17.380 --> 00:11:20.440
+the embedding computation and the key idea
+
+00:11:20.440 --> 00:11:24.355
+is that you want to use heterogeneous message passing, right?
+
+00:11:24.355 --> 00:11:25.930
+Normally in a GNN,
+
+00:11:25.930 --> 00:11:28.885
+we apply the same message aggregation computation
+
+00:11:28.885 --> 00:11:31.780
+to all the children in the computation graph, right?
+
+00:11:31.780 --> 00:11:35.125
+So whenever we- we are, uh, aggregating, uh,
+
+00:11:35.125 --> 00:11:37.345
+masters and transporting messages,
+
+00:11:37.345 --> 00:11:41.500
+we apply the same aggregation in the same neural network operator, right?
+
+00:11:41.500 --> 00:11:43.960
+So, um, this is what we classically do.
+
+00:11:43.960 --> 00:11:47.545
+In our graph neural- identity aware graph neural network,
+
+00:11:47.545 --> 00:11:50.380
+we are going to do heterogeneous message passing.
+
+00:11:50.380 --> 00:11:54.820
+So we are going to use different types of aggregation, um,
+
+00:11:54.820 --> 00:11:59.830
+different types of message passing applied to different nodes based on their color.
+
+00:11:59.830 --> 00:12:02.260
+So it means that in an IDGNN,
+
+00:12:02.260 --> 00:12:04.150
+we are going to use, um,
+
+00:12:04.150 --> 00:12:06.310
+different message and aggregation, uh,
+
+00:12:06.310 --> 00:12:09.400
+functions, uh, for nodes with different, uh, colors.
+
+00:12:09.400 --> 00:12:11.170
+So it means that for example,
+
+00:12:11.170 --> 00:12:14.290
+whenever we are aggregating into a color node,
+
+00:12:14.290 --> 00:12:16.600
+we are going to use one type of, uh,
+
+00:12:16.600 --> 00:12:19.360
+transformations and message passing operator
+
+00:12:19.360 --> 00:12:22.360
+and whenever we are aggregating into a non-colored node,
+
+00:12:22.360 --> 00:12:24.895
+we are going to use a second type of,
+
+00:12:24.895 --> 00:12:27.205
+uh, aggregation and transformation.
+
+00:12:27.205 --> 00:12:29.470
+So this means that in a given layer,
+
+00:12:29.470 --> 00:12:31.810
+different message and aggregation, uh,
+
+00:12:31.810 --> 00:12:35.050
+functions would be used to nodes based on the color,
+
+00:12:35.050 --> 00:12:37.720
+uh, of the node and this is the key, right?
+
+00:12:37.720 --> 00:12:40.450
+Because if the node- nodes is color and it
+
+00:12:40.450 --> 00:12:43.360
+can use a different aggregator, this means that,
+
+00:12:43.360 --> 00:12:48.310
+uh- that the- the- the message will get transformed differently,
+
+00:12:48.310 --> 00:12:52.450
+which means the final results will be different depending on whether
+
+00:12:52.450 --> 00:12:57.340
+the nodes with colors were involved in aggregation versus nodes without colors,
+
+00:12:57.340 --> 00:13:00.880
+uh, uh, being involved in aggregation.
+
+00:13:00.880 --> 00:13:05.770
+So um, you know why does this heterogeneous message-passing work?
+
+00:13:05.770 --> 00:13:07.720
+Right? Suppose that two nodes,
+
+00:13:07.720 --> 00:13:11.215
+V_1 and V_2 have the same computational graph structure,
+
+00:13:11.215 --> 00:13:13.975
+but they have different node coloring, right?
+
+00:13:13.975 --> 00:13:18.070
+Um, and since we apply different neural network embedding computation,
+
+00:13:18.070 --> 00:13:20.185
+right- different, um, uh,
+
+00:13:20.185 --> 00:13:23.650
+message passing and different aggregation, right,
+
+00:13:23.650 --> 00:13:26.695
+we have different parameters for nodes with one,
+
+00:13:26.695 --> 00:13:29.245
+uh, color versus the nodes with the other color,
+
+00:13:29.245 --> 00:13:31.975
+this means that the final result, uh,
+
+00:13:31.975 --> 00:13:35.680
+will be different and this means that the final output-
+
+00:13:35.680 --> 00:13:40.690
+the final embedding between V_1 and V_2 is going to be, uh, different.
+
+00:13:40.690 --> 00:13:43.495
+So, you know, what is the key, uh,
+
+00:13:43.495 --> 00:13:47.815
+difference between GNN and identity aware GNN?
+
+00:13:47.815 --> 00:13:49.240
+If we look at this,
+
+00:13:49.240 --> 00:13:51.250
+uh, you know- uh, use, uh,
+
+00:13:51.250 --> 00:13:54.190
+this case- uh, this example we have looked so far,
+
+00:13:54.190 --> 00:13:56.860
+if I have nodes V_1 and V_2 I wanna distinguish them,
+
+00:13:56.860 --> 00:13:59.440
+in the classical GNN computation,
+
+00:13:59.440 --> 00:14:01.975
+the two computation graphs are the same,
+
+00:14:01.975 --> 00:14:03.940
+uh, all the nodes are the same,
+
+00:14:03.940 --> 00:14:06.085
+there is no differentiating node features,
+
+00:14:06.085 --> 00:14:09.475
+so the aggregations across these two, uh,
+
+00:14:09.475 --> 00:14:11.110
+trees will be the same,
+
+00:14:11.110 --> 00:14:13.405
+so we won't be able to distinguish A and B.
+
+00:14:13.405 --> 00:14:15.820
+In the case when we actually color
+
+00:14:15.820 --> 00:14:20.380
+the starting node and now the two computation graphs are different,
+
+00:14:20.380 --> 00:14:23.200
+so all we have to account for now that- is
+
+00:14:23.200 --> 00:14:26.740
+that when we aggregate the information from the- um, uh,
+
+00:14:26.740 --> 00:14:29.290
+from the leaves to the root of
+
+00:14:29.290 --> 00:14:34.405
+the graph neural network that this information about the color is preserved
+
+00:14:34.405 --> 00:14:38.230
+or somehow accounted for so that the final message will have
+
+00:14:38.230 --> 00:14:42.070
+a different value depending on one, uh, versus the other.
+
+00:14:42.070 --> 00:14:43.419
+And this is exactly,
+
+00:14:43.419 --> 00:14:46.150
+um, the case what is happening,
+
+00:14:46.150 --> 00:14:49.090
+and this is why IDGNN allows us,
+
+00:14:49.090 --> 00:14:51.565
+uh, to make this distinction.
+
+00:14:51.565 --> 00:14:53.995
+Um, another thing to think about it,
+
+00:14:53.995 --> 00:14:56.740
+what is G- IDGNN really doing?
+
+00:14:56.740 --> 00:15:01.840
+IDGNN is really counting cycles of different lengths,
+
+00:15:01.840 --> 00:15:04.000
+uh, uh starting at a given,
+
+00:15:04.000 --> 00:15:05.440
+uh, given the root node, right?
+
+00:15:05.440 --> 00:15:06.655
+So if I start here,
+
+00:15:06.655 --> 00:15:12.820
+IDGNN will now able to count or realize that there is a cycle of length 3, right?
+
+00:15:12.820 --> 00:15:15.070
+So here- this is now basically a cycle.
+
+00:15:15.070 --> 00:15:17.860
+You get off- you go from yourself to the- uh,
+
+00:15:17.860 --> 00:15:19.990
+to the neigh- to the neighbor, uh,
+
+00:15:19.990 --> 00:15:22.015
+and then to another neighbor,
+
+00:15:22.015 --> 00:15:23.470
+and you'll come back to the node, right?
+
+00:15:23.470 --> 00:15:25.360
+So this is a cycle of three hops.
+
+00:15:25.360 --> 00:15:28.300
+While- while in this case you- we- we'll
+
+00:15:28.300 --> 00:15:32.500
+reali- graph neural network is going to realize that this is a cycle of length 4,
+
+00:15:32.500 --> 00:15:34.315
+because you have to go to the node,
+
+00:15:34.315 --> 00:15:36.070
+to the neighbor, um,
+
+00:15:36.070 --> 00:15:38.140
+to the first neighbor, to the second neighbor,
+
+00:15:38.140 --> 00:15:40.150
+to the third neighbor, and from here,
+
+00:15:40.150 --> 00:15:41.920
+you only arrive, uh,
+
+00:15:41.920 --> 00:15:43.930
+to the starting node itself, right?
+
+00:15:43.930 --> 00:15:48.160
+So here we'll real- the- the computational graph will be able to capture
+
+00:15:48.160 --> 00:15:53.425
+that- or be able to compute that- that node is part of a cycle of length,
+
+00:15:53.425 --> 00:15:56.305
+uh, 4, but no cycles of length 3.
+
+00:15:56.305 --> 00:15:59.080
+While here, these will be able to capture that
+
+00:15:59.080 --> 00:16:02.620
+the node is a part of cycle of length o- uh,
+
+00:16:02.620 --> 00:16:05.530
+3 but not, uh, let's say 4.
+
+00:16:05.530 --> 00:16:08.545
+So this is what IG- IDGNN is able to do.
+
+00:16:08.545 --> 00:16:14.020
+It's able to count cycles and it's able to learn and count- count them through the,
+
+00:16:14.020 --> 00:16:18.160
+uh, uh, message passing of the graph neural network.
+
+00:16:18.160 --> 00:16:21.400
+So, um, how do you now,
+
+00:16:21.400 --> 00:16:23.830
+uh, uh, how do you do this now?
+
+00:16:23.830 --> 00:16:25.705
+So as I said, one is to use,
+
+00:16:25.705 --> 00:16:27.820
+uh, heterogeneous message passing.
+
+00:16:27.820 --> 00:16:31.885
+Um, and, uh, and the second way how you can do this is that,
+
+00:16:31.885 --> 00:16:35.695
+um, we can- based on the intuition we have, uh, just proposed,
+
+00:16:35.695 --> 00:16:39.055
+you can also use a simplified version of the IDGNN,
+
+00:16:39.055 --> 00:16:42.145
+where basically the idea is to include identity information
+
+00:16:42.145 --> 00:16:45.640
+as an augmented node feature, um, and, uh,
+
+00:16:45.640 --> 00:16:49.915
+sidestep the- the heterogenous node, uh, uh,
+
+00:16:49.915 --> 00:16:54.940
+message passing and the idea here is basically you can augment the node feature,
+
+00:16:54.940 --> 00:16:57.520
+by using the cycle counts in each layer
+
+00:16:57.520 --> 00:17:00.630
+as an- as an augmented node feature and then apply,
+
+00:17:00.630 --> 00:17:02.770
+a simple GNN, right?
+
+00:17:02.770 --> 00:17:06.500
+So basically, you want to use cycle counts in each layer as
+
+00:17:06.500 --> 00:17:11.240
+an augmented feature for the root node and then simply apply het- uh,
+
+00:17:11.240 --> 00:17:15.440
+homogeneous message-passing, basically drop the colors, right?
+
+00:17:15.440 --> 00:17:18.260
+So the idea would be that every node gets now,
+
+00:17:18.260 --> 00:17:22.625
+um, ah, uh, gets a description that simply says,
+
+00:17:22.625 --> 00:17:25.525
+how many cycles of length 0 are you part of,
+
+00:17:25.525 --> 00:17:28.920
+how many cycles of length 2- like- cycles of length 3s,
+
+00:17:28.920 --> 00:17:30.330
+and, uh, and so on.
+
+00:17:30.330 --> 00:17:33.740
+And this way, you will be able to, um, uh, uh,
+
+00:17:33.740 --> 00:17:36.410
+to distinguish the node- uh,
+
+00:17:36.410 --> 00:17:38.225
+the two computational graphs,
+
+00:17:38.225 --> 00:17:40.445
+and be able to distinguish the two nodes, uh,
+
+00:17:40.445 --> 00:17:43.755
+into two different, uh, classes.
+
+00:17:43.755 --> 00:17:48.440
+So let's summarize the identity aware graph neural networks.
+
+00:17:48.440 --> 00:17:53.985
+Uh, the- this is a general and powerful extension to graph a neural network framework.
+
+00:17:53.985 --> 00:17:57.100
+Um, it makes graph neural networks more expressive.
+
+00:17:57.100 --> 00:18:01.280
+Uh, the IDGNN, this idea of inductive node coloring and
+
+00:18:01.280 --> 00:18:06.150
+heterogeneous message passing can be applied to any graph neural network architecture,
+
+00:18:06.150 --> 00:18:09.815
+meaning, um, gra- graph convolutional neural network,
+
+00:18:09.815 --> 00:18:11.870
+GraphSAGE, um, GIN,,
+
+00:18:11.870 --> 00:18:15.590
+so graph isomorphism network and- and any other, uh, architecture.
+
+00:18:15.590 --> 00:18:22.835
+Um, and IDGNN will provide a consistent performance gain in many node-level, um, er,
+
+00:18:22.835 --> 00:18:24.860
+as well as edge and graph-level tasks,
+
+00:18:24.860 --> 00:18:28.100
+because it allows us to break the symmetries and allows
+
+00:18:28.100 --> 00:18:31.330
+us to the- basically identify how the node,
+
+00:18:31.330 --> 00:18:34.070
+uh, belongs to different, uh, cycles.
+
+00:18:34.070 --> 00:18:37.920
+This means that IDGNNs are more expressive than their, uh,
+
+00:18:37.920 --> 00:18:42.455
+graph- kind of classical graph neural network, uh, counterparts.
+
+00:18:42.455 --> 00:18:46.810
+Um, and this means that IDGNN is kind of this- the, uh,
+
+00:18:46.810 --> 00:18:52.270
+uh, the simplest model that is more expressive than 1-WL test.
+
+00:18:52.270 --> 00:18:57.950
+Um, and it can be easily implemented because it's basically just you color the root node,
+
+00:18:57.950 --> 00:18:59.630
+and that's all the information,
+
+00:18:59.630 --> 00:19:01.700
+uh, you need to, uh, worry about.
+
+00:19:01.700 --> 00:19:04.820
+So, uh, this is quite cool because it allows us now to
+
+00:19:04.820 --> 00:19:08.580
+distinguish this node on a triangle versus node on a square.
+
+00:19:08.580 --> 00:19:13.040
+Um, this was the first and the key idea is here to have this inductive node coloring,
+
+00:19:13.040 --> 00:19:16.940
+and then we also talked about position aware graph neural networks,
+
+00:19:16.940 --> 00:19:20.330
+where the idea is that you want to distinguish the position of the node in the graph,
+
+00:19:20.330 --> 00:19:23.315
+and the key idea there was to use the notion of
+
+00:19:23.315 --> 00:19:27.515
+anchors and characterize the location- the position of the node,
+
+00:19:27.515 --> 00:19:29.440
+by the location, uh,
+
+00:19:29.440 --> 00:19:31.775
+by the distance of the node to the anchors.
+
+00:19:31.775 --> 00:19:36.244
+And we talked about we want to have anchors- anchors of different sizes.
+
+00:19:36.244 --> 00:19:39.050
+And we wanna have a lot of anchors of size 1,
+
+00:19:39.050 --> 00:19:40.480
+we wanna have a lot- uh,
+
+00:19:40.480 --> 00:19:42.085
+fewer anchors of size 2,
+
+00:19:42.085 --> 00:19:44.930
+even fewer of size 4 and so on and so forth.
+
+00:19:44.930 --> 00:19:48.695
+Um, and the- the distance of a node to the anchor
+
+00:19:48.695 --> 00:19:52.610
+is the distance of the node to the- any node that is part of this,
+
+00:19:52.610 --> 00:19:54.650
+uh, anchor or, uh, anchor set.
+
+00:19:54.650 --> 00:20:02.000
+[NOISE]
+

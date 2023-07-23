@@ -1,0 +1,340 @@
+What we have seen so far is social science explanations,
+why clusters, uh, appear in networks.
+Um, and what do we are going to do next is to start talking about
+methods that build on the intuition I have just explained and actually,
+uh, identify, uh, these clusters in networks.
+So, uh, let's start with what we have learned so far, right?
+Like Granovetter's theory suggests,
+that networks are composed from tightly connected,
+uh, clusters, or sets of nodes.
+Um, and the connections inside the clusters are strong, uh,
+interpersonally, socially, and these connections across the clusters are weak,
+are more like acquaintance uh, relationships,
+we can call these clusters also communities,
+we call them groups,
+we call them modules.
+It is kind of all the same, right?
+And, uh, we are going to use the word network communities to
+refer- to refer to sets of nodes with a lot of internal connections and few,
+uh, external ones, meaning a few to the rest,
+uh, of the- of the network.
+So now the question will be given- given a, uh,
+a network, how do we find these,
+uh, densely connected groups of nodes?
+Ideally, we would like uh, uh,
+then these densely connected groups of nodes to then
+correspond to real underlying, uh, social communities.
+So let me give you a few examples of this.
+So for example, one, uh,
+most famous and most used social network is called Zachary's Karate Club network.
+And Zachary was also a PhD student and he was studying,
+uh, social relationships in a university karate club.
+Um, and this is the social network of that,
+uh, uh, university karate club.
+But what was interesting is that during the study,
+the conflicts led this karate club to split into two groups.
+And what is interesting is that actually here the split is
+denoted that circles went and created a new karate club,
+and the squares, uh,
+remained in the old karate club.
+And what is striking is that basically this network kind of split in the middle, right?
+Like the circles went on one end and the squares went on the other.
+So it's not that, you know,
+a random set of nodes will decide to form a new club.
+But it's kind of one part of the network separated out- itself out, right?
+And actually, the- the- the way you can automatically find this,
+uh, this split is to simply say,
+how do I split the nodes of this network into two sets
+so that the number of edges that crosses between the two sets,
+meaning goes from one set of nodes to the other, um, is minimized.
+All right, So basically this was one of
+the first examples that basically communities happen based on
+the underlying network structure and that you can predict which humans are going to join
+one team and which humans are going to join
+the other team based on the social relationships between them.
+Perhaps that is kind of obvious and well known to us today.
+But, uh, back in '60s,
+this was, uh, totally miraculous, right?
+It wasn't at all expected that it's actually social connections that
+make- that play such a big role in how groups and communities form.
+Another example of groups and communities is in a very different part of the world.
+So it is in, uh,
+online advertising where basically if you think you are a Google or a Facebook, um,
+you have advertisers who say,
+who- where do they want their ads to be shown.
+So you can create this bipartite graph where you put, uh,
+advertisers at the bottom and you put,
+uh, queries or keywords,
+uh, on the other side.
+And then here I'm kind of showing the adjacency matrix where a dot means that
+a given advertiser wants its ads to be shown when a given query,
+a given keyword, a given person with a given interest, uh, shows up.
+And what you'll find out is that there are
+these well-defined dense clusters where, you know,
+groups of advertisers, um,
+bid or advertise on common keywords or on common, uh, interests.
+And you know, here is one example of, uh, you know,
+the gambling set of advertisers who are gambling on people,
+who are advertising on people interested in gambling queries.
+So it allows you to identify
+micro markets, subgroups in this type of online advertising space.
+Another example is, you know,
+imagine you take a network of, uh,
+NCAA University football teams
+and you connect two teams if they play games with each other.
+Uh, and here's a visualization of the network.
+And the question is, is that any structure in how teams, uh, play each other?
+And if you run these community detection methods,
+you would actually identify the- the groups.
+Here they are visualized, right?
+So notice this network is the same as that network, right?
+So this is just visualize the network.
+This is what the visualization comes up with.
+It doesn't seem that is any real structure here, right?
+Maybe you say, oh, there seems to be something here and maybe there is a cluster here.
+I don't know, maybe there's something here.
+It's very hard to say.
+But after you apply a community detection method,
+it will actually go and identify,
+um, the clusters and here they are.
+And what is interesting and- right,
+is that they actually exactly correspond to these conferences in which, er,
+teams are organized where teams play each other
+inside the conference more than with other conferences.
+And we even have a couple of themes that are-
+that are not part of any community because they
+are part of this Independence conference
+and they just kind of play the two different teams.
+So this is how, for example,
+we can extract structure of them out of the network,
+even though initially the structure is not obvious.
+To give you another example now is to say,
+how do we formalize this, right?
+How do we identify the sets of tightly connected, uh, nodes?
+And the way we are going to do this is that we are going to specify,
+um, a metric that we call modularity.
+And we are- and this metric will measure how well
+a network is partitioned into communities.
+So given a partitioning of the network into groups of nodes,
+let's assume that right now somebody gave- gives us this partitioning.
+We are going to compute this modularity score q,
+and if we have the modularity, uh, score defined,
+then what we are going to do later is we are going to say,
+can I search over,
+can I find a very good, uh,
+set of partitioning such that my modularity score will be as high as possible.
+So that's what we are going to do later.
+But now, let's assume that, uh,
+groups are given to us, um,
+and we want to estimate how good of a clustering are we having.
+And the way the modularity operates is the following, we say,
+modularity Q will be proportional to the summation
+over all the groups where for every group,
+I want to ask how many edges are there between the members of the group?
+How many edges are within the members of the group S?
+Minus how many edges would I expect between this,
+h, group S, um,
+in some null, uh,
+random null model, right?
+And if the group S has much more edges
+between its members than what is expected at random,
+then we have found a strong significant cluster.
+And now you know what is the total modularity of
+the network is the sum over these modularity scores,
+uh, of individual clusters.
+Right? So because we have these expected number of edges within a group s,
+we need a null- we need a null model, right?
+We need a random graph null model.
+So now if we go back to our subgraph mining,
+we talked about Erdos-Renyi as an example of a round- of a- of a model.
+Um, and we also talked about configuration model as an example of a null model.
+So let me now tell you, uh,
+and remind you about the configuration model,
+right, which we already talked about,
+I think two lectures ago when we talked about, uh, subgraph mining.
+The idea is the following;
+given a real graph G on N nodes and M edges,
+we want to create,
+uh, a random network G prime.
+And we will refer to this random network as a rewired network because essentially it
+will mean that we every node keeps its degree number of connections constant,
+but connects to random nodes rather to- than
+to the ones that they are really in- connected to in the network.
+So this means that our network,
+we'll have the same degree distribution,
+the same degree sequence,
+but it will have random connections.
+Um, and we are going to consider graph g as a multigraph, right?
+We'll allow multiple edges to exist,
+uh, between the nodes.
+So now you can say,
+I have these nodes,
+they have these spokes.
+These are kind of these rough edges.
+And now I wont to randomly connect,
+uh, these, uh, endpoints.
+And of course, maybe between a pair of nodes,
+I will allow multiple edges because perhaps both of these two end points,
+randomly, you know, by chance decide to
+connect to these two end points so it'll be kind of a double-edge.
+But for the purpose of this, uh,
+discussion right now, that's completely fine and okay.
+So then, you can ask yourself,
+what is the expected number of edges between a pair of nodes i and j,
+where node i has degree, uh,
+k_i, and node j has deg- degree k_j.
+Uh, and the way to derive this equa- er,
+expression is the following.
+You say, um, what is the total number of,
+uh, edge endpoints?
+Basically the spokes.
+Number of spokes is 2 times n, right?
+Every edge has two end points.
+Every edge gets cut in half.
+If I have m edges,
+then I have 2 times m, uh, end points.
+This is why we have this guy- this thing here.
+Then what is K sub j, right?
+K sub j is the degree of, uh, node j.
+It's the number of spokes it has.
+So now I say, um,
+for every node- for every spoke of node i,
+I randomly pick another spoke.
+So node, um, er, k_j,
+accounts for k_j divided by 2m fraction of all available spokes.
+Right? Because this guy could also decide to link to itself or whatever else, right?
+So now basically I say out of these k_i different tries, different random, um,
+end points selections, uh, for, er,
+each one of them has the probability k_j divided by 2m to connect to node j.
+So now, um, if I multiply these together,
+I basically say that the expected number of edges between I and
+j is simply the degree of i times degree j divided by 2m.
+Right? So basically what this means is that the probability or the expected number
+of edges is simply equal to the product of the degrees,
+uh, of the nodes, uh, uh,
+um, that we are interested in.
+All right? So, um,
+we have this very elegant relationship, uh,
+about the expected number of edges between a pair of
+nodes under this random configuration model,
+where nodes keep their degree,
+but the edges are assigned, uh, randomly,
+which basically means these endpoints get randomly connected uh,
+with each other and we're leaving this kind of,
+uh, multi graph, uh, world.
+Right? So now that we have this, uh,
+expected number of edges between, uh,
+i and j, then I can say, you know,
+just like as a- as a- as a- as a side,
+uh, calculation, I can say, okay,
+so what is the total expected number of edges in this,
+uh, graph g prime?
+So basically I'm saying,
+let's sum over, um, all the nodes i,
+all the nodes j. Um,
+so all pairs of nodes and ask what is the expected number of edges between them?
+And, of course, I have to multiply this by one-half because when I go over all pairs,
+it means I will count every edge twice because i, j and j,i will be counted twice.
+So if I work out these summations explained here, basically,
+I- I get it's a summation of the,
+uh, uh, the degrees, uh,
+times another summation over the degrees, uh,
+the sum of the degrees is two times n. The sum over
+the degrees is two times n. And here I have divide by,
+um, 1- 1 over 2 times n that comes from here times one-half.
+So I get, um,
+2 times m times 2 times m divided by 4 times m. Uh, you know, uh,
+4s cancel out, one m cancel out and I'm left with, uh,
+m. So this means that this mo- this un- this model,
+both the degree distribution and the total number of edges, uh, will be preserved.
+And the expected number of edges between a pair of nodes is de- determined, uh,
+by this formula, k_i times k_j divided by 2m.
+So now let's go back to the modularity.
+So in modularity we said,
+we have a number of edges between the group s, uh,
+minus the expected number of edges within, uh,
+the group s. So notice that we are only interested in the edges inside the group,
+and we are not explicitly minimizing for the number of edges that cross between groups.
+This is kind of implicitly accounted for, uh, in modularity.
+So how do we write this out now,
+given what we learned about configuration model as our null model?
+So we are going to write the following.
+We are going to say modularity, uh,
+of our group, uh,
+S in, uh, graph, uh,
+G is simply a sum over the- uh,
+all the pairs of nodes,
+uh, in the group.
+This is, uh, where the,
+er, that pair of nodes is connected.
+This simply counts number of edges between the groups.
+And the second theorem says, ah-ha,
+for every pair i, j,
+I'm going to multiply their,
+uh, their degrees, divide by 2m.
+So this is the expected number of edges between a pair of nodes.
+Right? So this is basically now saying,
+what is the real number of nodes minus
+the expected number of nodes over all the pairs of nodes in a given group?
+And now I sum this up over all the groups, little s, uh,
+from the partitioning of nodes into grou- into communities
+into groups, capital S. Um, and this, uh,
+factor 1 over 2m is, uh,
+is a normalizing constant so that
+our modularity metric Q will have range from minus 1 to 1.
+Right? If all the edges are inside the group,
+um, uh, uh, uh, uh, group s,
+and, uh, uh, somehow we would expect very little edges,
+uh, inside that group,
+then modularity will be- will be very close to 1.
+And, uh, if we have
+kind of an anti-community where we ex- where we have no edges between the- uh,
+uh, between the group.
+But based on the degrees of those nodes,
+we would expect a lot of edges,
+then the value will be negative, will be minus 1.
+So as I said, the modularity can take,
+a value from minus 1 to 1.
+It is positive if the number of edges within the group
+exceeds the numb- the expected number of edges.
+And in reality, in practice, uh,
+if the modularity Q is greater than let's say, 0.3, 0.7,
+this means that the graph has a significant community structure that we have identified,
+uh, really strong, uh, clusters,
+if our modularity is in this range.
+So let me recap.
+Uh, modularity Q is defined over an undirected graph and our partitioning of nodes s. Um,
+and it is intuitively defined as a summation over all the groups,
+number of nodes between the members of the group,
+minus number of, um,
+expected number of, uh,
+edges uh, between the members of the group.
+Uh, given- using the configuration model as a null model,
+we then instantiate modularity using the following formula,
+where we basically say for every group s,
+take pairs of- all pairs of nodes from the group.
+Ask whether a given pair is connected.
+So this summation, we now count,
+uh, the number of edges uh,
+between the members of the group, minus, uh,
+degree of one node, the degree of the other node,
+divided by twice the number of edges in the network.
+So this is the expected number of edges between i and j,
+um, uh, under the configuration models.
+So these difference tells us, um, er, er,
+how- how many more- what is the difference between
+the true number of edges and expected number of edges,
+uh, inside a given group.
+And now we sum this up over all different groups and we normalize it.
+So this is how,
+uh, we can, uh, write it.
+Now that we have the modularity score,
+we basically have an objective function.
+So now the question is,
+can I identify clusters' communities by maximizing this modularity score,
+by basically maximizing, uh, this metric?
+So the question will be, uh,
+that we're going to address next is, if I, uh,
+search over these groupings,
+can I- how do I find, uh, uh,
+uh, sets that have high modularity score?

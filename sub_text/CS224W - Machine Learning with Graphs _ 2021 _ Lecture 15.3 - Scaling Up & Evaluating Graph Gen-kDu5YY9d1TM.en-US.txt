@@ -1,0 +1,259 @@
+What I want to discuss
+next is how do we make the RNN tractable? And how do we evaluate it? So we are first going to
+discuss about tractability. How do we make our
+model more scalable? And the issue is that
+in a graph in principle any node can connect
+to any prior node. So this means there
+might be a lot of steps for edge generation, right? When node 1,000 joins, we
+may need to generate now 1,000 possible edges, right? Does it link to node 999, and
+then 998, all the way down to node let's say
+number 1, right? So this would mean
+that in principle we need to generate a
+full adjacency matrix. And this is complex,
+and it's like-- it leads to very kind of
+long-range edge dependencies. Because you have to memorize-- the model needs
+to memorize a lot in terms of what
+previous nodes were added and which previous nodes does
+a new node want to connect to, right? So if you have a node
+ordering like I show you here, then for example,
+the way you generate this graph would be add node
+1, add node 2, add node 3, and only now start
+creating edges, right? Then this doesn't
+feel like natural, it seems that like this
+when I added node 3, I needed now to remember that
+1 and 2 were already added and all that, right? And the point is that a
+new node needs to link to-- can in principle link to
+any previous node, right? Even node 5 could
+link to node number 1? And the question is, how would
+we limit this complexity? And how would we limit these
+long range dependencies, right? Because this means that
+the hidden state of node 5 somehow has to remember that
+node 1 was added at all the-- at the beginning and
+that 5 should link to 1. And that's a lot to kind
+of ask our model to do. So if we can help it in any
+way that would definitely help. So the way the insight
+is that we can take a-- because the insight
+is that we can come up with an node ordering that makes
+our model much more tractable. So the insight is that,
+rather than having a random node ordering and
+having the model to worry about long-range
+dependencies, we are going to use a node
+ordering that helps the model learn better. And the node ordering
+we propose is called the breadth-first
+search node ordering. Basically, we are going to
+start at some random node in the graph. We are going to label
+it as node number 1. We are going to label its
+nodes as, let's say 2 and 3. Then their neighbors
+are 4 and 5, right? And this leads now to a
+much more natural recipe to generate the graph, right? We are saying add node 1,
+add node 2, connect 2 to 1, add 3 connect it with 1, add
+4 connect it with 2 and 3. It's kind of much more nicely
+interwoven, these things are. And if you say, how would
+you draw this graph? You'd probably draw it this
+way, not some other way that you first put all the nodes
+down and then connect them, right? So the BFS ordering,
+what does it buy us? It buys us the following,
+because node 4 does not connect to node 1, we
+know that no other node is going to connect to
+1 from now on, right, because it's a breadth-first
+search ordering. So if for example, node 5
+were to connect to node 1, then its ID wouldn't be 5, it
+would be less than 5, right? So we know that all
+of node 1's neighbors have already been traversed
+when a given node does not link to it. Therefore, node 5, and
+all the following nodes, right, as I said, will
+never connect to node 1. And why is this important? Because this means
+that when node 5 comes I don't need to worry about
+node 1 anymore, right? Node 1 I can kind of forget, I
+need to have much less memory, right? I don't need memory, I only
+need memory of two steps rather than memory of
+remembering what I did all the way at the beginning. So the BFS ordering,
+the key insight is that node 5 will
+never connect to node 1. And this means that we only
+need memory of two steps, rather than the memory
+of n minus 1 steps where n is the number of
+nodes in the network. And this also means
+that it reduces the number of possible
+orderings, right, rather than considering all
+the possible orderings which is n factorial of them. We only have to kind of consider
+the number of distinct BFS orderings. And it also reduces
+the number of steps for edge generation
+because of this insight that we know that
+5 won't link to 1. And this is important. Because so far, I
+explained to you, I said, the edge level
+RNN generates the column of the adjacency matrix. But if you take this
+BFS based ordering, then the edge level
+RNN does not really need to generate
+the entire column. It can-- it only
+needs to generate a small part of the
+column because we know that the rest is 0, right? So, rather than
+generating connectivity to all previous
+nodes, and having to remember all this with
+the proper node ordering, we are guaranteed
+that all we need to do is generate just a small band
+of this adjacency matrix. And again, this
+doesn't prevent us from generating any
+kind-- like graphs, this is still fully
+general, it is just exploiting the ability that
+we can re-number the nodes. We can order the nodes in
+whatever order we want. And because real
+graphs are sparse, a favorable ordering
+gives us a lot of benefit because it's much
+easier to learn to generate just this
+blue part, than to learn to generate this
+entire upper triangle of the adjacency matrix. So this was the
+discussion of how do we scale up our model and
+its insight, that we can come up or we can decide on the ordering
+and if you are smart about it, it can really help us. It could help the model learn. The second thing I
+want to talk about is, how do we evaluate
+graph generation, right? And there are two ways
+how you can do it. One is that we
+visually look at them and see whether
+they are similar. And that's good to
+get some intuition, but we also want to define a
+statistical notion of graph similarity. And of course, you
+could try to say, I'll take two graphs and I'll
+somehow align them one on top of the other, but that is very
+expensive and for big graphs you cannot do that. So we have to define some kind
+of statistical measure of graph similarity between two graphs. So first, let me show
+you some visual examples of what GraphRNN is able to do. So what I'm showing here is
+three input training graphs. These are the output
+graphs from GraphRNN, and here are some output from
+three traditional generating models. This is the Kronecker
+graphs generating model, this is the mixed membership
+stochastic block model, and this is the
+preferential attachment to the Barabasi-Albert model. And what you notice
+is that GraphRNN, if you give it grids it's
+going to generate you grids. You see little mistakes because
+the model is stochastic, so it may make some little
+mistakes, that's OK. But you see that other
+models completely fail, they are not able to
+generate the grid. And this is not surprising
+because none of these models was developed to generate grids. They were developed
+to generate networks for different types
+of properties. So that's OK, right? GraphRNN can generate the
+grid the others cannot. What is interesting though,
+is, even if you for example give GraphRNN examples
+of graphs with two clusters with this kind
+of community structure, GraphRNN is able to learn
+that these graphs have that structure and is
+able to generate you graphs with such a structure. Why? For example, Kronecker graphs or
+Barabasi-Albert, they cannot-- they were not done to
+generate graphs with community structures. So they cannot do that, but
+mixed membership's stochastic block model was developed
+for community structure. So it does a good job, right? And what I want to say
+here is the following, right, is that GraphRNN
+is super general, right? It's basically able to
+take these input graphs and learn about the
+structure and then generate new graphs with
+similar structure, right? You don't have to tell it,
+Hey, I have communities. Hey, this is a grid. You just give it the graph, and
+it will figure it out by itself that the given graph
+is a grid and it needs to generate a grid, or
+that it's a community structure graph or anything else. So it's quite remarkable that
+such a diversity of graphs, the same model can
+cover and you don't even have to tell it what
+the input graphs are. So now, how about doing
+more rigorous comparison about statistical
+similarity, right? How do we do that, right? we-- as I said we cannot do
+direct comparison between two graphs, trying to
+do graph alignment, because graph isomorphism
+testing as we have seen is an NP, is a hard
+problem, let's say. So the solution is to
+compare graph statistics, and the typical graph statistics
+we have already discussed would be like degree
+distribution, clustering coefficient, or orbit count
+statistics from the graphlets that I discussed, I think
+in lecture number two. So the point would
+be that given a graph we are going to describe it
+with a set of statistics, and then we are going to
+say that the two graphs are more similar if their
+corresponding statistics are more similar. And in our case, each
+of these statistics we are going to think of it
+as a probability distribution. And I'm going to explain
+why is this important. OK. So first, is that,
+given two statistics, maybe two graph
+properties, maybe degree-- two degrees sequences,
+two degree distributions, two orbit count distributions. We want to compare this
+on sets of training graphs as well as on the
+syntactic graphs. You want to see how similar
+is a set of training graphs to the set of
+synthetically generated graphs. And we'd like to measure
+the level of similarity between the two. And we are going to
+do a 2-step approach. In the first step, we are
+going to do the following. We are going to take
+each of these graphs and we are going to describe
+it with a set of statistics. We'll say here is the
+degree distribution, here is the clustering
+coefficient distribution. And now, we'll take
+and we are going to this for all the input
+graphs, training graphs, as well as, for all
+the generated graphs. And now, we are going to take,
+let's say, degree distribution of a synthetic graph and degree
+distribution of a real graph, and we want to see how much
+of these distribution differ. And to measure--
+to quantify that we are going to use something
+that we call the earth mover distance. And now, that we have compared
+the statistic individual statistics. Now, we need to aggregate
+and measure how-- once we have a measure of
+degree distribution similarity, we have a measure of clustering
+coefficient similarities. Now, we need to take
+these similarities and further aggregate them to
+get the overall similarity. And for this second
+level aggregation, we are going to
+use what is called the maximum mean discrepancy
+that will be based on the earth mover distance. So let me tell-- let me first define the
+earth mover distance and then the MMD. So the earth mover
+distance, kind of tries to measure similarity
+between two distributions, or similarity between
+two histograms. And the way you
+can-- the intuition is that, what is the
+minimum amount of effort, minimum amount of Earth, minimum
+amount of probability mass to move from one
+pile to the other, so that one pile gets
+transformed to the other, right? So I say, I have a distribution,
+I have two distributions, how much more? How much mass? How much of this yellow-- dirt, yellow earth,
+do I have to move between these
+different pillars, so that I will make
+it and transform it into this type of distribution? So if I have distributions
+that are very different, then the earth mover
+distance would be high. And if they are kind of similar,
+the earth mover distance will be low. And earth mover distance can
+be solved as an optimal flow, and is found by using a linear
+program optimization problem. We're basically saying, the
+amount of work I have to do is, how do I take
+F and transform it. How much earth do
+I have to move, so that it minimizes
+the overall cost didj between the probability
+distributions x and y. So that's the intuition behind
+the earth mover distance metric. And then, the
+second part will be that, we are going to use
+the maximum mean discrepancy, or MMD. And the idea of
+maximum discrepancy is to represent distances
+between distributions, as distances between mean
+embeddings of their features, right? And here I give you
+the formula for it. But basically, the MMD between
+two distributions p and q, you can think of it--
+is-- that this is the-- if I write it in terms
+of some kernel k, it's kind of the expectation
+over these elements x and y that are drawn from
+distribution p and q, and taking the expectation over
+the distribution of p and q. And of course, we need
+to have this kernel k. In our case, the kernel
+will be the L2 distance. So now, let me just summarize. How do we put all this together? We are given two sets
+of graphs and we want to see how similar they are. The way we are going to do
+this is, for every graph we are compute-- we are going to
+compute its statistics. We are then going to
+use earth mover distance to measure to the discrepancy
+between the two statistics, between the two distributions. And then, we are going
+to apply the mean-- the maximum mean
+discrepancy to measure the similarity between
+these sets of statistics. Where the similarity
+between sets elements-- which means the
+individual distributions in your statistics is computed
+with the earth mover distance. And this means, for
+example, that, this way we can rigorously evaluate
+the correspondence between the
+particular statistic-- set of statistics on
+the training graph, as well as, on the
+testing graphs. 

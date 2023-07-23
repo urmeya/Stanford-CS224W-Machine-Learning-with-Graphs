@@ -1,0 +1,722 @@
+So what I want to talk about next is a solution,
+uh, to- to these questions.
+And in- in particular,
+the method we'll talk about is called Query2box,
+that allows us to reason over knowledge graphs using what is called, uh, Box Embeddings.
+So let me first,, uh,
+motivate the setting, and then give you how this method works.
+So we said we wanna answer more complex predictive queries on, uh, graphs.
+And let's say that we wanna be able to also include conjunctions,
+so not just sets, but also intersections.
+We wanna be able to take an intersection of two sets in the embedding space.
+What we need to be able to do is two things.
+We need to be able to now figure out how are we going to
+represent a set of entities in the embedding space?
+And then, how are we going to define the intersection operator in the embedding space?
+How do we quickly take, uh,
+two sets of entities and say,
+what are the entities that are in the intersection, uh, between them?
+So let's see how to do that.
+The key inside that, uh,
+will allow us to do this is the concept of a box eEmbedding.
+What this means is that we're going to embed all the entities,
+and the relations in our space as boxes,
+as, uh, multidimen- dimensional, uh, rectangles.
+And the intuition would be that every box is
+defined by two points where it's defined by the center,
+and is defined by the corner.
+We'll call the center,
+center, and we'll call the corner, offset.
+So this basically tells me, you know,
+what is the offset in, uh, one dimension?
+What is the offset in the other dimension?
+This basically tells me what is the size of the box.
+And intuitively, we want to,
+uh, let say, in our case of Fulvestrant,
+we wanna embed all of its side effects in a- in a box, uh, that is,
+uh- so that in basically, uh,
+all the side effects caused by Fulvestrant will be- will be embedded close together,
+and they will be enclosed in this,
+uh, in this box.
+So that's the- that's the idea.
+So let me now tell you,
+uh, keep kind of building on this.
+So, um, the reason why we wanna embed things as
+boxes is because intersection of boxes is well-defined.
+Right? Basically, what I mean by that is,
+uh, if you take two boxes,
+and take an intersection,
+intersection of two boxes is a box.
+It can be an empty box,
+right, a box of size 0.
+But if there is any non-trivial overlap,
+that overlap will be a box.
+So it means we can now think about how are we going to define
+trans-geometric transformations over these boxes
+that corresponds to logical, uh, operators.
+Right? So when we traverse the knowledge graph to find answers,
+each step will basically, uh,
+produce a set of reachable entities,
+a set of entities that the query covers, uh, so far.
+Um, and we are going to now model this set of
+entities with a box that encloses all of them. All right.
+So, um, this means that we can,
+uh- that box provide a powerful obstruction because boxes kind of enclose,
+uh, sets of, uh, entities.
+And then we can define geometric intersection operator,
+uh, over, uh, let's say,
+two, or multiple boxes,
+and when- when we intersect them,
+the intersection is still a box.
+So we- it's very easy again to have this compositional property,
+where we can take boxes,
+intersect them in arbitrary ways,
+but, uh, we always are left of- are left out with a box,
+which we can further kind of manipulate,
+and change in shape however we like.
+So that's why this is kind of cool,
+um, and, uh, exciting.
+So, uh, what does it mean to be a- to be able to embed with boxes?
+Here is what we need to figure out or here's what we need to learn.
+We need to learn uh,
+opa- uh, we need to learn entity embeddings.
+So every embedding, entity will have an embedding,
+and it will be a box,
+but it will be a- a- a trivial box.
+So basically, it will be a point, right?
+It will be a box of a- a size 0, or volume 0.
+Then we'll have relation embeddings,
+which will basically, um,
+generalize the notion of params,
+where we are going to take- now learn how to move around,
+and, er, expand, or shrink boxes.
+So the relation embeddings will be like vectors,
+that are going to take boxes,
+and move them around.
+Then intersection operator is something that is- that is new.
+Uh, the intersection operator will take, uh,
+multiple boxes on the input,
+and will output a single box.
+And intuitively, this will be an intersection of, uh, boxes.
+But we are going to learn this, uh, intersection operator.
+Um, so it'll have some parameters so that our,
+uh, approach will be even more,
+uh, expressive, and more robust.
+So how will this work?
+Let me just kind of give you a cartoon.
+Again, we are talking about, uh, you know,
+what are drugs that cause shortness of breath,
+and treat diseases associated with protein, uh, ESR2?
+Uh, the way we do this,
+right, in terms of query plan,
+we say a-ha, we start with a anchor entity, ESR2.
+We wanna move across the, um,
+across the relationship called associated, uh, with.
+And the way we are going to do this is that we are going to define
+this relation projection operator P. Uh,
+here is how it's defined.
+We'll have one for every relation.
+And essentially what this will do is it will take one box,
+and it will kind of move it according to our given relation,
+and also, um, expand its,
+uh, or shrink its size.
+So basically, we will have, um,
+this learned, uh, ve- this learned operator for every relation.
+It's going to move the center,
+and it's going to change the offset.
+So basically, it will change the size as well as the location,
+uh, of the box.
+So I can start with, uh, q,
+and then I apply this, uh,
+projection r to it to get a new box, uh, q prime.
+So that's the projection operator.
+So how would this look in our case if I started the ESR2,
+and I wanna move across the associated relation?
+I would take this trivial box, apply my, uh,
+r- r- r associated,
+and basically, this would move it, uh,
+and expand it to include, uh,
+all the- all the diseases associated with, uh, ESR2.
+Now, um- now that I have a new box,
+I can again, simply kind of follow the query plan.
+Now I wanna traverse over a TreatedBy,
+which again, I would take this box, apply TreatedBy, uh,
+projection operator, the transformation to the box, which would, you know,
+further move it, and you know,
+expand or shrink it,
+depends what the model we learn.
+Uh, and then the idea is that whatever the answers to this path to a predictive query,
+those are the entities, uh,
+inside, uh, the box.
+And that's essentially the idea, right?
+Now, I can also try to answer the second part of the query,
+which is shortness of breath CausedBy.
+So I start with the shortness of breath entity,
+apply this CausedBy box transformation to get another box.
+And now, uh, what are the entities that are,
+uh, in the intersection of the two boxes?
+Uh, those will be basically the answers to my query.
+In our, uh- in our case, uh,
+this would be these, uh- these two entities,
+uh, fulvestrant, uh, and the other drug.
+Right? So that's essentially the idea.
+I have one box, I have the other box I'm interested
+in, what is the intersection, uh, of them?
+So that's, um, the idea about how would I do the embedding grid boxes?
+Now, let me talk about how does- how is this intersection operator, uh, really defined?
+Uh, one approach would be to simply define it as kind of hardcore,
+or just mathematically as intersection of boxes,
+almost like as- as in a Venn diagram.
+Uh, we wanna be a bit more, um, flexible.
+And we wanna do, uh, uh,
+and learn a geometric intersection operator,
+we'll call it J.
+Where the idea is we wanna take multiple boxes as input,
+and produce the intersection,
+uh, of these boxes.
+We'll call it the intersection box.
+Uh, and the intuition,
+we are going to use this to say the center of
+the new box should be close to the centers of the input boxes.
+So these are the three input boxes and the centers.
+Um, so we would like to take kind of intuitively the intersection between them.
+So we want the new center to be kind of a function of these three centers,
+and we want the intersection to be kind of close to- to them.
+And then the offset,
+so the size of the box,
+should shrink, since, uh,
+the size of the intersection is smaller than the size of,
+uh, any of the input sets,
+or any of the input boxes.
+So formally, we'll have
+this intersection operator that will take an arbitrary set of boxes,
+and produce a new box.
+Now the way we define this operator is we need to say what is happening to the center,
+and what is happening to the offset of the intersection.
+The way we are going to find the center of the intersection is,
+we are going to do this through a learned oper- operation.
+Our learning operation will take the following,
+it will take the centers of the boxes that are on
+the input and then we are going to learn this function, f,
+that takes a center of the box and, um,
+and transforms it and then we will apply softmax to this, uh, to dysfunctions.
+What this will allow us to do is that,
+basically the - the intuition is that the center of the intersection would be
+somewhere in this green region defined by the centers of the input boxes.
+We define the center as a weighted sum of the input box centers,
+where W is this weight,
+the importance of our- of our given box on the intersection of boxes.
+So, W represents, in some sense,
+a self attention score on the cen- how much a center of
+each input box affects the center of the intersection box.
+Uh, and this funny operator is called Hadamard product,
+which is basically element-wise product, right?
+It's just you - you uh - uh,
+take product of cells uh,
+that correspond, uh, to each other.
+So this is how center uh,
+is defined and of course,
+f is a function that we are going to learn.
+Similarly now, we also have to define the offset.
+And the way we are going to define the offset of the intersection is to
+take- is we'll take the min- smallest of all the input boxes,
+so we take the minimum in terms of the offsets.
+And then we are going to also learn this offset function,
+f offset, that is going to aggregate and transform the offsets.
+So here, the - the intuition is that if we first take
+the minimum of the offsets of input boxes and then make the model more
+expressive by introducing- introducing this new function f_off for extracting
+the representation of the input boxes with the sigmoid function to guarantee shrinking,
+uh, of the- of the offset.
+Again this f_off will have some trainable parameters uh,
+that will uh, that we are going to learn
+through the training process uh, of the entire model.
+So, uh, you know, intuitively,
+the idea is that once I have two boxes on the input,
+I wanna- I wanna produce the intersection of the two boxes and in our case,
+the intersection of the two boxes, for example,
+would be this, uh, shaded, uh, area here.
+Uh, and that- and whatever entities are enclosed or are close to this box,
+uh, those are the answers,
+uh, to our, uh, query.
+So now, what we need to do is,
+so far I said, oh, um,
+entities that are the answer that are included in the box,
+they have to be kind of inside the box, right?
+In reality, this might be uh, harder,
+because, uh, data is noisy, um, uh,
+there might be inconsistencies,
+contradictions in the knowledge graph,
+so we need to define the notion of distance between the box and a point.
+And the idea will be that, uh, we are going to define this distance to have two parts.
+We're going to define the distance from the center to the point,
+if the point is inside the box,
+and if it's outside the box,
+then we'll take the distance between the center and the corner and the corner,
+uh, and the point.
+Um, and the point here is that we wanna be able to uh,
+account for the distance differently.
+We wanna measure distance, uh, uh,
+from the center if, uh,
+when the- when the point is inside the box in some set of units.
+And then we are going to have this, uh,
+weight scalar Alpha that will, uh, uh,
+be less than one so that basically we- we are going to
+penalize the- the- the distance from the center of the box,
+uh, more if the point is, uh,
+inside than if it is,
+uh, outside the box.
+Uh, and the intuition is that if the point is enclosing the box,
+it should- the box should be, uh,
+it should be very close, uh,
+to the center of the box so that we get more robustness from our- from our approach.
+We don't want the point to be kind of close to the border or the edge of the box,
+we want it towards the center of the box.
+So that's how we now define the- the distance between the entity and the box.
+So now when we have the final embedding of the query,
+all we do is basically apply this distance, um,
+and say who are the points that are closest according to this distance,
+uh, to the center,
+uh, of the box.
+So now we have discussed two things.
+We discussed how we can embed everything, uh,
+all the entities as boxes,
+how we learn the- the box transformation operation,
+the projection operation that is one per relation,
+and then we talked about how we learn
+these intersection conjunction operator that takes the- as an input,
+a set of boxes,
+and produces the intersection box.
+Of course, our natural question next is,
+could I- could I have these predictive queries,
+uh, even with a union operator?
+So, for example, to be able to answer queries like OR.
+Um, and so next what we are going to look at is,
+how would you be able to answer what we will call AND-OR queries?
+Or what is technically called existential positive first-order queries.
+So basically, these are queries with conjunction and disjunction operator, right?
+So the question is, how would we be able to dis- are we able to
+design a disjunction operator and embed
+AND-OR queries in low dimensional vector space and be able to
+answer predictive AND-OR queries in the,
+uh, space as well.
+So the question is,
+can we embed AND- AND-OR queries in a low-dimensional space?
+The answer is actually no.
+The reason for that is that allowing union over
+arbitrary sets requires high dimensional embeddings.
+So let me quickly give you a sense why we need a lot of dimensions.
+Imagine I'm given three queries, q1, q2,
+q3, and each one of them has one answer.
+Uh, you know, q1 has v1 as an entity,
+v1 has answer q2,
+v2, and q3,
+v3 entity has the answer.
+So now, imagine I- I allow an entity operation, right,
+which basically means I can take, uh,
+any pair of queries and do an OR between them.
+So the answer set will be, uh,
+the answer set for the first query union the answer set,
+uh, of the second query.
+So given that we have two queries,
+sorry, given that we have three queries, the question is,
+uh, can- would we be able to model union operation when we embed them,
+let's say on a two-dimensional plane?
+And yes, you could, right?
+Basically, you say for every individual query,
+I can simply put a box around the entity and this would mean, uh,
+for a given query,
+I want the entity that is the answer to it to be inside the box and that's,
+uh, you know, easy to achieve.
+We can space these entities apart and put a box around each one of them and say,
+uh-huh, the box is the embedding of the query and
+the answer to the query is embedded inside the box.
+You know, all good.
+How about the unions?
+Um, in this case,
+I can easily, uh, do the union.
+This is, for example, how a box of union 1,
+query 1, union query 2 would look like so, uh,
+q1 or q2, this is how, uh,
+q2 or q3 would look like,
+and this is how uh,
+q1, uh, or q3, uh, would look like.
+So it seems it all works for three queries in two dimensions. However-
+What if we have four points?
+So imagine now I have four queries.
+I have four queries each one with one entity as the answer.
+Can I now use a two-dimensional space to embed them,
+um, and be able to do arbitrary unions between arbitrary queries?
+Uh, and it turns out I cannot design a box embedding such that, for example,
+in this case, that would represent the union of q, q_2, or q_4.
+Because there will always be some other kind of box or some other entity,
+um, uh, in- in between them, right?
+And if I move this entity away, perhaps here,
+then I won't be able to- to- to model the union between v_1 and v_4.
+So basically, um, there will always be, um, some issue.
+And, uh, what is the conclusion, or if you,
+um, if you do the, uh, mathematics carefully,
+what turns out is that if you have M, uh,
+queries or M entities with non-overlapping answers um,
+then you need the dimensionality of order M to handle arbitrary OR queries, right?
+So in our case, we said if I have three queries, I need two-dimensions,
+if I have four queries I need three-dimensions,
+and so on and so forth.
+So because real- real world knowledge graph have a lot of entities, for example,
+you know, FB15k has 15,000 entities and it's considered a small knowledge graph.
+This would mean that if we want to be able to- to uh,
+model arbitrary OR operation between arbitrary sets of entities,
+this would mean we need an embedding dimension of 15,000.
+And uh, that's far uh,
+far too much for us to be able to do this.
+So, um, it seems, um, hopeless, right?
+Since we cannot embed AND-OR queries in low-dimensional space can we still handle them?
+And actually, the answer is yes.
+And the answer is yes because we can rewrite the query to, um, in uh,
+into a different form so that the query is kind of logically equivalent,
+but the union operation happens all at the end, right?
+So the idea is if I have the original query plan, where I,
+you know take two projections,
+take the union, take one more projection,
+and take- then take an intersection,
+I can rewrite this into a different query plan that gives me the identical answer,
+it's logically equivalent, but the union only happens at the end.
+So why is this beneficial?
+Because I already know how to answer this part to get a box.
+I know how to answer this- this part up to here to get a box.
+So now, uh, write these the answer to my query?
+Is simply entities included in the first box and entities included in the second box.
+So that's very easy to do because the union occurs,
+uh, at, uh, always as- as a last step.
+So what is important is any AND-OR query can be transformed into uh,
+an equivalent what is called, um,
+disjunctive normal form, which is a disjunction of conjunctive queries.
+Um, and this means that if I have a query that's now a disjunction of conjunctions,
+I can simply first answer these conjunctions,
+and then take the OR or the union at the end.
+So it means, um,
+we can aggregate these unions uh, at the last step.
+That is one caveat is that when you do this transformation into disjunctive normal form,
+so from the original query to the disjunctive normal form,
+the size of the query can increase exponentially.
+Um, but in our case,
+this is not the problem because answering queries um,
+is so uh, is so fast,
+it's just kind of uh,
+navigating the embedding space.
+So this doesn't, uh, doesn't sound like too big,
+uh, of a problem.
+So now that we have um,
+defined the uh, the disjunctive normal form and we have rewritten the uh,
+the query as a set of conjunctive queries and then apply the OR operation at the end,
+then all we need to do is to change the notion of the distance between the query,
+the embedding of the query um, and the entity.
+And the way we can write this out mathematically is very intuitive.
+We say that um, the query in the disjunctive normal forum,
+conjunctive query q_1 or q_2 or q_3,
+we can simply define the distance between the embedding of
+this query and the entity to be- to be the minimum of
+the distances between the- the box distances
+between the individual conjunctive queries and that entity.
+So basically we say the entity is an answer uh,
+to the query if it is inside at
+least one of the individual conjunctive query boxes, right?
+So that it is close to at least one of the,
+uh, conjunctive queries q.
+So that's why we have the minimum here, right?
+So as long as v is the answer to the one conjunction,
+query q then the distance between that query and v will be uh, very small.
+And we achieve this by using this minimum uh, based uh, distance.
+So, um, this now, uh, er, uh,
+allows us basically to- to answer uh,
+arbitrary AND-OR predictive queries.
+So the way we would go about this,
+if- as we are given a query q at the beginning,
+we would rewrite it into a disjunctive normal form.
+So a, uh, disjunction of conjunctive queries q_1 to q_m.
+We would uh, embed this q_1 to q_m using this set of box operations,
+meaning uh, projections and uh, intersections.
+And then we would simply calculate the box distance between each q_i uh,
+from the disjunctive normal form and entity v and uh, take the minimum of these distances.
+And then the final score of an entity is simply the dista- is
+this minimum base distance between the entire uh, query uh, and uh,
+the- and the embedding of a given entity uh,
+for which we are interested in assessing how likely is that the entity an answer uh,
+to our uh, to our query.
+So now we have talked about how the method
+works from the point of view of once the embeddings are there,
+once the box operators are there, uh,
+how do we apply it to answer an arbitrary predictive query?
+The question is, uh what kind of training procedure do we use to learn this all?
+What does this mean is,
+we need basically a simil- a- a setup similar to knowledge graph
+completion task so that we can learn all these parameters, right?
+Um, when I say parameters,
+I mean we need to learn entity embeddings,
+we need to learn these relation embeddings,
+these box transformations, and we need to learn the intersection operator.
+And the way we are going to learn this is basically that we are going to select uh,
+or sample or create a set of queries.
+For every query, we are going to have a positive set of entities.
+This will be our set of answers.
+We are going to have a negative set of entities,
+this will be non-answers.
+And, uh, our goal will be to- to learn all these uh,
+parameters in such a way that answers are included
+in the final box and non-answers are uh, outside the box.
+So let me, uh, uh, summarize this.
+So we are going to first randomly sample query q from
+the training knowledge graph and
+identify an- an entity v that is the answer uh, to that query.
+Then we are also going to identify some negative entity,
+let's call it v prime,
+that is not an answer to the query, right?
+So for example, I could say,
+uh, I start uh, with uh,
+let's go back to our uh,
+Barack Obama nationality American.
+So, uh, I would say- I would sample a query um, uh, nationality.
+This is a simple kind of knowledge graph completion query,
+not even a multi- multi-hop.
+Uh, I start with Obama,
+along with the nationality,
+I find American, so that's a positive entity.
+And then perhaps I say a negative entity could be some other random uh,
+entity in uh, in the graph.
+Um, perhaps it could be Paris, uh,
+or if I want to be smarter I say I have the true entities
+of type Americans, so United States.
+So I want to pick another country, perhaps Germany,
+as a negative example,
+as a non-answer uh, to this query.
+Now that um, I,
+now that I have sampled the query and the answer and non-answer,
+I embed the query using the transformations and then I calculate the score function f uh,
+of entity v, which is the answer entity,
+and the entity v prime,
+which is the non-answer uh, entity.
+And then the goal is that now I can compute the gradients, uh,
+with respect, uh, to this, uh,
+loss function l where the goal is to maximize,
+uh, the- the score of the entity v. So basically, uh,
+it means maximize the negative distance,
+which means minimize the distance,
+while minimizing, uh, the distance of the non-answer.
+So the lo- the way we write the loss is, we say, uh, s- uh, uh,
+f- uh, Sigma is a sigmoid function,
+uh, that has value,
+you know, between 0 and 1,
+so basically, I'm saying I want,
+uh, to, uh, maximize, uh,
+f for, uh, the answer,
+and I wanna minimize,
+uh, f for the non-answer.
+And now I can take gradient or derivative with
+respect to this loss function to then be able to update
+both the entity embeddings as well as the projection and
+intersection operator parameters in order to be able to learn this, uh, well.
+Of course, we are not only to  going to sample one-hop queries,
+we are also going to sample two-hop queries,
+three-hop queries, intersection type queries, uh,
+all kinds of different, uh, query structures,
+and that will be, uh,
+our, uh, training set.
+And then given these queries,
+given an answer entity,
+the- and non-answer entity,
+we are going to, uh, optimize this likelihood,
+meaning we are going to find parameters of the model
+which is embeddings of entities plus these,
+uh, operators so that all these, uh,
+will, uh, optimize, uh, the loss function.
+So how do we, uh,
+how do we instantiate, uh,
+a query, uh, in the knowledge graph?
+We will assume we are given a query template, and then we, uh,
+in- instantiate the query, uh,
+will simply be to do the backward walking.
+Uh, what I mean by that is we are, uh,
+basically start from the initial answer entity,
+and then we are kind of going to walk backwards towards the anchored entities, right?
+So, um, in our case,
+for example, we could say,
+let's take fulvestrant as our, uh, answer entity.
+So now we are going- now that we have kind of
+randomly picked this entity from the knowledge graph,
+we're going to kind of move backward, uh,
+along the knowledge graph to then get the- the query plan,
+the query structure, right?
+So we are just at fulvestrant,
+then we, um, uh, move,
+we say we're- we will need to take intersection of two relations,
+relation 1 and relation 2,
+so let's pick two relations from,
+uh, fulvestrant and move backward.
+And then now that we are here,
+we moved across TreatedBy.
+Uh, now, we can again move one step, uh,
+backward along the projection operator, um,
+for the second type of relation like, uh, associated.
+And, uh, now this will now become my anchor entity.
+And now, uh, I do the same thing for the second relation,
+uh, here CausedBy and find the second, uh, anchor entity.
+So now I have just sampled the query that goes from ESR2 and shortness of breath,
+through associated TreatedBy, as well as from shortness of breath to CausedBy,
+and the intersection of them is the fulvestrant.
+So this is now my sampling, uh, of the query.
+And then what I can do is, uh,
+find some entity that is not answer to this query and use that as a,
+uh, non, uh, answer, right?
+Uh, it is important when we do this sampling to be careful, uh,
+because the query q must have answers,
+uh, on the KG.
+Um, and we will take one of the answers as instantiated, uh,
+uh, answer for our, uh,
+positive example, and, um,
+we're then going to basically randomly sample some negative,
+uh, examples, non-answers, which are basically other entities, uh,
+in the knowledge graph, but we have to be careful that we are not, uh,
+by accident sampling some other entity that's also,
+uh, answer, uh, to the query.
+So that's, uh, essentially the idea.
+Um, and the- the- the impressive thing is that we can actually make this,
+uh, all work and that now we are able to answer arbitrary, uh,
+predictive queries in knowledge graphs, uh,
+even though they might be notoriously, uh,
+incomplete or, uh, may not have,
+uh, uh, all the edges.
+And what I wanna do to, uh,
+finish the lecture is give you a quick,
+um, example of how would this look like.
+So, for example, here we are going to take the Freebase 15,000, uh,
+knowledge graph, which is a knowledge graph about, uh,
+real-world entities, uh, people,
+uh, things like that.
+And imagine we wanna have a query, uh, you know,
+who are all male instrumentalists who play string instruments, right?
+Uh, and we are going to, uh,
+use our system to learn the embedding of, uh,
+all the nodes, uh, all the entities to learn the projection operator,
+to learn the conjunction operator.
+Um, and then we are going to take this, uh,
+high-dimensional embedding and we are going to project it
+down to just two dimensions so we can visualize it, right?
+So, um, here's the visualization, right?
+So here is at, uh,
+15,000, uh, different dots,
+one corresponding to the embedding of, uh, each entity,
+and these are real entities with real embeddings,
+and here is our, uh, query plan, right?
+We, uh, we wanna answer, uh,
+you know, who are male instrumentalists who play string instruments,
+so we'll start with string instruments as the anchor entity, go over, um,
+the instance of relation to find all st- instances of string instruments,
+then we are going to go over,
+uh, PlayedBy, uh, relation, uh,
+to identify all the- all the people who
+play these string instruments, any of them, right?
+And then we are going to go from node male to say
+instance of to find all the instances of male, uh,
+males in our dataset,
+and now we need to take the intersection to find all the males
+who are also playing any of the string, uh, instruments.
+So let me show you how this, uh,
+actually works in this, uh, two-dimensional projection.
+So, uh, the anchor node for string instrument,
+if you would, uh, locate it,
+is actually here, uh, the blue one.
+Now I will take and apply a box transformation that will say,
+uh, what are the instances of the string, uh, instrument, right?
+What are all the individual string instruments?
+Um, and if I do this,
+um, actually notice now,
+um, the- the dot- the- the dots will have different types of colors.
+True-positive means, this is a string instrument inside the box.
+Um, false-negative means this is a string instrument outside the box.
+Uh, false-positive would be, um,
+other entities that are not string instruments but are inside the box.
+And true-entities are non-string instruments outside the box.
+And what you see here is that basically,
+we are able to perfectly enclose all the string instruments inside the box,
+and there are 10- 10, uh,
+instances of a string instrument in our dataset.
+So we have just identified,
+uh, all the string instruments in the embedding space.
+Now we wanna take the box of, um,
+all the string instruments and transform it to cover,
+uh, the- the people,
+uh, females and males, right?
+Who play these instruments.
+Uh, and if we do this, uh, here is the,
+uh, these are the entities that are inside the box.
+Again, because this is a two-dimensional projection, you know,
+this is not a box,
+uh, but in high-dimensions it is.
+And again, we see that we are able to cover, basically, um,
+98, uh, percent of all the- all the,
+uh, all the- all the, uh,
+instrumentalists of string instruments,
+and that, we have a few false positives,
+basically a few other entities, um,
+that are not instrumentalists of string instruments,
+but are still inside the box, right?
+So there is a bit of error,
+but the point is now we have 472 instrumentalists,
+both musicians, female and male,
+who play string instruments like a guitar, right?
+So now, uh, with this,
+let's move to the second part where we take the male,
+uh, the node male.
+Um, the male- the node, uh,
+is here, uh, and now we wanna say, uh,
+do the box transformation instance of to
+cover all the males in this, uh, knowledge graph.
+And if we do this, this is kind of the entities that are inside the male box,
+it's, uh, 3,500 of them.
+So we basically went from one entity to a giant box that covers,
+uh, 3,500, uh, males that are,
+uh, represented in this dataset.
+Now that we have these two boxes,
+we wanna apply the intersection,
+uh, operator, uh, to this,
+that you take the two boxes and take the intersection between them.
+Um, and if you do this, the intersection, um,
+has, uh, almost 400 different entities,
+and these are the entities that are predicted to be,
+uh, male players of string, uh, instruments.
+What is interesting, you see that basically,
+we are able to almost perfectly answer, uh,
+this query even though we were doing all these operations,
+uh, directly, uh, in the embedding space.
+And this is just one example how we can basically answer, uh,
+arbitrary predictive queries, uh,
+over these, uh, types of incomplete, uh, knowledge graphs.
+So, um, to summarize today's lecture;
+uh, we introduced, uh,
+um, the problem of a, uh,
+logical reasoning in knowledge graphs using embeddings, and in particular,
+we talked about how are we formulating
+answering queries as a predictive machine learning task.
+So we basically, rather than traversing the knowledge graph,
+we have defined the task in terms of a binary prediction task that says,
+"Predict what entities are the answer to a given query."
+And the benefit of our approach is that it is,
+uh, very scalable, meaning, uh,
+answering queries is very simple because it just requires, uh,
+transforming boxes and then checking what entities are inside the box.
+Um, and it is also very robust because we
+don't rely on individual links of the knowledge graph,
+but we really rely on the embeddings and the relationships in the embedding space.
+Um, and the key idea for today's lecture was we wanna
+embed queries by navigating the embedding space, right?
+We have this com- we've- we took advantage of
+this compositional property of uh, TransE method,
+and then we extended TransE to this notion of
+box embeddings so that we can then define the intersection of boxes.
+Um, and we learned how to transform boxes according to given relations,
+we call this a projection operator,
+um, and then we also showed how the,
+um, how the union operations can also be carried
+out- carried out by rewriting the query into the- a disjunctive normal form and,
+um, apply the union operator,
+uh, all the way, uh, at the end.

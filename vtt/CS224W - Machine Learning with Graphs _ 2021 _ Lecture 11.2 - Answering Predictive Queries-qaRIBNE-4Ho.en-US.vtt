@@ -1,0 +1,781 @@
+WEBVTT
+Kind: captions
+Language: en-US
+
+00:00:04.310 --> 00:00:07.680
+So, how are we going to predict, uh,
+
+00:00:07.680 --> 00:00:10.860
+the answers to a given query on a knowledge graph?
+
+00:00:10.860 --> 00:00:14.070
+Uh, this is what we are going to discuss next.
+
+00:00:14.070 --> 00:00:18.390
+And the key idea we wanna do here is we wanna take advantage of
+
+00:00:18.390 --> 00:00:22.680
+the structure of the underlying- this embedding space.
+
+00:00:22.680 --> 00:00:26.295
+And the idea is that we wanna embed queries.
+
+00:00:26.295 --> 00:00:28.800
+Um, and the way you think of this is that really,
+
+00:00:28.800 --> 00:00:32.925
+this will be a generalization of the TransE method that we talked about,
+
+00:00:32.925 --> 00:00:34.440
+uh, last time, right?
+
+00:00:34.440 --> 00:00:38.040
+Last time, we said that the TransE knowledge graph completion method,
+
+00:00:38.040 --> 00:00:40.050
+the idea is you start with the head,
+
+00:00:40.050 --> 00:00:43.620
+um- you wanna go from head to tail and way you go from head
+
+00:00:43.620 --> 00:00:47.540
+to tail is to learn this vector r that moves you from h,
+
+00:00:47.540 --> 00:00:49.280
+uh, to t. So you say,
+
+00:00:49.280 --> 00:00:51.230
+what is the scoring function, right?
+
+00:00:51.230 --> 00:00:54.500
+What is, kind of the- the likelihood, the, you know,
+
+00:00:54.500 --> 00:00:56.600
+some kind of uh, probability if you like,
+
+00:00:56.600 --> 00:00:58.905
+that- that, uh, he- uh, that, uh,
+
+00:00:58.905 --> 00:01:03.515
+if you start with the he- that head and tail are related with the relationship r,
+
+00:01:03.515 --> 00:01:05.870
+then the way you've write the scoring function is- is
+
+00:01:05.870 --> 00:01:09.495
+head plus the vector rminus the point,
+
+00:01:09.495 --> 00:01:10.710
+uh, t, and now,
+
+00:01:10.710 --> 00:01:11.820
+this is the distance.
+
+00:01:11.820 --> 00:01:13.355
+Essentially what this is saying is,
+
+00:01:13.355 --> 00:01:15.760
+what is the distance between h and r,
+
+00:01:15.760 --> 00:01:18.800
+um, and the point, uh, t?
+
+00:01:18.800 --> 00:01:22.320
+So another way to interpret this,
+
+00:01:22.320 --> 00:01:23.695
+uh, TransE is to say,
+
+00:01:23.695 --> 00:01:25.270
+I will embed the query.
+
+00:01:25.270 --> 00:01:27.785
+The query is hat plus relation.
+
+00:01:27.785 --> 00:01:31.070
+And the goal now is that embedding of the query is
+
+00:01:31.070 --> 00:01:34.850
+close to the entity t that is the answer to the query, right?
+
+00:01:34.850 --> 00:01:39.260
+We wanna say the- the distance between the embedding of the query and
+
+00:01:39.260 --> 00:01:41.660
+the entity t is simply the distance between
+
+00:01:41.660 --> 00:01:44.780
+these two points where another way to think of it is,
+
+00:01:44.780 --> 00:01:46.460
+I'll start with the head,
+
+00:01:46.460 --> 00:01:48.110
+that's my anchor node.
+
+00:01:48.110 --> 00:01:52.400
+I'm going to traverse over this learned vector r that will,
+
+00:01:52.400 --> 00:01:53.945
+you know, lead me to some point.
+
+00:01:53.945 --> 00:01:56.665
+This is now the embedding of my query.
+
+00:01:56.665 --> 00:01:59.900
+And now, my goal is to minimize the distance between the,
+
+00:01:59.900 --> 00:02:02.870
+um, embedding of the query q and the, uh,
+
+00:02:02.870 --> 00:02:09.200
+uh, the point t. This is the embedding of the entity that is answer, uh, to this query.
+
+00:02:09.200 --> 00:02:12.410
+So for example, if I start I know with an entity called
+
+00:02:12.410 --> 00:02:17.510
+Barack Obama and I wanna move along this vector that corresponds to the,
+
+00:02:17.510 --> 00:02:19.840
+um, relationship called nationality,
+
+00:02:19.840 --> 00:02:22.470
+I add h plus, uh,
+
+00:02:22.470 --> 00:02:25.935
+vector for nationality, I end up at this point q.
+
+00:02:25.935 --> 00:02:27.590
+And my goal now is that, of course,
+
+00:02:27.590 --> 00:02:29.240
+there would be some other entities, uh, uh,
+
+00:02:29.240 --> 00:02:31.100
+embedded, uh, in this space.
+
+00:02:31.100 --> 00:02:34.150
+I want the distance between the q and American to be small.
+
+00:02:34.150 --> 00:02:36.320
+Uh, and I want it in some sense, and I want,
+
+00:02:36.320 --> 00:02:39.110
+let's say the distance between q and New York, uh,
+
+00:02:39.110 --> 00:02:42.885
+to be larger because the answer to nationality of Obama is- is,
+
+00:02:42.885 --> 00:02:44.705
+let's say American and it's not,
+
+00:02:44.705 --> 00:02:46.880
+uh, New Yorker, uh, right?
+
+00:02:46.880 --> 00:02:48.880
+So that's essentially the idea, right?
+
+00:02:48.880 --> 00:02:50.855
+So once I have embedded the query,
+
+00:02:50.855 --> 00:02:53.280
+uh, in this case, embedding the query is very easy.
+
+00:02:53.280 --> 00:02:54.930
+I start with the anchor entity and add,
+
+00:02:54.930 --> 00:02:57.550
+uh, uh, relation to it, a vector to it.
+
+00:02:57.550 --> 00:03:00.280
+Um, then I want the onset entity,
+
+00:03:00.280 --> 00:03:05.435
+the entity t, to be close- embedded very close to the embedding of the query.
+
+00:03:05.435 --> 00:03:07.710
+That's the idea of the TransE.
+
+00:03:07.710 --> 00:03:10.190
+So what we can do now, uh, with TransE,
+
+00:03:10.190 --> 00:03:13.210
+we can generalize it to multi-hop reasoning, right?
+
+00:03:13.210 --> 00:03:15.520
+So if I say, uh, starting with the query,
+
+00:03:15.520 --> 00:03:18.460
+er, defining the query q as, uh, er,
+
+00:03:18.460 --> 00:03:20.649
+anchor entity and a set of relations,
+
+00:03:20.649 --> 00:03:24.550
+then it's intuitive how I can generalize this using TransE.
+
+00:03:24.550 --> 00:03:28.780
+I can start with my embedding of my entity v and then I can simply move,
+
+00:03:28.780 --> 00:03:31.730
+uh, along the vector of, uh, relation 1,
+
+00:03:31.730 --> 00:03:35.155
+uh, move along another vector of- for relation 2 and I
+
+00:03:35.155 --> 00:03:39.125
+chain these vectors together to arrive at some point, uh, in space.
+
+00:03:39.125 --> 00:03:41.690
+And I will call this point q because this is now
+
+00:03:41.690 --> 00:03:44.450
+an embedding of this query that started with,
+
+00:03:44.450 --> 00:03:46.910
+uh, uh, entity and then traversed,
+
+00:03:46.910 --> 00:03:48.850
+uh, uh, a set of relations.
+
+00:03:48.850 --> 00:03:51.475
+Right? And why is this elegant is because now,
+
+00:03:51.475 --> 00:03:55.140
+creating this embedding for the, uh, for the,
+
+00:03:55.140 --> 00:03:58.820
+ah, query q simply involves a couple of vector additions, right?
+
+00:03:58.820 --> 00:04:00.890
+I start with a point and then I add,
+
+00:04:00.890 --> 00:04:02.960
+uh, these vectors, uh, to it.
+
+00:04:02.960 --> 00:04:06.605
+And now that I have identified the embedding of the- of the q,
+
+00:04:06.605 --> 00:04:10.105
+I only look at what are the entities embedded close to these points.
+
+00:04:10.105 --> 00:04:12.870
+Those are my answers that are- basically,
+
+00:04:12.870 --> 00:04:15.030
+those are my predicted answers, right?
+
+00:04:15.030 --> 00:04:19.060
+It's a, uh, now I formulate this as a prediction task where I say,
+
+00:04:19.060 --> 00:04:22.130
+whatever is close to the point q, that's my answer.
+
+00:04:22.130 --> 00:04:23.985
+Um, that's essentially, uh,
+
+00:04:23.985 --> 00:04:26.055
+the idea about, um, ah,
+
+00:04:26.055 --> 00:04:27.945
+how do we now generalize, uh,
+
+00:04:27.945 --> 00:04:31.395
+TransE to this kind of uh, multi-hop, uh, queries.
+
+00:04:31.395 --> 00:04:32.970
+To give you an idea, right?
+
+00:04:32.970 --> 00:04:36.095
+I could say what proteins are associated with adverse events,
+
+00:04:36.095 --> 00:04:38.625
+uh, events caused by, uh, Fulvestrant?
+
+00:04:38.625 --> 00:04:41.115
+Then basically, I have my, uh, Fulvestrant.
+
+00:04:41.115 --> 00:04:43.080
+I have my, uh, embedding space.
+
+00:04:43.080 --> 00:04:44.790
+Here's, you know, hypothetically,
+
+00:04:44.790 --> 00:04:47.865
+the- the embedding of the drug, a Fulvestrant,
+
+00:04:47.865 --> 00:04:50.340
+then I would traverse across, uh,
+
+00:04:50.340 --> 00:04:56.180
+across a vector that I have learned for the- co- to- for the causal relations- relation.
+
+00:04:56.180 --> 00:04:57.665
+And hopefully, you know,
+
+00:04:57.665 --> 00:05:00.410
+the goal is that all these side effects that are caused by
+
+00:05:00.410 --> 00:05:04.035
+Fulvestrant are embedded close to this, uh, point here.
+
+00:05:04.035 --> 00:05:05.490
+And now that I'm at this point,
+
+00:05:05.490 --> 00:05:09.920
+I wanna add the traverse along the relationship associated with,
+
+00:05:09.920 --> 00:05:11.945
+so I would add the associated with,
+
+00:05:11.945 --> 00:05:13.130
+uh, relation to it.
+
+00:05:13.130 --> 00:05:15.980
+Perhaps, you know, this vec- learning vector is like this.
+
+00:05:15.980 --> 00:05:19.400
+So this is now the embedding of my query and the goal
+
+00:05:19.400 --> 00:05:23.000
+is that the proteins that are the answer to this predictive query,
+
+00:05:23.000 --> 00:05:25.775
+uh, they are embedded close to this point,
+
+00:05:25.775 --> 00:05:27.815
+uh, q, and these would be my answers.
+
+00:05:27.815 --> 00:05:32.874
+So it simply just asking embed the query and find the entities that are close,
+
+00:05:32.874 --> 00:05:34.920
+uh- closest to the embedding,
+
+00:05:34.920 --> 00:05:36.120
+uh, of the query.
+
+00:05:36.120 --> 00:05:39.360
+So that's the, uh, idea for answering, uh,
+
+00:05:39.360 --> 00:05:41.595
+multi-path queries, uh, using,
+
+00:05:41.595 --> 00:05:44.580
+ah, a, uh, extension of TransE.
+
+00:05:44.580 --> 00:05:46.725
+So what are some,
+
+00:05:46.725 --> 00:05:48.120
+uh, things to discuss?
+
+00:05:48.120 --> 00:05:49.770
+Uh, what are some insights?
+
+00:05:49.770 --> 00:05:54.705
+First is that we can train TransE to optimize the knowledge graph,
+
+00:05:54.705 --> 00:05:56.925
+uh, completion objective, right?
+
+00:05:56.925 --> 00:06:00.210
+Uh, basically meaning we can, uh, uh, basically,
+
+00:06:00.210 --> 00:06:04.090
+learn TransE by learning the entity embeddings as well as the vectors are.
+
+00:06:04.090 --> 00:06:09.030
+Um, and because TransE can naturally ha- handle composition relations, right?
+
+00:06:09.030 --> 00:06:10.530
+Last- last, uh, week,
+
+00:06:10.530 --> 00:06:12.030
+we were discussing about, uh,
+
+00:06:12.030 --> 00:06:13.730
+different types of, um,
+
+00:06:13.730 --> 00:06:16.940
+properties of these different graph completion methods.
+
+00:06:16.940 --> 00:06:18.650
+And we talked about the TransE has
+
+00:06:18.650 --> 00:06:22.200
+this compositional property where you can- you can, um,
+
+00:06:22.200 --> 00:06:24.460
+uh, chain multiple, uh,
+
+00:06:24.460 --> 00:06:26.560
+predictions or multiple relations,
+
+00:06:26.560 --> 00:06:28.605
+uh, one- one after the other.
+
+00:06:28.605 --> 00:06:31.320
+And this really allows TransE to be- to,
+
+00:06:31.320 --> 00:06:34.710
+uh- to be able to answer path bath- based queries.
+
+00:06:34.710 --> 00:06:39.355
+Uh, for example, if you look at TransR, DistMult, or ComplEx,
+
+00:06:39.355 --> 00:06:41.750
+they are not able to be used in this kind of
+
+00:06:41.750 --> 00:06:46.030
+path settings because they cannot handle composition, uh, relations.
+
+00:06:46.030 --> 00:06:51.135
+So it means they cannot- they are not suitable for answering, uh, path queries.
+
+00:06:51.135 --> 00:06:54.360
+So the key here was this insight, but basically,
+
+00:06:54.360 --> 00:06:56.520
+we learn how to move around,
+
+00:06:56.520 --> 00:06:58.815
+uh, in the- in the embedding space.
+
+00:06:58.815 --> 00:07:02.910
+And the goal is to se- to embed the entities as well as learn these,
+
+00:07:02.910 --> 00:07:07.710
+uh, uh, vectors that allow us to kind of strategically move around, uh, given the,
+
+00:07:07.710 --> 00:07:10.185
+uh- given the query to embed the, uh,
+
+00:07:10.185 --> 00:07:14.840
+the query and then the entities that are closest to the embedding of the query,
+
+00:07:14.840 --> 00:07:17.575
+those are, uh, our answers.
+
+00:07:17.575 --> 00:07:21.360
+So this was now about answering path queries.
+
+00:07:21.360 --> 00:07:22.600
+The question then becomes,
+
+00:07:22.600 --> 00:07:24.970
+can we answer more complex, uh, queries,
+
+00:07:24.970 --> 00:07:28.980
+for example, that also include some logical operator like a conjunction?
+
+00:07:28.980 --> 00:07:30.680
+A conjunction is an and.
+
+00:07:30.680 --> 00:07:33.670
+So for example, maybe I get a query that is,
+
+00:07:33.670 --> 00:07:36.880
+what are drugs that cause the shortness of breath and treat
+
+00:07:36.880 --> 00:07:41.075
+diseases associated with protein- protein, uh, ESR2?
+
+00:07:41.075 --> 00:07:44.040
+So the way I think of this is that ESR2 and
+
+00:07:44.040 --> 00:07:46.995
+shortness of breath are my, uh, anchor entities.
+
+00:07:46.995 --> 00:07:49.190
+From ESR, I wanna go to as, ah,
+
+00:07:49.190 --> 00:07:52.455
+across associated with and then TreatedBy.
+
+00:07:52.455 --> 00:07:53.910
+Uh, from shortness of breath,
+
+00:07:53.910 --> 00:07:57.785
+I wanna say CausedBy and whatever are the drugs that do both,
+
+00:07:57.785 --> 00:07:59.815
+uh, I need to take the intersection here.
+
+00:07:59.815 --> 00:08:03.890
+And those are, uh, the entities that are predicted to be the answer,
+
+00:08:03.890 --> 00:08:05.150
+uh, to my query, right?
+
+00:08:05.150 --> 00:08:08.090
+So these are- what- drugs that cause shortness of
+
+00:08:08.090 --> 00:08:12.180
+breath and treat diseases associated with my,
+
+00:08:12.180 --> 00:08:15.090
+uh, protein of interest, uh, ESR2.
+
+00:08:15.090 --> 00:08:17.850
+Um, if you are, let's say a drug development,
+
+00:08:17.850 --> 00:08:19.770
+a medic- medicinal chemist,
+
+00:08:19.770 --> 00:08:21.490
+this is a real-world query,
+
+00:08:21.490 --> 00:08:25.060
+you would like to ask over your, uh, knowledge graph.
+
+00:08:25.060 --> 00:08:28.125
+So, um, how would we answer,
+
+00:08:28.125 --> 00:08:29.685
+uh, uh, this type of query?
+
+00:08:29.685 --> 00:08:34.295
+Let's say if the knowledge graph is complete and we can do knowledge graph traversal,
+
+00:08:34.295 --> 00:08:36.440
+the way we would do is we start with the first,
+
+00:08:36.440 --> 00:08:38.990
+uh, anchor entity, uh, ESR2.
+
+00:08:38.990 --> 00:08:42.345
+We traverse across the associated,
+
+00:08:42.345 --> 00:08:44.120
+uh, uh, uh, with, uh,
+
+00:08:44.120 --> 00:08:50.430
+relationship to get the- to the diseases associated with this, um, protein.
+
+00:08:50.430 --> 00:08:53.220
+Uh, from here, we then move to, uh,
+
+00:08:53.220 --> 00:08:55.170
+what are the drugs that are, uh,
+
+00:08:55.170 --> 00:08:57.585
+that treat, uh, these diseases.
+
+00:08:57.585 --> 00:08:59.520
+Again, we- we move, uh,
+
+00:08:59.520 --> 00:09:02.490
+we now traverse across the TreatedBy relationship,
+
+00:09:02.490 --> 00:09:05.050
+uh, to arrive to the set of drugs.
+
+00:09:05.050 --> 00:09:07.930
+And then we also have to start with a shortness of
+
+00:09:07.930 --> 00:09:11.615
+breath entity and move across, uh, CausedBy.
+
+00:09:11.615 --> 00:09:12.990
+These are now the, ah,
+
+00:09:12.990 --> 00:09:15.825
+drugs that, uh, cause shortness of breath.
+
+00:09:15.825 --> 00:09:18.500
+And now, we basically have to take an intersection between
+
+00:09:18.500 --> 00:09:21.825
+this set of entities and that set of entities.
+
+00:09:21.825 --> 00:09:24.350
+And whatever is- is in the intersection,
+
+00:09:24.350 --> 00:09:26.340
+that is the answer to our question.
+
+00:09:26.340 --> 00:09:28.020
+So in- our, um,
+
+00:09:28.020 --> 00:09:30.060
+the answer to our question would be, uh,
+
+00:09:30.060 --> 00:09:31.950
+Fulvestrant and, uh, uh,
+
+00:09:31.950 --> 00:09:34.830
+Paclitaxel, um, uh, drug, right?
+
+00:09:34.830 --> 00:09:37.945
+So the point is, um, that we have now, uh,
+
+00:09:37.945 --> 00:09:41.225
+two entities that are answer to our query,
+
+00:09:41.225 --> 00:09:43.910
+if we think of it as a knowledge graph,
+
+00:09:43.910 --> 00:09:47.365
+uh, uh, traversal, uh, type task.
+
+00:09:47.365 --> 00:09:50.720
+And of course, similarly to what I was saying before,
+
+00:09:50.720 --> 00:09:54.365
+is a given- if some of the links on the path are missing,
+
+00:09:54.365 --> 00:09:55.835
+which is usually the case,
+
+00:09:55.835 --> 00:09:58.700
+then the- then a given entity would not be,
+
+00:09:58.700 --> 00:10:03.260
+uh, will not be able to predict or identify that it is the answer to our query.
+
+00:10:03.260 --> 00:10:05.505
+So for example, if, uh, we don't know that,
+
+00:10:05.505 --> 00:10:08.135
+uh, ESR2 is associated with breast cancer,
+
+00:10:08.135 --> 00:10:10.760
+then the- then there is no way for us to discover
+
+00:10:10.760 --> 00:10:13.600
+that Fulvestrant is actually the answer,
+
+00:10:13.600 --> 00:10:15.270
+uh, to our question.
+
+00:10:15.270 --> 00:10:18.780
+So, uh, again, if the knowledge graphs are incomplete,
+
+00:10:18.780 --> 00:10:22.110
+knowledge graph traversal, um, won't work.
+
+00:10:22.110 --> 00:10:24.785
+So the question then becomes,
+
+00:10:24.785 --> 00:10:27.490
+how can we use embeddings to, uh,
+
+00:10:27.490 --> 00:10:31.430
+in some sense, implicitly impute these missing relations, um,
+
+00:10:31.430 --> 00:10:35.525
+and also, uh, how would we even be able to figure out that, you know,
+
+00:10:35.525 --> 00:10:37.130
+in this case, uh, you know,
+
+00:10:37.130 --> 00:10:40.670
+that there should be a link between ESR2 and breast cancer?
+
+00:10:40.670 --> 00:10:41.780
+And the hope is, right,
+
+00:10:41.780 --> 00:10:43.850
+that our method who will take a look
+
+00:10:43.850 --> 00:10:46.280
+at the entire knowledge graph will see that basically, uh,
+
+00:10:46.280 --> 00:10:50.300
+ESR2 here is also associated with, um, uh,
+
+00:10:50.300 --> 00:10:54.440
+ESR1 and, uh, uh, BRCA1, right?
+
+00:10:54.440 --> 00:10:57.155
+And we see that there are kind of these strong relations here.
+
+00:10:57.155 --> 00:11:02.090
+So what this would allow us to do is kind of be able to implicitly impute and say if
+
+00:11:02.090 --> 00:11:04.760
+breast cancer is associated with these two proteins
+
+00:11:04.760 --> 00:11:07.675
+who are strongly associated with this third protein,
+
+00:11:07.675 --> 00:11:10.340
+perhaps there is a missing relationship here, right?
+
+00:11:10.340 --> 00:11:12.650
+That's kind of what our algorithm,
+
+00:11:12.650 --> 00:11:14.435
+uh, needs to be able, uh,
+
+00:11:14.435 --> 00:11:16.470
+to do, uh, implicitly,
+
+00:11:16.470 --> 00:11:18.570
+uh, through, uh, node embeddings, right?
+
+00:11:18.570 --> 00:11:21.590
+The- the hope is that other contexts and other relationships in
+
+00:11:21.590 --> 00:11:25.570
+the graph will allow us to do this, uh, implicitly.
+
+00:11:25.570 --> 00:11:33.080
+So, uh, going back to our question about how would we now implement logical, uh,
+
+00:11:33.080 --> 00:11:35.570
+relations like intersection, uh,
+
+00:11:35.570 --> 00:11:37.950
+an and operator in this, uh,
+
+00:11:37.950 --> 00:11:42.170
+setting where we wanna answer more complex queries in a predictive way?
+
+00:11:42.170 --> 00:11:43.370
+The question then becomes,
+
+00:11:43.370 --> 00:11:48.095
+how do we- how do we in- how do we do this in the embedding space?
+
+00:11:48.095 --> 00:11:52.880
+And the first insight is that when we have this query plan that I showed it here,
+
+00:11:52.880 --> 00:11:55.310
+then this in- these, uh, starting nodes,
+
+00:11:55.310 --> 00:11:57.835
+these anchor nodes, they are single entities.
+
+00:11:57.835 --> 00:12:00.560
+But if you think about what are these gray nodes,
+
+00:12:00.560 --> 00:12:02.690
+what do they represent in my query plan?
+
+00:12:02.690 --> 00:12:06.080
+They actually represent a set of entities, right?
+
+00:12:06.080 --> 00:12:09.490
+So they represent, let's say, all the, um,
+
+00:12:09.490 --> 00:12:13.055
+all the diseases that are associated with ESR2
+
+00:12:13.055 --> 00:12:16.790
+or they represent all the drugs that are caused by,
+
+00:12:16.790 --> 00:12:19.220
+uh, that cause, uh, shortness of breath.
+
+00:12:19.220 --> 00:12:23.490
+So the question then becomes how do we repre- do this,
+
+00:12:23.490 --> 00:12:27.645
+uh, representation of entities in the embedding space because now these are sets?
+
+00:12:27.645 --> 00:12:33.760
+And how do we then define intersection operators in this, uh, latent space?
+

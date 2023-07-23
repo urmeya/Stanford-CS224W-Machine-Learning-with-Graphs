@@ -1,0 +1,493 @@
+In the last part
+of this lecture,
+I'm actually going to talk about
+an application of deep graph
+generative models to
+molecule generation, right?
+So basically, if you want to
+generate drug-like molecules,
+you can use graph
+generative models.
+So let me tell you about that.
+So what we are going
+to do is the following.
+The question is,
+can we learn a model
+that can generate valid and
+realistic molecules that
+optimize some property?
+Right.
+So the way you
+can think of it is
+that we want to have a model.
+The model is going to
+output a given molecule.
+This molecule has to be valid--
+basically, it has to obey
+the rules of chemistry.
+It also has to be
+realistic, right?
+You cannot generate some
+Frankenstein type molecule.
+It has to be realistic.
+It has to look like a drug.
+And we want it to
+optimize a given property.
+For example, we want it
+to optimize drug likeness.
+We want to optimize
+its solubility.
+And the paper I'm going to
+talk about, or the method
+is called Graph
+Convolutional Policy
+Network for Goal-directed
+Molecular Graph Generation.
+And it's linked here.
+And you can read it if
+you want more details.
+So, here is a high level
+overview of this paper,
+and of this novel problem of
+optimal molecule generation,
+right?
+The goal here is to generate
+graphs that optimize a given
+objective, like drug-likeness,
+that obey underlying rules--
+meaning that the
+graphs are valid,
+like chemical validity
+rules, like the bonds
+and things like that--
+and are learned from
+examples, meaning
+they look realistic, right?
+They imitate molecular graphs
+which we use for training,
+right?
+And we just talked
+a bit about how
+do we imitate a given
+distribution of graphs.
+But here the difference is,
+we don't want to only imitate,
+we want to generate
+graphs that are valid,
+and we want to
+generate graphs that
+actually optimize a
+given criteria, a given
+black box, right?
+And here the important point
+is that the criteria is really
+a black box, right?
+It's this black box where
+the graph generation
+will get some feedback, right?
+The objectives
+like drug-likeness
+are governed by physical
+laws, which to us will
+be assumed they are unknown.
+What I mean by that is we don't
+need them to be written down.
+All we have to do is
+to have a black box.
+If we give it a
+molecule, the black box
+tells us how good
+that molecule is.
+But we don't have to
+look into the box.
+That's the important point.
+So, how are we going to do this?
+We are going to do this and cast
+it as a reinforcement learning
+problem.
+And the way with
+reinforcement learning,
+the way that we formalize it is
+that we have a machine learning
+agent that observes
+the environment,
+takes an action to interact
+with the environment,
+and then receives a
+positive or negative reward.
+And then the agent wants
+to learn from this loop.
+And the key idea is
+that agent can directly
+learn from the
+environment, which
+is a black box to
+the agent, right?
+So we think that there
+is the environment.
+The agent is taking
+actions, and it's
+interacting with
+the environment,
+and the environment is
+giving back some feedback,
+some rewards to the agent.
+And there are two
+types of the rewards,
+there is the
+instantaneous reward
+and then there is the
+long term reward, right?
+In our case,
+instantaneous reward
+will did I just add an
+atom to the molecule,
+and I did it according to
+the rules of chemistry.
+And then the long
+term reward will
+be after we are done with
+generating the molecule, how
+good was that molecule?
+That's the long term reward.
+OK.
+So the solution to this
+goal-directed molecule
+generation, we call it Graph
+Convolutional Policy Network
+that combines graph
+representation
+and reinforcement learning.
+And the key component
+of GCPN is that we
+are going to use a graph neural
+network to capture the graph
+structure information,
+we are going
+to use reinforcement
+learning to guide
+the generation towards
+the desired objective,
+and we are going to
+use supervised learning
+to imitate examples on a given
+training data set, right?
+We want our molecules
+to look realistic.
+How does GCPN differ
+from GraphRNN?
+First, what is the commonality?
+The commonality is that these
+are both generative models
+for graphs, and they
+try to kind of imitate
+or they can be learned
+given a data set.
+What are the main
+differences is that GCPN
+is going to use a graph
+neural network to predict
+the generation of
+the next action,
+and while GraphRNN is using
+the hidden state of an RNN
+to decide on the next action.
+A graph neural network
+is more expressive
+than a recurrent neural
+network, so that's
+the benefit of
+the GCPN approach,
+but on the negative
+side, the GNN
+takes longer time to
+compute than an RNN.
+So molecules
+generally are small,
+so we can afford this more
+complex algorithm that
+has bigger expressive
+power, and it
+will-- is able to learn more.
+So GCPN will then also
+use reinforcement learning
+to direct graph generation
+towards our goal,
+towards our black box.
+And reinforcement learning will
+enable us this goal directed
+graph generation.
+So to give you an idea,
+both of these two,
+both GCPN and GraphRNN are
+sequential graph generation
+approaches.
+But in the GraphRNN we
+predict the action based
+on the RNN hidden state, right?
+So the node gives the hidden
+state to the edge level RNN,
+and then the hidden
+state is passed on,
+and the edges have
+generated, and then
+the hidden state goes back
+to the node level RNN, right?
+So basically all the
+information, all the history
+is captured in
+this hidden state.
+And if you have
+generated 10,000 nodes,
+this means this hidden state has
+been transformed 10,000 times,
+and then for every edge
+it's also been transformed.
+So it's a lot that this
+hidden state needs to capture.
+So in a GCPN, we won't have
+this notion of a hidden state,
+but we are going to use the
+GNN to basically give me
+the embeddings of the nodes.
+So I'm going to say, here is
+a partially generated graph,
+and here is a new node.
+What I'm going to
+do is I'm going
+to embed each of the nodes in
+the partially generated graph,
+and then I'm also going to have
+some embedding for the new node
+number 4.
+And then, based on
+these embeddings,
+I'm now going to
+predict which node
+number 4 should link to, right?
+So this means that
+basically now I'm
+not using the RNN to do this,
+but I'm using a graph neural
+network to generate the
+state, and then I'm simply
+doing link prediction.
+So I'm kind of using--
+predicting potential links
+using node embeddings
+rather than to directly generate
+them based on the hidden state.
+That's the difference.
+And this would be much more
+scalable, sorry, much more
+expressive, much more
+robust, but less scalable
+because we have to now
+compute these embeddings
+and then evaluate
+these link predictions
+for every single action.
+So the overview of GCPN
+is that it has these
+following four steps, right?
+First, we are going
+to insert the nodes.
+Then we are going to
+use the GNN to predict
+which nodes are going to
+connect with each other.
+Then we are going
+to take an action,
+and we are going to
+check chemical validity.
+And then if the
+action is correct,
+we say yes, you
+created a good edge,
+you didn't create a good edge.
+And then, after the model is
+done generating the graph,
+we are going to compute
+the final reward.
+We are going to ask
+the black box, what
+do you think of the
+molecule we generated?
+So a few questions
+about the reward--
+we will have two rewards.
+One will be the
+reward per step, which
+will be basically to--
+whether the model has
+learned to take a valid action.
+Basically, at each step
+a small positive reward
+will be awarded for taking a
+valid action-- so basically,
+by respecting the
+rules of chemistry.
+And the final reward will be
+proportionate to the-- the goal
+is for it to optimize
+the desired property
+of the molecule, right?
+At the end, we are going
+to get huge positive reward
+if the molecule is
+good, and a low reward,
+or no reward if the
+molecule is bad, right?
+And the total reward is
+going to be final reward
+plus these stepwise rewards.
+And then, in terms of training
+the model, there are two parts.
+First is the
+supervised training,
+where we are going to train
+the policy by imitating
+the actions given real observed
+graphs using the gradient.
+So basically, here
+we are just kind
+of going to try to
+learn our model how
+to generate realistic molecules
+and not worry about optimizing
+the structure yet.
+So it's just about learning
+to generate proper molecules
+and obey chemistry.
+And then in the second
+part of the training
+we are going to actually
+train a policy that
+optimizes the reward.
+And here we are going to use
+a standard policy gradient
+algorithm that is kind of
+classical reinforcement
+learning.
+But the point is, we are going
+to have two steps of training,
+one to learn the chemistry
+and then the second one
+to learn how to
+optimize the reward.
+And now if I want
+to show you this,
+we will have the
+partially generated graph,
+the GCPN is going to decide how
+to grow it one node at a time
+and how to create connections.
+We are going to get
+small positive reward
+and the gradient
+based on the fact
+that we have generated
+the graph correctly.
+And this is going to
+loop until we decide
+the molecule is generated.
+Now that the molecule
+is generated,
+we are going to ask our
+black box to tell us
+how good is this molecule.
+And then this final
+reward is going to be
+also back-propagated, right?
+So this generation is
+going to be trained
+using the supervised
+learning, and then
+this overall end-to-end
+with the delayed reward
+will be trained in this
+kind of reinforcement
+learning framework.
+And what is the benefit
+of this approach
+is that we can generate
+molecules that try
+to optimize a given property.
+So here I'm showing
+you different molecules
+that optimize log P, which is
+a particular chemical property,
+or here we are
+optimizing QED, which
+is the quantum energy--
+again, something
+that medicinal
+chemists worry about.
+And you can see how these
+graphs that we generate
+look like real molecules.
+Another thing that this
+allows you to do-- it
+allows you to take a
+partially-built molecule
+and complete it.
+So for example, you can start
+with some starting structure,
+where here, log B--
+I think it's solubility.
+So basically you start with some
+very bad values of solubility,
+and then you say, how do
+I complete this structure
+to improve solubility?
+And here you see how it went
+from minus 8 to minus 0.7,
+and from minus 5 to minus
+2, by basically completing
+the molecule, right?
+So this is the point, is
+we can take, basically,
+a partially built structure or
+finish it, or create a brand
+new structure.
+So let me summarize the
+lecture of graph generation.
+So complex graphs can be
+successfully generated
+via sequential generation
+using deep learning.
+Each step is a decision that is
+made based on the hidden state,
+and this hidden state can
+either be implicit or explicit.
+In the RNN, this
+vector representation
+about keeping the
+state was implicit
+because it was all in this
+hidden state, while in the GCPN
+the state was explicit because
+it was computed directly
+on the intermediate graphs and
+encoded by a neural network.
+I also showed you possible
+tasks for GraphRNN.
+We talked about imitating
+a given set of graphs.
+For the second
+part, for GCPN, we
+talked about optimizing
+graphs to a given goal.
+I talked about the application
+to molecule generation
+to try to generate molecules
+with optimal properties,
+but you could apply this to any
+kind of graph generation task,
+to any kind of
+property-- for example,
+including generating
+realistic maps,
+generating realistic cities,
+road networks, materials,
+and things like that.

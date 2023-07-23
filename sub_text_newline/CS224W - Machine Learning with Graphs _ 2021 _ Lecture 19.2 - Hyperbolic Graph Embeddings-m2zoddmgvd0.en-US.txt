@@ -1,0 +1,682 @@
+Uh, in this lecture, I will introduce the use of hyperbolic graph embeddings in learning,
+uh, representations for graphs that exhibit certain hierarchical and tree-like structure.
+Um, so in previous lecture, uh,
+we have focused on graph representation learning in the Euclidean space,
+uh, which is the R_ n. Um, however,
+Euclidean embeddings cannot always capture complex graph structure.
+So here we have an example of a tree structure,
+uh, a, uh, complete binary tree,
+where the first level we observe there,
+uh, there's one node,
+and the second level we have two nodes,
+and the third level we have four nodes, etc.
+So in this kind of tree-like structure often, there, uh,
+there is an exponential increase in the number of nodes,
+uh, as the depth of the tree increases.
+So these kind of trees are, uh,
+difficult to be embedded in the Euclidean space, uh,
+as you have seen, uh, because the slide itself is a 2D plane.
+And we can see that, uh,
+as the depth increases,
+uh, the nodes that are, uh,
+leaves become closer and closer to each other to the point that they can no longer,
+uh, the embedding space could no longer represent,
+uh, the distance between them, um, faithfully, uh,
+because they are very, very clustered together due
+to the exponential increase in the number of nodes.
+So here we are focusing on these kind of,
+uh, graphs with, uh, such tree-like structure.
+Um, so we define these kind of tree-like graphs as,
+uh, graphs that are similar to a tree.
+For example, the binary tree as shown above,
+but it can still contain a very few cycles.
+Uh, for example, in real-life, uh, uh, situations,
+we can have things like knowledge graph that are organized hierarchically because,
+uh, many of the human knowledge are organized hierarchically.
+And, uh, at the same time,
+there could still exist a certain kind of loops in- in- in the structure.
+So it's most- mostly a tree but with a certain,
+uh, a number of loops in- in the graph itself.
+So here, uh, we're considering this kind of structure and, uh,
+we want to notice that embedding geometry has been very important in terms of,
+uh, capturing this kind of special graph structure.
+Um, here we consider some,
+uh, other, uh, interesting graph structure.
+For example, if we have graphs with,
+uh, very, uh, many, very large cycles.
+Uh, uh, these kind of graphs are best embedded into spherical geometry.
+Because in a spherical geometry with the positive curvature, the, um,
+the graphs, uh, uh,
+we can actually embed many,
+many cycles because the sphere contains many, many cycles.
+Um, whereas a- if you- if we have a grid-like graph,
+um, Euclidean space is the best.
+Uh, because as you can see,
+the Cartesian coordinate itself is a grid-like structure.
+So it could, uh, a Euclidean space with zero curvature would be the best.
+So how about hierarchical tree-like graphs?
+Um, for these kind of graphs,
+we are considering the use of hyperbolic space,
+which is an alternative, uh,
+embedding space to model, uh,
+embeddings for trees with tree-like structure.
+Um, the advantage of hyperbolic embedding, uh,
+space, um, allows it to,
+uh, naturally model trees.
+And we will, um, elaborate on these advantages, uh,
+in the later, uh,
+later slides where we explain the definition.
+However, there are certain challenges, uh,
+when we combine deep learning, and hyperbolic spaces.
+The primary reason is that existing deep-learning toolboxes can only be applied,
+uh, to, uh, uh Euclidean space.
+Uh, whereas in hyperbolic space,
+we need to define special operators to,
+uh, to perform this kind of deep-learning, uh, operations.
+Um, uh, let's first define what is a hyperbolic space.
+So hyperbolic geometry differs from Euclidean geo- geometry by its, um,
+uh, fifth axiom of, uh,
+Euclidean, uh, geometry, which is the parallel postulate.
+So in Euclidean geometry,
+the parallel postulate says that in a given plane,
+given a line and a point that is not on the line itself,
+at most one line parallel to the given line can be drawn through the point.
+Um, and- and this- this seems very obvious in the Euclidean space.
+If we have, uh, if we- if we have a line then the line parallel to itself is, uh,
+kind of unique, uh,
+if we only consider,
+uh, lines that pass through one point.
+Um, however, in, uh, hyperbolic geometry, uh,
+there are infinites number of lines that are parallel to a given line through the point.
+This might not seem very, uh,
+intuitive because we are very familiar with Euclidean space.
+But here is a representation of a
+hyperbolic space in terms of Poincare ball.
+So we will explain what is a Poincare ball there.
+Um, but it's basically a way to visualize the hyperbolic space in Euclidean space.
+And you can see the blue line here.
+Um, it looks like a curve, uh,
+but it is actually a straight line, uh,
+uh, in- in the hyperbolic space.
+And we can- we can also define a redpoint here,
+which is another point that is not on the line.
+Um, and hyperbolic geometry states that, uh,
+there are infinite number of lines that are parallel to the line.
+And these lines are actually drawn in the visualization.
+So all these are curved, uh,
+black lines that's, uh, we draw here.
+They're actual- actually straight lines, uh,
+hyperbolic geometry, and they also pass through the redpoint.
+And at the same time,
+they are also parallel to the blue curve, uh,
+sorry, it- to- to the blue straight line in the hyperbolic space.
+Uh, and that's, uh,
+mainly how it differs from the Euclidean space.
+Uh, so because of these special properties,
+hyperbolic space cannot be naturally represented in
+the Euclidean space because it violates the fifth,
+uh, uh, the fifth axiom of Euclidean space,
+which is the parallel postulate.
+So, um, we currently use
+two geometry models to represent or to visualize hyperbolic space,
+um, by embedding it as a subspace of the Euclidean space.
+And, uh, they are also equivalent.
+So we can also map between
+these two models that visualize hyperbolic space and Euclidean space.
+So the first model that we're going to introduce is the Poincare model.
+Uh, this is a model,
+uh, where we represent, uh,
+uh, where you represent the hyperbolic space as a open, uh, an open ball.
+So, um, a visualization of it is, uh,
+on the right where,
+uh, we can see a ball.
+Um, and this, uh, by open,
+we mean that's- the set of all points in this hyperbolic space,
+uh, do not ex, uh, do not include the boundary of the ball.
+So the- the outer circle,
+uh, is not part of the, uh, ball,
+but everything inside the circle, uh,
+is part of the Poincare, uh, Poincare ball.
+And the radius is proportional to the square root of
+K. And we will introduce what is K later.
+Uh, K is actually the inverse of the curvature.
+Um, and- and, uh,
+the important property here is that each triangle in the figure has the same area.
+So, uh, it might not, uh, again,
+it's not very intuitive in Euclidean space, uh,
+as we see like all the triangles in the middle tend to have a larger, uh,
+seems to have a larger area in the Euclidean definition of, uh, uh, Euclidean metric.
+Uh, but, um, uh,
+but every triangle here actually have the same area.
+And, uh, you can see why this space is very amenable to embedded,
+uh, hierarchical or tree-like structure.
+Because you notice that in the middle or in the center, uh, of the, uh,
+uh, Poincare ball, there are very few of these triangles that are, uh,
+in- in hyperbolic space, whereas, uh, uh,
+towards the edge of the,
+uh, or of the circle, uh,
+you can see like there are exponentially many of these,
+uh, smaller triangles, uh,
+albeit with the same, uh,
+area, um, that are embedded, uh,
+towards the edge of
+the hyperbolic space or the- to- towards the edge of the Poincare ball.
+So this exponential increase in- in terms of the area or the volume, um, uh,
+as the, uh, the r- radius or the norm increases,
+allow us to embed, uh, hyperbolic trees.
+So basically trees, um,
+can be embedded by embedding its, uh,
+roots in the center,
+um, because there are very few of them.
+Um, and embedding all the leaves on the edge of the Poincare ball, um,
+because there are exponentially many of these leaves,
+uh, uh, at the, uh, as the depth increases.
+Um, and we're going to introduce another alternative model that, uh,
+models the hyperbolic space,
+which is called the hyperboloid model,
+um, and also called Lorentz model.
+Um, this is basically an upper sheet of
+a two sheet hyperboloid and that is visualized in the figure below.
+And this is also a set of Euclidean space.
+So, um, unlike Poincare model as you can see,
+there are exponentially many, um,
+triangles towards the edge of the,
+um, Poincare, uh, Poincare ball.
+And, here hyperboloid model is numerically more stable,
+meaning that you don't have to have
+extremely high machine precision to represent all these,
+uh, small triangles, uh,
+in terms of their embeddings,
+uh, towards the edge of the Poincare ball.
+Uh, here, um, it is basically in the hyperboloid and there is no upper bound.
+So it can go,
+um,- um,- um - the numbers can grow very large, but,
+uh,- uh, it does not require a very high number of, uh,
+floating-point precisions to represent the, um, uh,
+exponentially many, um - um, uh,
+points in that - that are towards the edge of the Poincare ball.
+So, um - um,
+papers have shown that hyperbolic model is numerically more stable and,
+um, it also have the advantage of, uh,
+having a slightly simpler formula to represent its, uh,
+metric and, uh, as well as, uh,
+distances, um, in - in this hyperbolic model.
+So a lot of times, uh,
+we do derivation and we, uh,
+represent the, uh, um,
+neural network architecture inside this hyperboloid model.
+Uh, so these two are,
+um- so the Poincare ball and the hyperboloid model,
+these two are equivalent in the sense that we can have a mapping, um,
+that, uh, that are between the Poincare ball and the hyperboloid.
+And this mapping is one-to-one,
+so, um, it's a projection.
+Um, so - so given uh,
+the brief introduction of the, uh, uh,
+hyperbolic space, uh,
+we want to also define our task here.
+So the task is the typical graph representation learning,
+uh, which we have, um, uh, we learned, uh,
+throughout this lecture, and tasks could
+be things like link prediction or node concentration.
+Um, and an example, um,
+um, example embedding space that achieves this, uh,
+kind of, task is the, uh, Poincare embedding,
+um, um, by nickel, uh, in 2018.
+Um, so in this visualization,
+which is in the form of a Poincare ball,
+we can see that entities are embedded inside this, um, Poincare ball.
+Um, and towards the center of it is, um - um,
+they contain the nodes with very high hierarchy
+or nodes that there are toward the roots of the tree.
+So for examples of entities,
+we have, uh, physical entity,
+we have, uh, abstraction or - organ, uh, organism.
+These are all very abstract and high
+level nodes that can contain many many different childrens.
+And - and towards the edge of the, uh,
+uh, embedding space, there are many many different,
+uh- exponentially many entities can be,
+um, um, embedded there,
+and these are typically nodes that are in
+the lower hierarchy or towards the leaves of the tree like graphs.
+For example, things like, um, uh,
+arrival, metabolic, uh, metabolic rates.
+These are very concrete and, uh,
+very detailed, uh, um - um, uh,
+description of certain entity, um,
+and there are exponentially,
+many of them which can be embedded towards the edge of the Poincare ball.
+And this is, uh, basically the, kind of,
+embedding we want to achieve so that we can perform things like link prediction,
+which means that we can predict whether an entity and, uh,
+another entity, uh, in this,
+uh, in this knowledge graph are connected.
+Um, um, meaning that, uh, uh, for, uh,
+for example, whether the bread and food are connected,
+it could be connected through an hierarchical relations,
+or it could be connected through a non-hierarchical relation.
+So, um, um, this is link prediction and we can also perform node classification,
+um, by, um, um, predicting a label for each of these, uh, nodes in the graph.
+Okay. And, um, before going into, uh,
+the detailed architecture, uh, let's first,
+um, um, also, um, look into, uh,
+how hyperbolic space are mathematically represented.
+So formal definition of the hyperbolic, uh,
+geometry is a manifold, um, um,
+which is, uh, which is, uh,
+basically a high dimensional surface,
+a 2D surface in - but in high dimensional.
+Um, and a Riemannian Manifold, um,
+is a special manifold,
+uh, which is equipped with two things.
+One is the inner product.
+So the inner product, uh,
+between two points had to be defined,
+and it is, uh, uh,
+it will define a metric space or like how
+distances are computed in - in this, uh, Riemannian manifold.
+And the other thing that is, uh, um,
+that is necessary for Riemannian manifold is the tangent space, um,
+which is a Euclidean space that approximates the manifolds,
+uh, but only locally.
+So you can I - imagine it is tangent to the surface, um,
+at a certain point, uh, touching the surface at a certain point at xX. Um,
+both function has to, uh- Riemannian manifold,
+states that both functions, uh,
+which is the inner product and the tangent space,
+has to vary smoothly,
+or, uh, called differentiable on a manifold.
+Um, there are also other, uh,
+concepts that are, uh, needed.
+So here, uh, we also considered the geodesics.
+Geodesics, um, is defined as the shortest path in the manifolds,
+uh, which is analogous to the straight line in R^n.
+So if you remember the - the plot where we have the parallel postulate,
+uh, in hyperbolic space,
+um, all these curves are actually geodesics,
+so they are the shortest path between two points in the - in the manifold.
+And that's why, um, we can say that there are
+infinitely many straight lines passing through the points,
+um, that are parallel to a given line.
+Um, the hyperbolic space, uh,
+is a Riemannian manifold with a constant negative curvature.
+Um, here we represented as negative 1 over K,
+where K has to be greater than 0.
+Um, so as you can see, uh,
+when becomes very very large, um, um,
+the hyperbolic space curvature becomes very very close to zero,
+um, and zero just means a flat space.
+So it will become more and more Euclidean as to,
+um, uh, as K increases.
+Uh, but , uh,
+the more negative is the curvature.
+So when K is small, uh,
+the more curved the space will be.
+And, um, here we look at a little bit of how does
+the curvature affect the - affect the embedding space.
+Um, so we use our negative 1, uh,
+1 over K to denote the curvature and,
+uh, uh, root K is also the radius of the Poincare ball.
+Um, um and that's how, uh,
+uh, the radius is related to the curvature.
+So, um, um, yeah.
+Uh, uh, if we look at the hyperboloid model, um,
+the - the - the formula is actually very simple.
+So this is the, uh, inner product definition,
+which is also called the Minkowski inner product,
+uh, in hyperbolic space.
+Um, so if we have a d-dimensional hyperbolic space,
+the hyperboloid model, um,
+will have a d plus 1 dimension.
+And the, um, the inner product is defined,
+um, by these two things.
+So, um, there is the negative parts of the inner product,
+and there is also the positive part of the inner product,
+which behaves almost identical to the Euclidean components.
+But we also have the negative part, which is, uh,
+um, which has negative sign,
+uh, in this inner product.
+And based on this, uh,
+inner product definition, the, uh,
+distance between two hyperbolic points,
+um, can be computed as such.
+So given two points, x and y in the hyperbolic space, um,
+you - we can compute this, um, uh,
+Minkowski inner products and divide by K,
+which is related to the curvature.
+And the arcosh means the,
+uh, the inverse of the hyperbolic cosine function.
+So we use this function, uh,
+to compute the distance between two points.
+Um, and another important concept is called the tangent space.
+Uh, so as we mentioned that,
+uh our tangent space is basically a Euclidean, um,
+uh, Euclidean approximation on a local,
+uh, point of the manifold.
+So a local neighborhood of the manifold.
+Uh - uh we can have a Euclidean space that is tangent to the manifold,
+but only touching the manifold at, uh, uh, at this one point.
+So for example, in this visualization,
+we have this hyperboloid model,
+again, um, um, representing the hyperbolic space, um,
+and, um, the, the tangent space,
+uh, at the North Pole,
+which is the bottom of the hyperboloid,
+uh, is drawn over here.
+Um, and we can, uh, define certain mapping here.
+So this, um, this line,
+um, um, this is actually a straight line.
+Of course it looks like a curve in a hyperbolic space,
+but if we also map it to the tangent space, this,
+uh, becomes a straight line because the tangent space is the Euclidean space.
+And the tangent space is defined, again,
+through this, uh, Minkowski inner product.
+Um, uh where, um, if we do inner product between v and x,
+um - um, it is 0.
+So that is the, uh, that is the curve - that defines the,
+uh, the set of all points, uh,
+v such that the inner product between v and x equals to
+0 defines the entire, um, tangent space, uh,
+at the point x. Um,
+and finally, we, um,
+we discuss a little bit about geodesic distances.
+Um, geodesic distance, as- as we mentioned
+is analogous to the shortest path in the Euclidean space,
+and, um, it's also the concept of straight line in hyperbolic space.
+And the more negative the curvature, uh,
+the more the geodesics will bend inwards towards the center.
+So - and - and the distance between,
+uh, two points will also increase.
+So here is an example plot where, uh,
+we compute distance between, uh,
+two points, x and y,
+with the same coordinate.
+So, um, uh - uh - uh, say, uh,
+like imagine something like x is 0.5,
+0.6, y is 0.2,
+0.3, and the distance between them actually increases
+if the curvature increases- sorry if the curvature becomes more negative.
+So, um, towards, uh, the more active parts,
+the - the distance between them actually increases more.
+So it can be more visualized in - in - in this figure, where,
+um, we have these, uh,
+two points here, x and y in hyperbolic space.
+Here we just represent it in the Poincare, um, Poincare ball.
+And here, uh, 0 is the origin,
+um, uh, root K is the,
+uh, is the radius,
+which is also inversely proportional to the curvature of the space.
+And the dark blue, um,
+curve means, um, is the boundary of the uh,
+hyperbolic space where, um,
+the curvature, uh, is more negative, right?
+Uh, and the more negative the curvature is, uh,
+the- the smaller the radius will be.
+So, uh, you can see that the geodesics are also drawn here.
+So, um, if the, uh,
+in the dark blue - so in higher - higher curvature of
+space the - the geodesics is more bends towards the center,
+towards, uh, the center of the hyper- uh hyperbolic space.
+Uh, whereas, uh, for the lighter blue, um,
+version or the lighter blue space which has larger curvature,
+the, uh, geodesic is less bends inward.
+And, um, in the extreme case where,
+um, the, um, x, y, uh, uh,
+the space is Euclidean meaning that the Poincare ball is kind of infinitely large,
+then the geodesics does,
+uh, does not bend at all,
+which recovers our Euclidean concept of shortest path,
+which is basically a straight line here.
+Um, and another important concept, um,
+based on, uh, all these definitions is the exponential and logarithmic manner.
+So this is a map that we can map from the tangent space to the manifolds and vice versa.
+So the exponential map maps points- any point in the tangent space to the Euclid- um,
+um, uh, from the tangent space to the Euclidean- um, uh, sorry,
+from the Euclidean tangent space to the hyperbolic, um,
+manifolds and the logarithmic maps, uh,
+from the, uh, manifolds,
+um, back to the Euclidean tangent space.
+Um, so here, uh, it- it is a visualization,
+and we use the norm, um,
+to represent the inner product between,
+uh, two points, uh,
+u- using this, uh,
+special, uh, Minkowski in the product definition.
+Um, so we can uh, conceptually, um,
+visualize it as, um, you know, uh,
+we have v in the tangent space of x.
+And if we want to map it back to the hyperbolic space,
+it becomes the point y,
+which is on the hyperbolic space.
+Uh, and inversely, we can use logarithmic map to map from this y, the blue point,
+back to the red point v,
+which is in the Euclidean space,
+is a Euclidean, uh, coordinate,
+and it's in the tangent space of x.
+So here this notation, we use, um,
+x here as the- the point that is touching- uh,
+so the tangent space of x, um,
+is the- is the Euclidean space that we want to map to and from.
+And K is the curvature,
+uh, so it is the- uh,
+this- um, the inverse of the curvature that we have, uh, defined.
+And here, notice that we have to use this cosh and sinh function,
+which are the- uh, which are the hyperbolic,
+uh, uh, trigonometry here.
+Um, the formulas are- are really very complicated.
+Um, um, um, but, um, um,
+if the high-level concept is that there exists- you just
+need to know that there exists such mapping between the- uh,
+the tangent space as well as the,
+uh, um, uh, manifolds.
+And, um, uh, we can use such mapping to, um,
+perform operation in the Euclidean space and ma- map it back to the hyperbolic space.
+Um, so given all these preliminaries,
+we can now introduce the, uh, hyperbolic GNN.
+So the main challenge that, uh,
+we are focusing on here is, uh,
+that, uh, input features are usually Euclidean.
+Um, um, but we want to map it, uh,
+to the hyperbolic space to- uh,
+to compute the node embedding on the hyperbolic space.
+And the second challenge is that, uh,
+we need to perform aggregation in the hyperbolic space,
+uh, uh, so that we can perform message passing.
+And, uh, the third challenge is that a hyper- uh,
+we do not know what is the right amount of curvature
+for the hyperbolic space that can perfectly embed the graph.
+So, uh, this is also something that we need to learn in the meantime.
+Um, so if you recall,
+the- um, the, um,
+uh, GNN, uh, formulation is mostly very similar.
+So, uh, here is an outline of the, uh,
+GNN architecture where we first compute
+the messages between all the neighbors as well as the central nodes.
+And- and then we aggregate all your neighbors', uh, messages, uh,
+to compute- uh, to compute a representation- uh,
+the hidden representation after the aggregation.
+And finally, uh, we will, uh,
+make an update, uh,
+um, of the representation, um, so that, uh,
+the- the next level representation will- um,
+will, uh, uh, capture the information of the previous layer representation.
+Um, so this is- this will be the,
+uh, typical like message,
+aggregation, and update function,
+um, but in a hyperbolic space.
+So notice that here we are writing,
+um, some, uh, superscripts.
+For example, like K_l minus 1,
+so this will indicate the curvature or the inverse of curvature at the layer l minus 1.
+And here, it is K_l minus 1, K_l,
+meaning that the update function needs to convert the point from the,
+uh, uh, hyperbolic space of the previous layer, so, uh,
+in the layer l minus 1 to the hyperbolic space of a layer l. Um,
+and the high-level concept, uh,
+is- is also visualized in the- um, in the figure here.
+So we have a bunch of points, uh,
+which are the previous layer embedding of the graph in the previous hyperbolic space.
+And we perform, um,
+a message computation of these- um,
+uh, uh, between these points as well as this center point here.
+Um, and after we perform these messages,
+we need to aggregate all these messages.
+And we perform this aggregation in this,
+uh, tangent space of the, uh,
+hyperbolic space because there is no natural definition
+of neural network operations in the hyperbolic space.
+Um, but if we map them into the tangent space,
+then we can, uh,
+do something like a center of gravity inside this tangent space,
+uh, at the point x.
+So we perform this, uh,
+aggregation in the tangent space.
+And after the aggregation,
+we have the green point here which is, um,
+then mapped back to the- um,
+an- another hyperbolic space of a different curvature.
+So you notice that here,
+it is the layer l minus 1, sorry,
+layer l plus 1, and in the previous layer, uh,
+it will be layer l. So this is
+a completely different hyperbolic space with a different curvature that we- um,
+but we can use the, uh,
+exponential and logarithmic map to map the aggregated results back to the- uh,
+the- um, the hyperbolic points in
+the new embedding space- in the new embed space with a different curvature.
+Um, so the, uh,
+formula for all these computations are very complex,
+um, and un- understanding them requires like, uh,
+uh, entire lecture on differential geometry.
+So I won't go very much into the detail,
+but there are some high-level, uh,
+concepts that you can get from- uh, get- get from here.
+So, for example, in the message computation, because, um,
+hyperbolic space has no natural neural network operations that can be defined here,
+we can use this, um, um,
+um, linear and- uh,
+so linear layer basi- the linear and addition, um,
+of the bias term, uh,
+in the tangent space of- um,
+of the, um, um,
+of the hyperbolic space.
+So here, we use this,
+um, circle and multiply it, uh,
+to represent this- like multiply all the linear- linear operation, and this, uh,
+circle and- um, and, um, plus, uh,
+inside it, uh, to represent the addition,
+so the Mobius addition.
+Uh, and- and these are very ea- um,
+and- and as you can see,
+these are, uh, defined through this exponential and logarithmic map here.
+So we first use the logarithmic map to map
+the points- the hyperbolic points to the Euclidean,
+um, tangent space, um,
+on that point- uh, on the origin.
+So this- here this o means origin.
+So we first map it to the orig- um,
+the tangent space of the origin.
+We perform this ma- uh, matrix multiplication in the tangent space.
+And because tangent space is Euclidean,
+this operation is well-defined.
+And after we perform this linear operation,
+you can then map it back to- uh, to the- uh, um,
+uh, to the hyperbolic space through this exponential map.
+So, um, compared to the Euclidean operation,
+basically ask this exponential and logarithmic back to
+convert to and from the tangent space to perform this operation.
+And similar is also true for,
+um, addition, but here,
+we need to have a special operator called parallel transpor- transport,
+uh, which- um, which tells you how to move the vector around in the space.
+So, um, this might not seem very intuitive because in Euclidean space, um,
+a vector, uh, can be moved around the Euclidean space without affecting its length.
+But actually, in hyperbolic space,
+you cannot freely move the vector because as you can see in the visualization,
+if we move the- uh, if we- we move a vector,
+um, out towards the edge of it,
+it will seem smaller, right?
+The coordinates will- um, the- the norm of that vector will have to change.
+So there's this also the parallel transport here, um, um,
+and that, uh, represent the analogy of the,
+uh, uh, addition operation in the hyperbolic space.
+Um, and all these- notice that all these functions,
+although they are very complex, are differentiable.
+So we can also use PyTorch and any, uh,
+different- uh, other differentiation software to perform these operations.
+Um, and in the aggregation,
+this is basically very similar to graph attention networks that we have learned.
+So we have this attention, uh, weights here.
+And we also map it- uh,
+map the points, uh,
+to the tangent space, uh,
+use the, uh, attention weights to aggregate them
+and then again map it back to the hyperbolic space.
+And in the hyp- uh, update function,
+it again follows the same- uh, same, um,
+uh, rule where we map it to the tangent space,
+we perform the non-linearity.
+But note that here, we, uh,
+map it back to a different curvature,
+right, um, because the next level has
+different coverage around different space definition.
+Uh, so finally, just to show a little bit of results,
+um, uh, here we can see a GNN embedding of a tree-like structure.
+Um, and as you can see, because there are exponentially many,
+uh, uh, points in the space and, um, uh,
+the- the- the geometry is not very nicely preserved,
+uh, because, uh, uh,
+here we visualize the nodes as like the lighter blue nodes
+represent the leaves and the dark blue nodes represent the, uh, roots.
+And you can see that some of these leaves are
+actually very embedded very close to the root,
+which does not respect the tree structure.
+Whereas in the hyperbolic geometry, uh,
+using the hyperbolic GCN, we're able to, uh,
+recover this tree-like structure very nicely, uh, and,
+uh, all the points are, uh,
+embedded in- in their respective hierarchy.
+And we also discovered that curvature is very important,
+and there is a sweet spot where we can embed the- um,
+a tree with a low distortion,
+but also very unstable- uh,
+numerically, uh, very stable.
+And, uh, finally, um,
+we also evaluated in a bunch of, uh,
+other- um, other, uh,
+standard datasets, uh, graph datasets.
+And we basically use this hyperbolicity to measure, like,
+how good, uh, is the hyperbolic GNN,
+uh, will perform in a given dataset.
+So this metric can be found in this,
+uh, Gromov, uh, hyperbolicity paper.
+Um, and basically the lower, uh,
+hyperbolicity, uh, the graph becomes more tree-like.
+So here, for example, delta equals to 0,
+uh, that means that the graph is,
+uh, kind of a perfect tree.
+Whereas here, if Delta is 11,
+then the graph is not very hierarchical or not very tree-like.
+So we can see that, uh, the hyperbolic GNN will per- tend to
+perform very well or extremely well when hyperbolicity is 0,
+so which means that the graph is, uh, very tree-like.
+Whereas if the graph, uh,
+does not look like a tree,
+then the- uh, uh, uh, the performance tend to drop.
+So, uh, that's why the hyperbolic GNN is
+especially suitable for hierarchical and on tree-like graphs.
+Uh, just to summarize,
+uh, here we introduce the hyperbolic geometry.
+And we have, uh, two models,
+the Poincare ball and hyperboloid uh, model, uh, to,
+uh, visualize and represent the hyperbolic, uh,
+space in the Euclidean- as a subspace of the Euclidean space.
+And we can use exponential logarithmic map to map points to and from the tangent space,
+which is Euclidean, where neural network operations can be performed.
+And finally, we show that we- uh,
+we can use a learnable,
+um, uh, curvature, um,
+um, at every layer of the GNN so that we can trade off performance and stability.
+Uh, thank you, and that's- um,
+that's all for, uh, this part of the content.

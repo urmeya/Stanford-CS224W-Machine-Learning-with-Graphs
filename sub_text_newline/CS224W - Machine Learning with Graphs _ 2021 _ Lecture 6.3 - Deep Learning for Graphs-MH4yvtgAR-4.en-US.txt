@@ -1,0 +1,685 @@
+Next, we are going to talk about deep learning for
+graphs and in particular, graph neural networks.
+So now that we have kind of refreshed our notion of,
+uh, how general, uh,
+neural networks- uh, deep neural networks work,
+let's now go and generalize neural networks so that they can be applicable to graphs.
+That's what we are going to do next.
+So, uh, the content is that we are going to talk about local network neighborhoods.
+And we are then going to describe
+aggregation strategies and define what is called, uh, computation graphs.
+And then we are going to talk about how do we
+stack multiple layers of these neural networks, uh,
+to talk about how do we describe the model parameters training- how do we fit the model,
+and how do we se- how do we- and give
+a simple example for unsupervised and supervised training.
+So this is what we are going to talk about and what we are going to learn,
+uh, in this part, uh, of the lecture.
+So the setup is as follows.
+Um, we are going to assume we have a graph G that has a set of vertices,
+a set of nodes.
+It has an adjacency matrix.
+Right now let's assume it's binary,
+so means unweighted graph.
+Let's also, for simplicity, assume it's undirected,
+but, uh, everything will generalize to directed graphs as well.
+And let's assume that every node, uh,
+also has a para- uh,
+a node feature vector X associated with it, right?
+So, um, you know,
+what are node features?
+For example, in social network,
+this could be user profile,
+user image, a user age.
+In biological network, it could be a gene expression profile,
+uh, gene functional information.
+And, for example, if there is no, um,
+node feature information the- in the dataset, um,
+what people like to do is either use indicator vectors,
+so one-hot encodings of nodes,
+or just a vector of all constants, uh, value 1.
+Uh, those are two, uh, popular choices.
+Sometimes people also use a degree, uh,
+as fe- a node degree as a feature, uh, of the node.
+And then another piece of notation,
+we are going to- to denote N of v to be a set of neighbors of a given node,
+uh, v. And that's basically the notation,
+the setup, uh, we are going to use,
+uh, for this part of the lecture.
+Now, if you say,
+how could I go and apply deep neural networks to graphs?
+Here is a naive, uh, simple approach.
+The idea you could have is to say,
+why don't I represent a network with adjacency matrix?
+And then why don't I append the node features to the adjacency matrix?
+Now think of this as a training example and feed it through a deep neural network, right?
+It seems very natural.
+I take my network,
+represent it as an adjacency matrix,
+I append node features to it.
+Now, this is, you know,
+the input to the neural network,
+um, and I'm able to make predictions.
+Uh, the issue with this idea is several.
+First is that the number of parameters of
+this neural network will be multiple times the number of nodes in the network.
+Because number of inputs here is the number of nodes plus the number of features.
+And if you say how- what is the- how many training examples I have,
+I have one training example per node.
+So it means you'll have more parameters than you have training examples
+and training will be very unstable and it will easily overfit.
+Another issue with this is that this model
+won't be applicable to graphs of different sizes.
+Because if now I have a graph that has a height of seven nodes,
+it's unclear how to fit a graph of seven nodes into five different inputs, right?
+Because here we have a graph of five nodes.
+So that's one, uh,
+big- uh, big issue.
+And another big issue is subtle but very
+important is that this approach will be sensitive to know node ordering.
+Meaning right now I number nodes as A, B,
+C, uh, D, and E in the following order so my adjacency matrix was like this.
+But now if I were to call for example node E- to call it A, B,
+C, D, and E,
+then the shape of my adjacency matrix would change, right?
+The nodes, uh, would be permuted.
+The rows and columns of the matrix will be permuted even
+though the information is still the same.
+And in that case,
+the mind would get totally confused and wouldn't know what to- what to output.
+So the point is that in graphs there is no fixed node ordering so
+it's unclear how to sort the nodes of the graph that you could,
+um, you know, put them as inputs in the matrix.
+That's much easier in images because you say I'll start with the top-left pixel,
+and then I- I'll kind of go line-by-line.
+In- in the graph,
+the same graph can represented by- in- by many different adjacency matrices,
+because it all depends on the ordering or- uh,
+in- in which you labeled or numbered the nodes.
+So we have to be invariant to node ordering.
+So the idea of what we are going to do is we're going to kind of,
+take- borrow some intuition from convolutional neural networks,
+from computer vision, but generalize them to graphs.
+So here's a quick idea about what convolutional neural networks do.
+Like if you have an image here,
+you know, represented as this grid,
+then you define this convolutional operator, basically,
+this sliding window that you are sliding over the image, right?
+You start at the top-left.
+This is now a three-by-three operator.
+You compute something over this,
+uh, area of the image,
+and then you slide the operator by, you know,
+some number of steps to the right and apply the same operator again.
+And- and you can keep doing this and you can imagine that now this will give
+you a new image of different size, of different- uh, um, uh,
+different number of rows and columns to which you can
+apply another, uh, convolutional operator,
+another kind of sliding window type operator that kind of goes over the rows,
+uh, uh, of that- of that image.
+And if you just chain this, uh,
+together, uh, you can then, uh,
+come up, uh, with convolutional neural networks and, uh, good predictions.
+Our goal here is to generalize this notion of convolution between simple lattices,
+between simple- uh, beyond simple matri- uh,
+matrices, uh, and also leverage node features and attributes.
+Like, for example, text or images that might be attached to the nodes of the network.
+The issue is that our networks are much more complex.
+So defining the node- the notion of a sliding window,
+let's- let's say, uh,
+you know, a three-by-three window,
+it's- is- is very strange because maybe in some case, you know,
+the sliding window may only cover three nodes in other-
+in other case the sliding window may cover many more nodes.
+And it's unclear how to define this notion of a window,
+and then it's also unclear how to define the notion of sliding the window over the graph.
+And this is a big, uh,
+complexity and a big challenge that, uh,
+graph neural networks have to do, uh,
+to be able to be applied to complex network data.
+So the idea that makes this,
+uh, work is the following step in intuition.
+So the idea is that single convolutional- single layer of a convolutional,
+uh, neural network, basically what it does it,
+for example, takes- uh, takes the, uh,
+area of three-by-three pixels,
+apply some transformation to them and creates a new pixel.
+And that's the way you can think of it, right?
+And now we can take this operator and slide it across the image.
+What we'd like to do in the graph is something similar, but, you know,
+if you wanna apply this operator in terms of a- uh,
+in terms of a, uh,
+let's say like a sliding window,
+then we will have a center of the sliding window, which is a node,
+and this center is going to kind of borrow,
+uh, aggregate information from its neighbors, right?
+The same way here you can imagine that this is the center of the operator and
+it's kind of collecting information from- from its neighbors,
+denoted by arrows, takes its own value as well and creates a new value,
+a new pixel, uh, for itself.
+So the idea is that- that what convolutional operators are certainly doing,
+they are transforming information from the neighbors,
+combining it, and creating a new kind of a message.
+So this is when today's lecture also relates to the,
+uh, last lecture when we talked about message passing, right?
+So today here we can think about a node collecting information from its neighbors,
+collecting messages from its neighbors, aggregating them,
+combining them, and creating a new message.
+So, uh, that is the- that is the idea.
+So how graph convolutional neural networks are going to work.
+Um, the idea is that node's neighborhood defines the neural network architecture.
+So basically the structure of the graph around a node of
+interest defines the structure of the neural network.
+Um, so the idea is,
+if i wanna make a prediction for this red node,
+I, here, uh, in the network,
+then the way we can think of this is that i is going to take information,
+uh, from its neighbors and neighbors are
+going to take information from neighbors of neighbors.
+And we are going to learn how to propagate this information,
+how to transform it along the edges of the network,
+how to aggregate the heat,
+and how to create a new message that then the next node up the chain can again aggregate,
+transform, um, and- and compute.
+So in some sense,
+the way we can think of graph neural networks is a two-step process.
+In the first step process we determine the node computation graph.
+And in the second process,
+we then propagate, um,
+the- the- the information,
+we propagate and transform it over this computation graph.
+And this computation graph defines the architecture or the structure of the underlying,
+uh, neural network, right?
+So, um, in this way,
+we learn how to propagate information across
+the graph structure to compute node features or,
+uh, node, uh, embeddings.
+So that's the intuition.
+Let me give you an example of what I mean by this.
+Consider here a very small,
+um, input graph on six nodes.
+Um, and what we will want to do is,
+the key idea would be that you want to generate base- node embeddings based on
+the local structure of the neighborhood around that target node.
+So for this input graph and this is the target node, uh,
+here is the structure of the neural network that is going to
+make computation to be able to make a prediction for node A.
+And let me explain you why is this neural network has this structure.
+The reason is that node A is going to
+take information from its neighbors in the network; B, C,
+and D. So here are B, C,
+and D. And then of course,
+this is kind of one layer of computation,
+but we can unfold this for multiple layers.
+So if we unfold this for one more layer,
+then node D takes information from its neighbor A.
+And that's why we have this edge here.
+Node C, for example,
+takes information from its neighbors A, B,
+uh, E, and F. They are- they are here; A, B,
+and F. And then D takes information from A and C because it's connected to nodes,
+uh, A and C. So now,
+what does this mean is that if this is the structure of the, uh,
+graph neural network, now what is- what we have to define,
+what we have to learn is we have to learn
+the message transformation operators along the edges as well as the aggregation operator.
+Say, because node B says,
+"I will collect the message from A,
+I will collect the message from C. These messages will be transformed,
+aggregated together in a single message,
+and then I'm going to pass it on."
+So that now node A can again say,
+"I'll take message from B,
+I will transform it.
+I will take a message from C,
+transform it, message from D, transform it.
+Now I am going to aggregate these three messages into the new message and
+pass it on to whoever is kind of in the layer, uh, above me."
+So that is essentially the idea.
+And of course, these transformations here,
+uh, uh, aggregations and transformations will be learned.
+They will be parameterized and distributed parameters of our model.
+What is interesting and fundamentally different from classical neural networks,
+is that every node gets to define its own neural network architecture.
+Or every node gets to define
+its own computation graph based on the structure of the network around it.
+So what this means is, for example,
+that, uh, blue node,
+D here, its computation graph will be like this,
+will very skinny because D takes information from A,
+and A takes it from B and C. So it's a- you know,
+this is now a two-layer neural network,
+but it's very skinny, very narrow.
+While for example, node C has a much bigger,
+much wider neural network,
+because C collects information from- from its four neighbors and
+then each of the neighbors collect it from its own set of neighbors.
+So that architecture, structure of this green neural network corresponding to nodes,
+target node C, is very different than the one from the node, uh,
+D. So what is interesting,
+um, conceptually is that now,
+every node has its own, uh,
+computational graph or it has its own, um, architecture.
+Um, some nodes, if the neighborhood of the network around them is similar,
+for example, these two nodes will have the same computation graphs.
+Like this is E and F,
+you see the kind of the structure of these computation graphs,
+these neural network architecture trees, uh, is the same.
+But in principle, every node can have its own computation graph, that's first thing.
+And then the second thing that's interesting,
+now we are going to train or learn over multiple architectures simultaneously, right?
+So it's not that we have one neural network on which we train
+now every node comes with its own neural network,
+uh, architecture, neural network structure.
+And of course, the structure of the neural network for
+a given node depends on the structure of the network around this node,
+because this is how we determine the computation graph.
+And that's kind of a very important, er,
+kind of deep insight into how these things are
+different than kind of classical, uh, deep learning.
+So now, how do- how does this work as we have multiple layers, right?
+So the point is that the model can be of arbitrary depth.
+We can create an arbitrary number, uh, of, uh,
+layers and nodes have embeddings at each layer.
+Um, and the embedding at layer 0 of a given node
+is simply initialized as its input features X.
+And then the layer K embedding gets information
+from nodes that are kind of K hops away, right?
+So the way this would work is,
+layer 0 embedding for nodes is simply their feature vectors,
+so here, denoted by X.
+Then for example, embedding of, um,
+node B at layer 1 would be sum aggregation of feature- feature vectors of, ah,
+of neighbors, uh, A and C, uh,
+plus its own feature vector,
+and this is now embedding of this node at layer 1.
+And then this will be passed on, uh,
+so that now node 2 can- node A can compute its embedding at layer 2.
+So what it means is that the embedding of A at layer 0
+is different than its embedding at layer 1- sorry, at layer 2.
+So at every layer,
+a node will have a different, uh, embedding.
+And also, we are only going to run this for a limited number of steps.
+We are not going to run this kind of infinitely long or
+until it converges as- as we did in the last lecture.
+We don't have this notion of convergence.
+We'd only do this for a limited number of steps.
+Each step corresponds to one layer of the neural network,
+corresponds to one hop,
+uh, in the underlying network.
+So if we want to collect information from K hops away from the starting node,
+from the target node,
+we are going to need a K layer neural network.
+And because networks have final diameter,
+it makes no sense to talk about, I know,
+100 layer, uh, deep neural networks.
+Again, unless your network has diameter or that you know,
+the longest, shortest path is of 100 hops.
+So now that we have, uh,
+defined the notion of how do we create
+this computation graph based on the structure of the neighborhood around a given node,
+now we need to talk about these transformations that happen in the neural network.
+And the key concept is neighborhood aggregation.
+Um, and the key distinction between different approaches,
+different graph neural network architectures is how different,
+uh, how this aggregation, uh, is done.
+How this information from, uh,
+children nodes is aggregated and combined,
+uh, with the information or message of the pattern.
+One important thing to notice is because
+the ordering of the nodes in a graph is arbitrary;
+this means that we have to have our aggregation operator to be,
+um, uh, permutation invariant.
+Right? So it- it- it means that, um,
+we- we can order the nodes in any order and if we aggregate them,
+the aggregation will always be the same, right?
+That's the- that's the idea.
+It doesn't matter in what order we aggregate,
+we want the- the result to be always the same because it doesn't matter whether,
+you know, node B has neighbors A- A and C,
+or C and A,
+they are just- it's just a set of elements.
+So it doesn't matter whether we're aggregating, you know,
+in that sense from A- A and C or C and A.
+You should always get the same result.
+So neighborhood aggregation function has to be,
+uh, order invariant or permutation invariant.
+So now, of course,
+the question here is- that we haven't yet answered is,
+what is happening in these boxes?
+What do we put into these boxes?
+How do we define these transformations?
+How are they parameterized? How do we learn?
+So the basic approach is, for example,
+is to simply average information from the neighbors,
+uh, and apply a neural network.
+So average- so a summation,
+use permutation or that invariant because in any number,
+you sum up the- the- the numbers,
+in any way you sum up the numbers,
+you will always get the same result.
+So average or a summation is a,
+uh, permutation invariant aggregation function.
+So for example, the idea here is that every- every of
+these operators here will simply take the messages from the children,
+uh, and average node,
+and then decide to take this average and make a new message out of it.
+So the way we can, um,
+do this is do the, er,
+we aggregate the messages and then we apply our neural network,
+which means we apply some linear transformation followed by
+a non-linearity to create a next, uh, level message.
+So let me, uh, give you an example.
+The basic approach is that we want to average messages coming from the children,
+coming from the neighbors and apply a neural network to them.
+So here is how this- uh,
+how this looks like in equation. So let me explain.
+So first, write H is a- our embedding and, uh, subscript means,
+uh, the node and superscript denotes the neu- uh,
+the level of the neural network.
+So at the beginning are the zeroth layer,
+the embedding of the node V is simply its feature representation.
+And now we are going to create higher-order embeddings of nodes.
+So right so this is a level zero so at level one,
+what are we going to do is- is getting an equation and let me explain.
+So first we say,
+let's take the embeddings of the nodes from the previous uh,
+from the previous layer.
+So this is the embedding of this node v from the previous layer.
+And let's multiply, transform it with some matrix B.
+Then, what we are saying is let's also go over the neighbor's uh,
+u of our node of interest v. And let's take the previous level embedding of every node u,
+let's sum up these embeddings uh,
+and average them so this is the total number of neighbor's.
+And then let's transform this uh, uh,
+aggregated average of embeddings of ma- of uh, children,
+multiply it with another matrix and uh,
+send these through a non-linearity, right?
+So basically we say, I have my own message- my own embedding if I'm node v,
+my own embedding from the previous layer, transform it.
+I aggregate embeddings from my children,
+from my neighbor's from previous level,
+I multiply that to be the different transformation matrix.
+I add these two together and send it through a non-linearity.
+And this is a one layer of my neural network.
+And now of course I can run this or do this for several times, right?
+So this is now how to go from level l,
+to level l plus 1, um,
+you know to- to- to compute the first layer embeddings,
+I use the embeddings from level zero,
+which is just the node features.
+But now I can run this for several kinds of iterations.
+Lets say several- several layers,
+maybe five, six, 10.
+And then whatever is the final um, eh, um,
+hidden representation of the final layer uh,
+that is what I call uh,
+the embedding of the node, right?
+So we have our total number of capital L layers and
+the final embedding of the node is simply h of v at the final uh,
+at the final layer- level- at the final level of uh, neighborhood uh, aggregation.
+And this is what is called a deep encoder,
+because it is encoding information from
+the previous layer- lay- lay- layer from a given node,
+plus its neighbor's transforming it using matrices B and W,
+and then sending it through a non-linearity to obs- to obtain next level uh,
+representation of the node.
+And we can basically now do this uh,
+for several iterations, for several uh, layers.
+So how do we train the model if every node gets its own computational architecture,
+and every node has its own transformation uh,
+parameters, basically this W and B?
+The way we train the model is that we want to define what are the parameters of it?
+And parameters are this matrices W and B,
+and they are indexed by l. So for every layer we have a different W,
+and for every layer we have a different uh, B.
+And the idea here is that we can now uh,
+feed this embeddings into the loss function and we can
+run stochastic gradient descent to train the rate parameters,
+meaning uh, B_l and uh, W_l.
+Um, and these are the two parameters,
+right one is the weight matrix for uh, neighborhood aggregation,
+and the other one is the weight matrix for transforming hidden um, hidden vector uh,
+embedding of uh, of- of the node itself uh,
+to create then the next level uh, embedding.
+So this is uh,
+how we- how we do this,
+what is important is that this weight matrices are shared across different nodes.
+So what- what this means is that this l and v are not indexed by the node,
+but all nodes in the network use the same transformation matrices.
+And this is an important detail.
+Um, as I have written things out so far,
+I have written them out in terms of nodes aggregating from neighbor's.
+But as we saw uh, earlier in graphs,
+many times you can also write things in the matrix form.
+So let me explain you how to write things uh,
+in the matrix form, right?
+Many aggregations can be performed efficiently if you uh,
+write them out in terms of matrix operations.
+So what you can do is you can take your um,
+matrix H and simply stag the embeddings of the nodes together,
+like here so every node is an embedding for a- for a- uh,
+given uh, node of a given layer.
+So we can define this notion of a matrix H^l,
+and then write the way I can simply compute them basically by saying,
+what is the sum o- of the embeddings- aggregation of embeddings um,
+of nodes u that are neighbor's of v. This is simply
+taking the- taking the uh, the correct um,
+entry in the- in the adjacency matrix and multiplying it with the matrix uh,
+H. And this way,
+I'm basically averaging or aggregating the embeddings coming from the neighbor' s. Um,
+then I can also define this notion of a diagonal matrix,
+where basically this matrix is zero only on the diagonal of it.
+We have uh, non-zero entries that are uh,
+the degrees of individual nodes,
+and then if you say what is the inverse of this diagonal matrix
+D. It is another diagonal matrix where on the uh,
+edges where around the entries on the diagonal,
+I have now one over the degree um- so that
+D- D times inverse of D is an identity matrix, right?
+So now if you take this and combine it with this uh,
+D minus 1 then you can write the neighborhood aggregation,
+basically averaging of the neighborhood embeddings simply has uh D to the minus 1.
+So the inverse of D, times adjacency matrix,
+times the embeddings at level H,
+at level l. So basically,
+what this means is that I can write things in terms of this summation and averaging,
+or I can write it as a product of three matrices,
+a product of this diagonal matrix that has one over the diagonal uh,
+one over the degree on the diagonal.
+So this corresponds to this theorem uh,
+A corresponds to summing over the neighbor's and H uh,
+uh, superscript l are the embeddings of the nodes from the previous layer.
+So this means I can think of this in terms of this kind of matrix equation,
+or I can write it basically as neighborhood uh, aggregation.
+So rewriting the update functioning matrix form then write- is- is like this, right?
+It's basically take the- uh,
+your embedding and multiply it with B, uh,
+take the embeddings of the neighbor's from previous layer um,
+and multiply them with W. Um,
+so red part of corresponds to neighborhood aggregation,
+blue part corresponds to uh, to self-transformation um.
+And in practice what this implies is that uh,
+efficient sparse matrix multiplication can be used
+to train these models very efficiently.
+So you can basically represent everything goes matrices,
+and then you have matrix gradients uh,
+and everything would work uh, very nicely.
+Now, in the last few minutes,
+I wanna talk about how to train this thing.
+So the node embeddings z are- are a function of the input graph.
+And we can train this in a supervised setting in a sense that we wanna minimize the loss,
+the same way as we discussed so far, right?
+I wanna make a prediction based on the embedding,
+and I wanna minimize the discrepancy between the prediction and the truth.
+Ur, where, you know,
+y could be, for example,
+an old label or a- or a scalar value.
+Um, or I could even apply this in an unsupervised setting,
+where I would say I want, you know,
+the- the similar- where node labels are unavailable,
+I can use the graph structure for supervision.
+So I could define the notion of similarity and say, you know,
+the dot product between the embeddings of
+two nodes has to correspond to their similarity in the network.
+And I could use now deep encoder to come up with the embeddings of the nodes,
+rather than using the shallow, uh, uh,
+shallow encoder, uh, but I could use the same decoder as in node to vet,
+meaning the- the random walk and,
+um, similarity matching using the dot problem.
+So that's you- I can apply this in both settings.
+Um, to explain how I could do,
+uh, unsupervised training a bit more.
+So the idea would- would be that similar,
+uh, nodes have similar embeddings.
+So the idea would be that, you know,
+let- let y- let y_u,
+v denote- be kept value one if node u and v are indeed similar,
+for example, they- they code- they, uh,
+code according to the same random work as defined in nodes to work.
+Decoder of the two embeddings,
+let's say, is a simple dot-product.
+It says embedding of one times the embedding of the other,
+and you want the- the discrepancy between the similarity and the, uh,
+similarity in the graph versus similarity in the embedding space to be,
+uh, small, so we can define this through the cross entropy.
+Um, and then we could again just basically run this, uh, optimization problem,
+to come up with the graph neural network that makes,
+uh, the predictions, um,
+as we- as we discussed.
+So, um, the way we are going to train this,
+is that we are going to train this either, as I said,
+in this kind of unsupervised way,
+and of course we can also directly train this in a supervised way.
+Which means that perhaps, you know,
+for a given node we have some, uh,
+we have- we have some label about a node,
+maybe this is a drug-drug interaction network,
+and you know whether this drug is toxic,
+uh, or not, whether it's safe or toxic.
+So we could then say, you know,
+given this neural network,
+predict at the end the label of the node.
+Whether it's safe or toxic.
+And now, we can backpropagate based on label.
+So both- both are o- both are possible,
+either we directly train to predict the labels,
+or we can train based on the network similarity,
+where network similarity can be defined using random works,
+the same way as in,
+uh, node to work.
+So for, uh, supervised training,
+uh, basically what we wanna do is,
+we wanna define, uh,
+the loss, uh, in terms of let's say classification,
+this is the cross entropy loss for a binary classification.
+Basically here is the prediction of the label for a- for a- uh,
+for a given color whether it's toxic or not,
+this is whether it is truly toxic or not, um,
+and then the way you can think of this is y takes value one if it's toxic,
+and zero if it's not.
+If the true value is zero,
+then this term is going to survive and it's
+basically one minus the lock predicted- prob- uh,
+one minus the predicted probability.
+So here we want this to be the predicted probability- to be as small as
+possible so that one minus it becomes close to one because log of 1 is 0,
+so that this discrepancy is small.
+And if the- if the,
+uh, class value is one,
+then this term is going to survive because
+1 plus 1- 1 minus 1 is 0 and this- this goes away.
+So here we want this term to be as close to one as possible.
+Which again would say, if it's- uh,
+if it's toxic, we want the probability to be high.
+If it's not toxic,
+we want the probability [NOISE] to be low- uh,
+the predicted probability, uh, of it being toxic.
+And this is the cross, uh, entropy loss.
+So this is the encoded input coming from node embeddings.
+Uh, these are the classification rates,
+uh, for the final classification.
+Uh and these are the, uh, node labels,
+is it basically toxic, uh, or not.
+Um, and I can optimize this loss function,
+uh, to basically come up with, uh,
+the- the parameters B and W that give me the embedding that then makes,
+uh, good or accurate predictions.
+So let me just give an overview and,
+uh, finish, uh, and complete the lecture.
+So the way we think of modern design is that given the graph,
+we wanna compute the,
+uh, the embedding of a target node.
+First, we need to define the neighborhood aggregation function.
+Um, uh, this is the first thing we have to do.
+The second thing we have to do then is to define the loss function on the embedding,
+like the cross entropy loss I was just discussing,
+um, and then we need to train.
+And the way we can train the model is that we train it on a set
+of nodes in a- on a batch of nodes.
+So we select a batch of nodes,
+create the computation graphs,
+and this is a batch of nodes on which we train.
+Um, and then what is interesting is that,
+after the model is trained,
+we can generate embeddings for any nodes, uh, as needed,
+and simply apply [NOISE] our model to them by basically just doing the forward pass.
+So this means that we can apply our model,
+even to nodes that we have never seen during training.
+So this means that, uh,
+we cannot train on one graph and transfer the model to
+the other graph because this particular set of, um,
+nodes could be used for training the parameters [NOISE] to be optimized here,
+and then we could apply this to a new set of nodes,
+to a new set of, uh, computation graphs.
+So this means that our model has inductive, uh, capability,
+which means that same aggregation parameters,
+same W and B,
+are shared across all nodes.
+Uh, and the number of model parameters in
+this case is sublinear with the size of the network,
+because W and B only depend on the embedding dimensionality and the size,
+number of features, and not on the size of the graph.
+And this means that graph neural networks are able to generalize to unseen nodes.
+And that's a super cool, uh,
+feature of them, because for example,
+this means that you can train your graph neural network on one graph,
+and you can apply it to a new graph.
+Because you determine matrices [NOISE] W and B here,
+and then you can transfer this,
+uh, to the new network.
+You can, uh, for example,
+train on one organism,
+and transfer this to the new organism here.
+This is, let's say, a biological network.
+This is also very useful for the networks that
+constantly evolve because you can take the snapshot of the network,
+create the computation graphs here,
+and determined the parameters so that when then in production,
+and you know, derives,
+you quickly create a computation graph for it.
+Just do the forward pass,
+and here you have the embedding for it.
+So no- no retraining the model, um, is necessary.
+And that is super cool because it means you can train- train on one graph,
+transfer to another one,
+train on a small graph,
+transfer the model to a big,
+uh, graph, or to an evolving graph.
+So let me summarize,
+uh, the lecture for today and finish here.
+What we did is, we generated node embeddings by
+aggregating no- node neighborhood information.
+We saw our first basic variant of this idea that
+simply averages up the messages coming from the neighbors.
+Um, and the key distinction between different architectures as we are going to see next,
+is that- is how this aggregation process is being done.
+And, uh, what I'm going to discuss in
+the next lecture will be the architecture called, um, um,
+GraphSAGE that generalizes this
+into basically a framework where different types of aggregations,
+different kas- kinds of transformations, uh, can be used.
+So, um, thank you very much, uh,
+for the lecture, um,
+and very happy, uh,
+to take questions now.

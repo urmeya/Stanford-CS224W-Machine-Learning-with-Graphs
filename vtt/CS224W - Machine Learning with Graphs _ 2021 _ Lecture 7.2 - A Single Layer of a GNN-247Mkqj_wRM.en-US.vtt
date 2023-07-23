@@ -1,0 +1,2218 @@
+WEBVTT
+Kind: captions
+Language: en-US
+
+00:00:04.100 --> 00:00:11.910
+So first, let's discuss about how do we define a single layer of a graph neural network, right?
+
+00:00:11.910 --> 00:00:15.180
+So what- what goes into a single layer?
+
+00:00:15.180 --> 00:00:17.685
+A single layer has two components.
+
+00:00:17.685 --> 00:00:21.270
+It has a component of a message transformation.
+
+00:00:21.270 --> 00:00:24.465
+And it has a component of message aggregation,
+
+00:00:24.465 --> 00:00:25.680
+and as I mentioned,
+
+00:00:25.680 --> 00:00:29.070
+different graph neural network architectures basically
+
+00:00:29.070 --> 00:00:33.195
+differ in how these operations are being done,
+
+00:00:33.195 --> 00:00:37.095
+among other kinds of things that differ between them.
+
+00:00:37.095 --> 00:00:39.985
+So what is the idea of a single GNN layer?
+
+00:00:39.985 --> 00:00:42.950
+The idea is that we want to compress a set of messages,
+
+00:00:42.950 --> 00:00:46.025
+a set of vectors coming from the children,
+
+00:00:46.025 --> 00:00:50.225
+from the- from the bottom layer of the neural network.
+
+00:00:50.225 --> 00:00:53.615
+In some sense compress them by aggregating them.
+
+00:00:53.615 --> 00:00:56.810
+And we are going to- to do this as a two-step process,
+
+00:00:56.810 --> 00:00:59.990
+as a message transformation and message aggregation, right?
+
+00:00:59.990 --> 00:01:01.280
+So if we think about this,
+
+00:01:01.280 --> 00:01:05.570
+we are getting a set of children at the- at the bottom, a set of inputs.
+
+00:01:05.570 --> 00:01:07.475
+We have- we have an output.
+
+00:01:07.475 --> 00:01:12.230
+What do we have to do is take the message from each of the child and transform it.
+
+00:01:12.230 --> 00:01:16.565
+Then we have to aggregate these messages into a single message and pass it on.
+
+00:01:16.565 --> 00:01:18.980
+So the way you can think of this is that we get
+
+00:01:18.980 --> 00:01:22.865
+messages, denoted as circles here, from the three neighbors,
+
+00:01:22.865 --> 00:01:24.365
+from the previous layer.
+
+00:01:24.365 --> 00:01:26.810
+We also have our own message, right?
+
+00:01:26.810 --> 00:01:29.555
+Message of the node v from the previous layer.
+
+00:01:29.555 --> 00:01:33.110
+Somehow we want to combine this information to create
+
+00:01:33.110 --> 00:01:38.720
+the next level embedding or to the next level message for this node of interest.
+
+00:01:38.720 --> 00:01:41.840
+What is important here to note is that this is a set.
+
+00:01:41.840 --> 00:01:44.719
+So the ordering in which we are aggregating
+
+00:01:44.719 --> 00:01:48.160
+these messages from the children is not important.
+
+00:01:48.160 --> 00:01:49.905
+What is arbitrary?
+
+00:01:49.905 --> 00:01:51.215
+And for this reason,
+
+00:01:51.215 --> 00:01:55.220
+these aggregation functions that aggregate, that summarize,
+
+00:01:55.220 --> 00:01:57.515
+that compress in some sense,
+
+00:01:57.515 --> 00:02:00.020
+the messages coming from the children have to
+
+00:02:00.020 --> 00:02:02.920
+be order invariant because they shouldn't depend,
+
+00:02:02.920 --> 00:02:06.360
+in which ordering, am I considering the neighbors?
+
+00:02:06.360 --> 00:02:08.915
+Because there is no special ordering to the neighbors,
+
+00:02:08.915 --> 00:02:10.100
+to the lower level,
+
+00:02:10.100 --> 00:02:12.825
+to the children in the network.
+
+00:02:12.825 --> 00:02:15.905
+That's an important detail. Of course,
+
+00:02:15.905 --> 00:02:18.065
+another important detail is that we want to combine
+
+00:02:18.065 --> 00:02:20.735
+information coming from the neighbor- from the neighbors
+
+00:02:20.735 --> 00:02:26.160
+together with a node's own information from the previous layer as denoted here.
+
+00:02:26.160 --> 00:02:30.020
+So I'm connecting information from level l minus 1 to create
+
+00:02:30.020 --> 00:02:34.130
+a message at level l. And I'm collecting information from the neighbors,
+
+00:02:34.130 --> 00:02:35.345
+from the previous layer,
+
+00:02:35.345 --> 00:02:41.620
+as well as from the representation of that node itself at  the previous layer.
+
+00:02:41.620 --> 00:02:45.075
+So let me now make things a bit more precise.
+
+00:02:45.075 --> 00:02:51.635
+So we will talk about message computation as the first operation that we need to decide.
+
+00:02:51.635 --> 00:02:53.960
+And basically, the message computation takes
+
+00:02:53.960 --> 00:02:56.960
+the representation of the node at the previous layer and
+
+00:02:56.960 --> 00:03:02.390
+somehow transforms it into this message information.
+
+00:03:02.390 --> 00:03:08.420
+So each node creates a message which will be sent to other nodes in the next layer.
+
+00:03:08.420 --> 00:03:12.110
+An example of a simple message transformation is that you take
+
+00:03:12.110 --> 00:03:15.540
+the previous layer embedding of a node and multiply
+
+00:03:15.540 --> 00:03:19.120
+it with the matrix W. So this is a simple linear layer,
+
+00:03:19.120 --> 00:03:25.025
+linear transformation, and this is what we talked about in the previous lecture.
+
+00:03:25.025 --> 00:03:27.020
+All right? So that's the first part.
+
+00:03:27.020 --> 00:03:29.615
+Then we need to decide this message function.
+
+00:03:29.615 --> 00:03:32.875
+In this case, it's simply this matrix multiply.
+
+00:03:32.875 --> 00:03:36.200
+The second question is about aggregation.
+
+00:03:36.200 --> 00:03:41.105
+The intuition here is that each node will aggregate the messages from its neighbors.
+
+00:03:41.105 --> 00:03:43.040
+So the idea is that I take now
+
+00:03:43.040 --> 00:03:47.580
+these transformed messages m that we just defined on the previous slide, right?
+
+00:03:47.580 --> 00:03:51.300
+So I take these transformed messages coming from nodes u,
+
+00:03:51.300 --> 00:03:53.729
+from the previous level that I transformed,
+
+00:03:53.729 --> 00:03:59.545
+let's say in this case with W, and I want to aggregate them into a single message.
+
+00:03:59.545 --> 00:04:02.780
+All right, I want to take this thing and kind of compress it, aggregate it.
+
+00:04:02.780 --> 00:04:05.870
+What are some examples of aggregation functions?
+
+00:04:05.870 --> 00:04:09.380
+A summation is a simple aggregation function,
+
+00:04:09.380 --> 00:04:15.260
+an average is an order invariant aggregation function as well as for example, Max,
+
+00:04:15.260 --> 00:04:19.925
+we take the maximum message or to the maximum coordinate-wise value,
+
+00:04:19.925 --> 00:04:21.230
+and that's how we aggregate.
+
+00:04:21.230 --> 00:04:26.545
+And again, all these- all these aggregation functions are order invariant.
+
+00:04:26.545 --> 00:04:30.380
+So for example, one concrete way how you could do this is to say, uh-huh
+
+00:04:30.380 --> 00:04:36.230
+the level l embedding for node v is simply a summation of
+
+00:04:36.230 --> 00:04:44.020
+the transformed messages coming from the neighbors u of that node of interest,
+
+00:04:44.020 --> 00:04:47.905
+v. And this is where the messages from previous layer got
+
+00:04:47.905 --> 00:04:50.750
+transformed and now we simply sum them up to have
+
+00:04:50.750 --> 00:04:54.800
+the embedding for the node at level l. And of course,
+
+00:04:54.800 --> 00:04:56.150
+now this node at level l,
+
+00:04:56.150 --> 00:04:59.735
+to send to- to create a message for level l plus 1.
+
+00:04:59.735 --> 00:05:01.925
+It will take now W l plus 1,
+
+00:05:01.925 --> 00:05:03.530
+multiply it with h,
+
+00:05:03.530 --> 00:05:09.185
+and send it to whoever is above them in the graph neural network structure.
+
+00:05:09.185 --> 00:05:13.175
+So this was now a message operation,
+
+00:05:13.175 --> 00:05:16.884
+message transformation, and message aggregation.
+
+00:05:16.884 --> 00:05:19.395
+One important issue is,
+
+00:05:19.395 --> 00:05:22.430
+if you do it the way I defined it so far is that information
+
+00:05:22.430 --> 00:05:25.610
+from the node itself could get lost, right?
+
+00:05:25.610 --> 00:05:32.530
+Basically, that computation of message for node v for level l does not directly
+
+00:05:32.530 --> 00:05:35.255
+depend on what we have already computed
+
+00:05:35.255 --> 00:05:39.510
+for that node- same node v from the previous level, right?
+
+00:05:39.510 --> 00:05:42.200
+So for example, if I do it simply as I show here,
+
+00:05:42.200 --> 00:05:45.515
+we are simply aggregating information about neighbors,
+
+00:05:45.515 --> 00:05:46.715
+but we don't really say,
+
+00:05:46.715 --> 00:05:48.270
+okay, but who is this node v?
+
+00:05:48.270 --> 00:05:50.165
+What do we know about node v before?
+
+00:05:50.165 --> 00:05:53.790
+So an opportunity here is to actually,
+
+00:05:53.790 --> 00:05:57.460
+to include the previous level embedding of node v.
+
+00:05:57.460 --> 00:06:01.185
+Then we are computing the embedding of v for the next level.
+
+00:06:01.185 --> 00:06:06.230
+So usually basically a different message computation will be performed, right?
+
+00:06:06.230 --> 00:06:07.940
+What do I mean by this is, for example,
+
+00:06:07.940 --> 00:06:12.955
+the message transformation matrix W will be applied to the neighbors u.
+
+00:06:12.955 --> 00:06:17.270
+While there will be a different message aggregation function B that
+
+00:06:17.270 --> 00:06:21.560
+will be applied to the embedding of node v itself.
+
+00:06:21.560 --> 00:06:24.470
+So that's the first difference, right?
+
+00:06:24.470 --> 00:06:29.690
+So that the message from the node itself from previous layer will be multiplied by B,
+
+00:06:29.690 --> 00:06:34.075
+while messages from neighbors from previous layer are going to be multiplied by
+
+00:06:34.075 --> 00:06:39.595
+W. And then the second difference is that after aggregating from neighbors,
+
+00:06:39.595 --> 00:06:43.615
+we can aggregate messages from v itself as well.
+
+00:06:43.615 --> 00:06:47.185
+And usually, this is done via a concatenation or a summation.
+
+00:06:47.185 --> 00:06:49.449
+So to show you an example,
+
+00:06:49.449 --> 00:06:51.490
+the way we can, we can do this is to say,
+
+00:06:51.490 --> 00:06:55.960
+ah-ha, I'm taking my messages from neighbors and I'm aggregating them.
+
+00:06:55.960 --> 00:06:58.675
+Let's say with a- with a summation operator.
+
+00:06:58.675 --> 00:07:02.510
+I'm taking the message from v itself, right,
+
+00:07:02.750 --> 00:07:05.070
+like I defined it up here.
+
+00:07:05.070 --> 00:07:07.960
+And then I'm going to concatenate these two messages
+
+00:07:07.960 --> 00:07:11.020
+simply like concatenate them one next to each other.
+
+00:07:11.020 --> 00:07:15.605
+And that's my next layer embedding for node v. So simply I'm saying,
+
+00:07:15.605 --> 00:07:17.680
+I'm aggregating information from neighbors,
+
+00:07:17.680 --> 00:07:22.595
+plus retaining the information about the node that I already had.
+
+00:07:22.595 --> 00:07:28.520
+And this is now a way how to keep track of the information that the node has
+
+00:07:28.520 --> 00:07:31.160
+already computed about itself so that it doesn't
+
+00:07:31.160 --> 00:07:34.369
+get lost through the layers of propagation,
+
+00:07:34.369 --> 00:07:38.165
+let's say by concatenation here, or by summation.
+
+00:07:38.165 --> 00:07:40.090
+That's another popular choice.
+
+00:07:40.090 --> 00:07:44.075
+So putting all this together, what did we learn?
+
+00:07:44.075 --> 00:07:46.940
+We learned that we have this message where
+
+00:07:46.940 --> 00:07:50.720
+each node from the previous layer takes its own embedding,
+
+00:07:50.720 --> 00:07:53.015
+its own information, transforms it,
+
+00:07:53.015 --> 00:07:55.915
+and sends it up to the parent.
+
+00:07:55.915 --> 00:07:59.540
+This is denoted here through this message transformation function.
+
+00:07:59.540 --> 00:08:03.595
+Usually, this is simply a linear function like a matrix multiply.
+
+00:08:03.595 --> 00:08:06.740
+And then we have this message aggregation step
+
+00:08:06.740 --> 00:08:11.000
+where we aggregate transformed messages from the neighbors, right?
+
+00:08:11.000 --> 00:08:15.155
+So we take these messages m that we have computed here and we aggregated them.
+
+00:08:15.155 --> 00:08:17.090
+We aggregate them with an average,
+
+00:08:17.090 --> 00:08:22.155
+with a summation, or with a maximum pooling type approach.
+
+00:08:22.155 --> 00:08:25.690
+And then what we can also do is,
+
+00:08:25.690 --> 00:08:30.875
+another extension here is to also add a self message and concatenate it.
+
+00:08:30.875 --> 00:08:33.080
+And then after we have done all this,
+
+00:08:33.080 --> 00:08:35.030
+we pass this through a non-linearity,
+
+00:08:35.030 --> 00:08:37.595
+through a non-linear activation function.
+
+00:08:37.595 --> 00:08:42.735
+And this last step is important because it adds expressiveness.
+
+00:08:42.735 --> 00:08:47.200
+Often, you know, this non-linearity is written as sigma.
+
+00:08:47.200 --> 00:08:51.995
+In reality, this can be a rectified linear unit or a sigmoid,
+
+00:08:51.995 --> 00:08:55.085
+or any other specific type of
+
+00:08:55.085 --> 00:09:00.215
+non-linear activation function, popularly other types of neural networks as well.
+
+00:09:00.215 --> 00:09:06.445
+But that's essentially how a single layer of graph neural network looks like.
+
+00:09:06.445 --> 00:09:09.715
+So now that we have seen this in abstract,
+
+00:09:09.715 --> 00:09:11.630
+I want to mention some of
+
+00:09:11.630 --> 00:09:16.325
+the seminal graph neural network architectures that have been developed
+
+00:09:16.325 --> 00:09:18.410
+and kind of interpret them in
+
+00:09:18.410 --> 00:09:23.425
+this unified message transformation, message aggregation framework.
+
+00:09:23.425 --> 00:09:29.375
+So, last lecture, we talked about graph convolutional neural network or a GCN.
+
+00:09:29.375 --> 00:09:31.384
+And I've wrote this equation,
+
+00:09:31.384 --> 00:09:41.840
+I said, ah-ha, the embedding of node v at layer l is simply an average of the embeddings of
+
+00:09:41.840 --> 00:09:48.275
+nodes u that are neighbors of we normalized the by the- by the N-degree of
+
+00:09:48.275 --> 00:09:54.890
+node v and transformed with matrix W and sent through a non-linearity.
+
+00:09:54.890 --> 00:09:56.270
+So now the question is,
+
+00:09:56.270 --> 00:09:59.750
+how can I take this equation that I've written here and write it in
+
+00:09:59.750 --> 00:10:03.515
+this message transformation plus aggregation function.
+
+00:10:03.515 --> 00:10:08.540
+And the way you can- you can do this is simply take this W and distribute it inside.
+
+00:10:08.540 --> 00:10:11.495
+So basically now W times
+
+00:10:11.495 --> 00:10:15.950
+h divided by number of neighbors is the message transformation function.
+
+00:10:15.950 --> 00:10:19.680
+And then the message aggregation function is simply a summation.
+
+00:10:19.680 --> 00:10:21.760
+And then we have a non-linearity here.
+
+00:10:21.760 --> 00:10:25.640
+So this is what a graph convolutional neural network is,
+
+00:10:25.640 --> 00:10:30.420
+in terms of message aggregation and message transformation.
+
+00:10:30.420 --> 00:10:34.195
+Um, so to write it even more explicitly,
+
+00:10:34.195 --> 00:10:36.955
+each neighbor transforms the message by saying,
+
+00:10:36.955 --> 00:10:38.530
+I take my, uh,
+
+00:10:38.530 --> 00:10:40.975
+previous layer embedding, multiply it with w,
+
+00:10:40.975 --> 00:10:42.310
+and divide it by the,
+
+00:10:42.310 --> 00:10:44.245
+uh node degree of v, so, uh,
+
+00:10:44.245 --> 00:10:49.180
+this is normal- normalization by node degree and then the aggregation is a summation
+
+00:10:49.180 --> 00:10:50.920
+over the neighbors, uh,
+
+00:10:50.920 --> 00:10:53.365
+of node v and then applying, uh,
+
+00:10:53.365 --> 00:10:56.410
+a nonlinearity activation function here,
+
+00:10:56.410 --> 00:10:58.375
+uh, denoted as sigma.
+
+00:10:58.375 --> 00:11:01.630
+So this is now a G- GCN written as
+
+00:11:01.630 --> 00:11:06.940
+a message transformation and a message aggregation, uh, type operation.
+
+00:11:06.940 --> 00:11:09.280
+So that's, um, number,
+
+00:11:09.280 --> 00:11:11.980
+uh, the first classical architecture.
+
+00:11:11.980 --> 00:11:16.600
+Uh, the second architecture I want to mention is called GraphSAGE,
+
+00:11:16.600 --> 00:11:19.855
+and GraphSAGE builds- builds upon the GCN,
+
+00:11:19.855 --> 00:11:21.265
+but extends it in, uh,
+
+00:11:21.265 --> 00:11:23.920
+several important, uh, aspects.
+
+00:11:23.920 --> 00:11:26.680
+Uh, the first aspect is that it realizes that
+
+00:11:26.680 --> 00:11:30.220
+this aggregation function is an arbitrary, uh,
+
+00:11:30.220 --> 00:11:33.370
+aggregation function, so it allows for multiple different choices
+
+00:11:33.370 --> 00:11:36.670
+of aggregation functions, not only averaging.
+
+00:11:36.670 --> 00:11:38.140
+And the second thing is,
+
+00:11:38.140 --> 00:11:40.315
+it- it talks about, uh,
+
+00:11:40.315 --> 00:11:42.880
+taking the message from the node itself, uh,
+
+00:11:42.880 --> 00:11:47.935
+transforming it, and then concatenating it with the aggregating- aggregated messages,
+
+00:11:47.935 --> 00:11:51.005
+which adds, uh, a lot of expressive, uh, power.
+
+00:11:51.005 --> 00:11:54.495
+So now let's write the GraphSAGE equation.
+
+00:11:54.495 --> 00:11:56.610
+In this message plus, uh,
+
+00:11:56.610 --> 00:11:58.920
+aggregation type operations, right?
+
+00:11:58.920 --> 00:12:01.140
+Messages computed through the,
+
+00:12:01.140 --> 00:12:03.860
+uh, uh, aggregation operator AGG here.
+
+00:12:03.860 --> 00:12:07.465
+Um, and the way we can think of this is that this is kind of a two-stage approach.
+
+00:12:07.465 --> 00:12:10.720
+First is that, um, uh, we, um,
+
+00:12:10.720 --> 00:12:13.059
+we take the individual messages,
+
+00:12:13.059 --> 00:12:14.500
+um, and transform them,
+
+00:12:14.500 --> 00:12:17.020
+let's say through, uh, linear operations,
+
+00:12:17.020 --> 00:12:19.930
+then we apply the aggregation operator that basically
+
+00:12:19.930 --> 00:12:23.230
+gives me now a summary of the messages coming from the neighbors.
+
+00:12:23.230 --> 00:12:28.000
+And then, uh, the second important step now is that I take the messages coming
+
+00:12:28.000 --> 00:12:33.310
+from the neighbors already aggregated, I concatenate it with v's own,
+
+00:12:33.310 --> 00:12:36.070
+um, um, message or embedding, uh,
+
+00:12:36.070 --> 00:12:37.435
+from the previous layer,
+
+00:12:37.435 --> 00:12:39.145
+concatenate these two together,
+
+00:12:39.145 --> 00:12:40.930
+multiply them with a- with
+
+00:12:40.930 --> 00:12:44.820
+a transformation matrix and pass through a non-linearity, right?
+
+00:12:44.820 --> 00:12:48.900
+So the differences between GCN is here and another more important difference
+
+00:12:48.900 --> 00:12:52.110
+is here that we are concatenating and taking our own,
+
+00:12:52.110 --> 00:12:54.075
+uh, embedding, uh, as well.
+
+00:12:54.075 --> 00:12:59.015
+So, um, to, now to say what kind of aggregation functions can be used?
+
+00:12:59.015 --> 00:13:00.895
+We can simply take, for example,
+
+00:13:00.895 --> 00:13:02.755
+weighted average of neighbors,
+
+00:13:02.755 --> 00:13:06.520
+which is what our GCN is doing.
+
+00:13:06.520 --> 00:13:09.430
+We can, for example, take any kind of pooling,
+
+00:13:09.430 --> 00:13:11.980
+which is, uh, you know, take the, uh, uh,
+
+00:13:11.980 --> 00:13:15.010
+take the- transform the neighbor vectors and apply
+
+00:13:15.010 --> 00:13:18.610
+a symmetric vector function like a min or a max.
+
+00:13:18.610 --> 00:13:20.110
+So you could even have, for example,
+
+00:13:20.110 --> 00:13:21.490
+here as a transformation,
+
+00:13:21.490 --> 00:13:23.530
+you don't have to have a linear transformation.
+
+00:13:23.530 --> 00:13:26.140
+You could have a multilayer perceptron as
+
+00:13:26.140 --> 00:13:29.650
+a message transformation function and then an aggregation.
+
+00:13:29.650 --> 00:13:33.190
+Um, you can also not take the average of the messages,
+
+00:13:33.190 --> 00:13:35.110
+but your sum up the messages.
+
+00:13:35.110 --> 00:13:38.920
+And, uh, these different, um, uh,
+
+00:13:38.920 --> 00:13:42.910
+aggregation functions have different theoretical properties.
+
+00:13:42.910 --> 00:13:48.565
+And we are going to actually talk about the theoretical properties and consequences, uh,
+
+00:13:48.565 --> 00:13:52.885
+of the choice of the aggregation function on the expressive power,
+
+00:13:52.885 --> 00:13:54.040
+uh, of the model,
+
+00:13:54.040 --> 00:13:56.320
+um, in one of the future lectures.
+
+00:13:56.320 --> 00:13:58.120
+And what you could even do, um,
+
+00:13:58.120 --> 00:14:00.490
+if you like, is you could apply an LSTM.
+
+00:14:00.490 --> 00:14:02.755
+So basically you could apply a sequence model, uh,
+
+00:14:02.755 --> 00:14:06.040
+to the- to the messages coming from the neighbors.
+
+00:14:06.040 --> 00:14:10.810
+Um, and here the important thing is that a sequence model is not order invariant.
+
+00:14:10.810 --> 00:14:12.160
+So when you train it,
+
+00:14:12.160 --> 00:14:16.900
+you wanna permute the orderings so that the- you teach the- the sequence model,
+
+00:14:16.900 --> 00:14:18.415
+not to keep, uh,
+
+00:14:18.415 --> 00:14:20.185
+kind of to ignore, uh,
+
+00:14:20.185 --> 00:14:22.810
+the ordering of the messages that it receives.
+
+00:14:22.810 --> 00:14:25.690
+But you could use something like this, um, as a,
+
+00:14:25.690 --> 00:14:29.080
+uh, as an aggregation, uh, uh, operator.
+
+00:14:29.080 --> 00:14:32.335
+So a lot of freedom, uh, to choose here.
+
+00:14:32.335 --> 00:14:35.590
+And then the last thing to mention about
+
+00:14:35.590 --> 00:14:39.715
+GraphSAGE is that adds this notion of l2 normalization.
+
+00:14:39.715 --> 00:14:45.595
+So the idea is that we want to apply l2 normalization to the embeddings at every layer.
+
+00:14:45.595 --> 00:14:47.980
+And when I say l2 normalization,
+
+00:14:47.980 --> 00:14:51.534
+all I mean by that is we wanna measure the distance,
+
+00:14:51.534 --> 00:14:54.010
+some of the squared values, uh,
+
+00:14:54.010 --> 00:14:57.505
+of the entries of the embedding of a given- of a given node,
+
+00:14:57.505 --> 00:14:58.645
+take the square root of that,
+
+00:14:58.645 --> 00:15:00.220
+and then divide by the distance.
+
+00:15:00.220 --> 00:15:02.770
+So basically this means that the Euclidean length of
+
+00:15:02.770 --> 00:15:06.250
+this embedding vector will always be equal to 1.
+
+00:15:06.250 --> 00:15:09.040
+And sometimes this is quite important and,
+
+00:15:09.040 --> 00:15:10.870
+uh, leads to big, uh,
+
+00:15:10.870 --> 00:15:15.520
+performance improvement because without l2 normalization, the embedding, uh,
+
+00:15:15.520 --> 00:15:19.615
+vectors of nodes can have different scales, different lengths, um,
+
+00:15:19.615 --> 00:15:21.095
+and in some cases,
+
+00:15:21.095 --> 00:15:25.325
+normalization of the embedding results in performance improvement.
+
+00:15:25.325 --> 00:15:27.790
+So after l2 normalization step,
+
+00:15:27.790 --> 00:15:29.380
+as I introduced it here,
+
+00:15:29.380 --> 00:15:32.485
+all vectors will have the same, uh, l2 norm.
+
+00:15:32.485 --> 00:15:33.805
+They'll have the same length,
+
+00:15:33.805 --> 00:15:36.040
+which is the length of, uh, 1.
+
+00:15:36.040 --> 00:15:37.345
+Uh, this is how, uh,
+
+00:15:37.345 --> 00:15:39.295
+this is defined, um,
+
+00:15:39.295 --> 00:15:41.365
+if- if you wanna, uh, really see it.
+
+00:15:41.365 --> 00:15:46.165
+So l2 normalization is also an important component, um,
+
+00:15:46.165 --> 00:15:52.600
+when deciding on the design decisions on the specific architecture of the,
+
+00:15:52.600 --> 00:15:55.615
+uh, graph, uh, neural network.
+
+00:15:55.615 --> 00:15:58.015
+And then the last, uh,
+
+00:15:58.015 --> 00:16:03.385
+classical architecture that I wanna talk about is called graph attention network.
+
+00:16:03.385 --> 00:16:05.695
+And here we are going to learn,
+
+00:16:05.695 --> 00:16:07.825
+uh, this concept of an attention.
+
+00:16:07.825 --> 00:16:10.825
+So let me first tell you what a graph attention network is,
+
+00:16:10.825 --> 00:16:14.590
+and then I will define the notion of attention and,
+
+00:16:14.590 --> 00:16:18.100
+uh, how do we learn it and what- what it intuitively means.
+
+00:16:18.100 --> 00:16:20.740
+So, uh, the motivation is the following.
+
+00:16:20.740 --> 00:16:26.455
+Writing graph attention network when we are aggregating messages from the neighbors,
+
+00:16:26.455 --> 00:16:29.125
+we have a weight, um,
+
+00:16:29.125 --> 00:16:32.440
+associated with every neighbor, right?
+
+00:16:32.440 --> 00:16:33.820
+So for every neighbor u,
+
+00:16:33.820 --> 00:16:36.925
+of node v, we have a weight, alpha.
+
+00:16:36.925 --> 00:16:39.430
+And this weight we call attention weight.
+
+00:16:39.430 --> 00:16:46.090
+[NOISE] And the idea is that this weight can now tell me how important of a neighbor, um,
+
+00:16:46.090 --> 00:16:48.430
+is a given- is a given node,
+
+00:16:48.430 --> 00:16:49.480
+or in some sense,
+
+00:16:49.480 --> 00:16:54.100
+how much attention to pay to a given, to a message from a given node u?
+
+00:16:54.100 --> 00:16:55.975
+Because if these weights are different,
+
+00:16:55.975 --> 00:16:59.560
+then messages from different nodes will have different weight,
+
+00:16:59.560 --> 00:17:02.005
+uh, in this summation. That's the idea.
+
+00:17:02.005 --> 00:17:04.435
+So now let's make a step back.
+
+00:17:04.435 --> 00:17:08.065
+Explain why- why- how- how this is motivated,
+
+00:17:08.065 --> 00:17:09.160
+why it's a good idea,
+
+00:17:09.160 --> 00:17:11.875
+and how to, uh, learn these weights.
+
+00:17:11.875 --> 00:17:15.655
+So if you think about the two architectures we talked about so far,
+
+00:17:15.655 --> 00:17:18.085
+so the GCN and GraphSAGE.
+
+00:17:18.085 --> 00:17:22.540
+There is already an implicit notion of this alpha.
+
+00:17:22.540 --> 00:17:28.630
+So alpha_uv is simply 1 over the degree of node v. So basically this is
+
+00:17:28.630 --> 00:17:35.020
+a weight factor or an importance of a message coming from u for the node v. And,
+
+00:17:35.020 --> 00:17:36.610
+uh, so far, you know,
+
+00:17:36.610 --> 00:17:39.190
+this alpha was defined implicitly.
+
+00:17:39.190 --> 00:17:42.460
+Um, and we can actually define it,
+
+00:17:42.460 --> 00:17:45.715
+um, more explicitly or we can actually learn it.
+
+00:17:45.715 --> 00:17:47.245
+Uh, in our case,
+
+00:17:47.245 --> 00:17:49.060
+alpha was actually for all the,
+
+00:17:49.060 --> 00:17:50.410
+uh, incoming no- uh,
+
+00:17:50.410 --> 00:17:52.840
+nodes u, uh, alpha was the same.
+
+00:17:52.840 --> 00:17:58.180
+It only depended on the degree of node v but didn't really depend on the u itself.
+
+00:17:58.180 --> 00:18:01.300
+So it does a very limiting kind of notion of attention, right?
+
+00:18:01.300 --> 00:18:04.000
+So in- in GraphSAGE or GCN,
+
+00:18:04.000 --> 00:18:07.570
+all neighbors are equally important to node v,
+
+00:18:07.570 --> 00:18:10.390
+when aggregating messages and the question is,
+
+00:18:10.390 --> 00:18:13.090
+can we kind of, er, uh, generalize this?
+
+00:18:13.090 --> 00:18:18.115
+Can we generalize this so that we learn how important is a message from a given node,
+
+00:18:18.115 --> 00:18:20.890
+uh, to the node that is aggregating messages, right?
+
+00:18:20.890 --> 00:18:23.380
+So we wanna learn message importances.
+
+00:18:23.380 --> 00:18:27.835
+And this notion of an importance is called attention,
+
+00:18:27.835 --> 00:18:30.880
+and attention- the word attention is kind of inspired
+
+00:18:30.880 --> 00:18:34.570
+by the- by- in a sense with cognitive attention, right?
+
+00:18:34.570 --> 00:18:38.800
+So attention alpha focuses on the important parts of
+
+00:18:38.800 --> 00:18:43.555
+the input data and kind of fades out or ignores, uh, the rest.
+
+00:18:43.555 --> 00:18:48.685
+So the idea is that the neural network should devote more computing power,
+
+00:18:48.685 --> 00:18:53.215
+more attention to that small important part of the input,
+
+00:18:53.215 --> 00:18:55.240
+um, and perhaps, you know,
+
+00:18:55.240 --> 00:18:57.415
+ignore- choose to ignore the rest.
+
+00:18:57.415 --> 00:19:02.665
+Um, and which part of the data is more important depends on the context.
+
+00:19:02.665 --> 00:19:05.305
+And the idea is that we are going to learn, uh,
+
+00:19:05.305 --> 00:19:09.835
+what part of the data is important through the model training process.
+
+00:19:09.835 --> 00:19:14.125
+So we allow the model to learn importance of different,
+
+00:19:14.125 --> 00:19:17.800
+uh, of different pieces of input that it is, uh, receiving.
+
+00:19:17.800 --> 00:19:21.550
+So in our case, we would want to learn this attention weight that
+
+00:19:21.550 --> 00:19:25.375
+will tell us how important is a message coming from node u, uh,
+
+00:19:25.375 --> 00:19:27.070
+to this, uh, node, uh,
+
+00:19:27.070 --> 00:19:29.410
+v. And we want this attention,
+
+00:19:29.410 --> 00:19:32.740
+of course, depend on the u as well as on,
+
+00:19:32.740 --> 00:19:34.600
+uh, v as well.
+
+00:19:34.600 --> 00:19:39.025
+So the question is, right, how do we learn, uh,
+
+00:19:39.025 --> 00:19:43.758
+these, uh, attention weights, these weighting factors, uh, alpha.
+
+00:19:43.758 --> 00:19:48.135
+So the goal is to specify an arbitrary importance, uh,
+
+00:19:48.135 --> 00:19:50.624
+between, um, between neighbors,
+
+00:19:50.624 --> 00:19:52.830
+um, when we're doing message aggregation.
+
+00:19:52.830 --> 00:19:55.635
+And the idea is that we can compute the embedding, uh,
+
+00:19:55.635 --> 00:19:59.840
+of each node in the graph following these attention strategies
+
+00:19:59.840 --> 00:20:04.330
+where nodes attend over the messages coming from the neighborhood,
+
+00:20:04.330 --> 00:20:07.285
+by attend, I mean give different importances to them.
+
+00:20:07.285 --> 00:20:09.550
+And then, uh, we are going to, um,
+
+00:20:09.550 --> 00:20:14.620
+implicitly specify different weights to different nodes, uh, in the neighborhood.
+
+00:20:14.620 --> 00:20:18.655
+And we are going to learn these weights, these importances.
+
+00:20:18.655 --> 00:20:21.505
+The way we are going to do this is,
+
+00:20:21.505 --> 00:20:23.545
+uh, to compute this as a, uh,
+
+00:20:23.545 --> 00:20:26.290
+byproduct of the attention mechanism,
+
+00:20:26.290 --> 00:20:29.095
+where we are going to define this notion of attention mechanism
+
+00:20:29.095 --> 00:20:32.530
+that is going to give us these attention scores or attention weights.
+
+00:20:32.530 --> 00:20:37.045
+So let- let us think about this attention, uh, mechanism, a,
+
+00:20:37.045 --> 00:20:40.120
+by first computing attention coefficients,
+
+00:20:40.120 --> 00:20:43.300
+e_vu across pairs of nodes,
+
+00:20:43.300 --> 00:20:45.715
+uh, u and v based on their messages.
+
+00:20:45.715 --> 00:20:48.895
+So the idea would be that I wanna define some function a,
+
+00:20:48.895 --> 00:20:52.870
+that will take the embedding of node u at previous layer,
+
+00:20:52.870 --> 00:20:55.420
+embedding of node v at previous layer,
+
+00:20:55.420 --> 00:20:57.760
+perhaps transform these two embeddings,
+
+00:20:57.760 --> 00:21:01.795
+and then take these as input and prod- give me a weight, right?
+
+00:21:01.795 --> 00:21:05.320
+And this weight will tell me the importance of, uh,
+
+00:21:05.320 --> 00:21:07.825
+u's message on the, uh,
+
+00:21:07.825 --> 00:21:10.990
+on the node, uh, v. So for example,
+
+00:21:10.990 --> 00:21:12.130
+just to be concrete, right?
+
+00:21:12.130 --> 00:21:16.600
+If I wanna say, what is the attention coefficients e_AB?
+
+00:21:16.600 --> 00:21:18.715
+It's simply some function a,
+
+00:21:18.715 --> 00:21:22.465
+of the embedding of node A at the previous step, uh,
+
+00:21:22.465 --> 00:21:25.750
+and the embedding of node B at the previous step,
+
+00:21:25.750 --> 00:21:28.345
+at the previous layer of the graph neural network,
+
+00:21:28.345 --> 00:21:31.210
+and this will give me now the weight, uh, of this,
+
+00:21:31.210 --> 00:21:34.690
+uh, or importance of this particular, uh, edge.
+
+00:21:34.690 --> 00:21:38.005
+So now that I have these, uh, coefficients,
+
+00:21:38.005 --> 00:21:41.950
+I wanna normalize them to- to get the final attention weight.
+
+00:21:41.950 --> 00:21:44.260
+So what do I mean by, for example, uh,
+
+00:21:44.260 --> 00:21:48.415
+normalize is that we can apply a softmax function,
+
+00:21:48.415 --> 00:21:52.060
+uh, to them so that these attention weights are going to sum to 1.
+
+00:21:52.060 --> 00:21:55.450
+So I take the coefficients e that we have just defined,
+
+00:21:55.450 --> 00:21:58.510
+I, uh, exponentiate them, and then, you know,
+
+00:21:58.510 --> 00:22:02.570
+divide by the s- exponentiated sum of them so that, uh,
+
+00:22:02.570 --> 00:22:04.765
+these, uh, attention weights, uh,
+
+00:22:04.765 --> 00:22:07.390
+alpha now are going to sum to 1.
+
+00:22:07.390 --> 00:22:10.150
+And then, right when I'm doing message aggregation,
+
+00:22:10.150 --> 00:22:15.265
+I can now do a weighted sum based on the attention weights, uh, alpha.
+
+00:22:15.265 --> 00:22:16.690
+So here are the alphas.
+
+00:22:16.690 --> 00:22:19.525
+These are these alphas that depend on e,
+
+00:22:19.525 --> 00:22:20.980
+and e is the,
+
+00:22:20.980 --> 00:22:22.840
+uh, is the, um,
+
+00:22:22.840 --> 00:22:26.305
+is- depends on the previous layer embeddings of nodes, uh,
+
+00:22:26.305 --> 00:22:28.570
+u and v. So, for example,
+
+00:22:28.570 --> 00:22:32.150
+if I now say, how would aggregation for node A look like?
+
+00:22:32.150 --> 00:22:35.640
+The way I would do this is I would compute these attention weights, uh- uh,
+
+00:22:35.640 --> 00:22:39.540
+Alpha_AB, Alpha_AC, and Alpha_AD because B,
+
+00:22:39.540 --> 00:22:41.175
+C, and D are its neighbors.
+
+00:22:41.175 --> 00:22:44.370
+Uh, these alphas will be computed as I- as I show up here,
+
+00:22:44.370 --> 00:22:48.040
+and they will be computed by previous layer embeddings,
+
+00:22:48.040 --> 00:22:49.210
+uh, of these, uh,
+
+00:22:49.210 --> 00:22:51.265
+nodes on the endpoints of the edge.
+
+00:22:51.265 --> 00:22:53.980
+And then my aggregation function is simply
+
+00:22:53.980 --> 00:22:57.985
+a weighted average of the messages coming from the neighbors,
+
+00:22:57.985 --> 00:23:00.700
+where message is, uh- uh- uh,
+
+00:23:00.700 --> 00:23:04.705
+multiplied by the weight Alpha that we have,
+
+00:23:04.705 --> 00:23:08.350
+uh, computed and defined up here.
+
+00:23:08.350 --> 00:23:13.570
+So that's, um, [NOISE] basically the idea of the attention mechanism.
+
+00:23:13.570 --> 00:23:18.010
+Um, now, what is the form of this attention mechanism a?
+
+00:23:18.010 --> 00:23:20.800
+We still haven't decided how embedding of one node
+
+00:23:20.800 --> 00:23:23.650
+and embedding of the other node get- get combined,
+
+00:23:23.650 --> 00:23:25.930
+computed into this, uh- uh,
+
+00:23:25.930 --> 00:23:27.445
+weight, uh, e. Uh,
+
+00:23:27.445 --> 00:23:30.115
+the way it is usually done is,
+
+00:23:30.115 --> 00:23:32.515
+uh- um, you- you have many different choices.
+
+00:23:32.515 --> 00:23:35.785
+Like you could use a simple, uh, linear layer, uh,
+
+00:23:35.785 --> 00:23:39.370
+one layer neural network to do this, um, or, uh,
+
+00:23:39.370 --> 00:23:41.215
+have alpha, uh, this, um,
+
+00:23:41.215 --> 00:23:44.005
+function a have trainable parameters.
+
+00:23:44.005 --> 00:23:45.940
+Uh, so for example a p- uh,
+
+00:23:45.940 --> 00:23:49.060
+a popular choice is to simply to say: let me
+
+00:23:49.060 --> 00:23:52.720
+take the embeddings of nodes A and B at the previous layer,
+
+00:23:52.720 --> 00:23:54.700
+perhaps let me transform them,
+
+00:23:54.700 --> 00:23:55.990
+let me concatenate them,
+
+00:23:55.990 --> 00:23:58.660
+and then apply a linear layer to them,
+
+00:23:58.660 --> 00:24:01.105
+and that will give me this weight, uh, e_AB,
+
+00:24:01.105 --> 00:24:03.925
+to which then I can apply softmax,
+
+00:24:03.925 --> 00:24:05.800
+um, and then based on that, ah,
+
+00:24:05.800 --> 00:24:08.950
+softmax transformed weight, I use that weight as,
+
+00:24:08.950 --> 00:24:11.200
+uh- uh, in the aggregation function.
+
+00:24:11.200 --> 00:24:15.940
+And the important point is that these parameters of fu- of, uh, function a,
+
+00:24:15.940 --> 00:24:18.115
+this attention mechanism a, uh,
+
+00:24:18.115 --> 00:24:21.970
+the- basically parameters of these functions are trained jointly.
+
+00:24:21.970 --> 00:24:24.610
+So we learn the parameters of
+
+00:24:24.610 --> 00:24:28.810
+the attention mechanism together with the weight matrices,
+
+00:24:28.810 --> 00:24:31.150
+so message transformation matrices,
+
+00:24:31.150 --> 00:24:33.460
+um, in the message aggregation step.
+
+00:24:33.460 --> 00:24:37.030
+So we do all this training in an end-to-end, uh, fashion.
+
+00:24:37.030 --> 00:24:39.570
+What this means in
+
+00:24:39.570 --> 00:24:43.110
+practice is that working with this type of attention mechanisms,
+
+00:24:43.110 --> 00:24:45.090
+uh, can be tricky because,
+
+00:24:45.090 --> 00:24:46.685
+uh, this can be quite finicky.
+
+00:24:46.685 --> 00:24:47.820
+Uh, in a sense,
+
+00:24:47.820 --> 00:24:49.710
+may- it's- sometimes it's hard to learn,
+
+00:24:49.710 --> 00:24:51.450
+hard to make it converge,
+
+00:24:51.450 --> 00:24:55.470
+so what we can also do is, uh, to, uh,
+
+00:24:55.470 --> 00:25:00.570
+expand this notion of attention to what is called a multi-head attention.
+
+00:25:00.570 --> 00:25:03.510
+And multi-head attention is a way to stabilize
+
+00:25:03.510 --> 00:25:06.700
+learning process of the attention mechanism,
+
+00:25:06.700 --> 00:25:08.560
+and the idea is quite simple.
+
+00:25:08.560 --> 00:25:12.114
+The idea is that we'll have multiple attention scores.
+
+00:25:12.114 --> 00:25:16.570
+So we are going to have multiple attention mechanisms a, um,
+
+00:25:16.570 --> 00:25:21.520
+and each one- and we are going to train- learn all of them, uh, simultaneously.
+
+00:25:21.520 --> 00:25:25.930
+So the idea is that we would have different functions a,
+
+00:25:25.930 --> 00:25:28.780
+for example, in this case, we would have three different functions a,
+
+00:25:28.780 --> 00:25:31.660
+which means I would- we would get three different, uh,
+
+00:25:31.660 --> 00:25:37.015
+attention coefficients, attention weights for a given edge vu.
+
+00:25:37.015 --> 00:25:40.510
+And then we will do the aggregation,
+
+00:25:40.510 --> 00:25:42.325
+uh, three times, uh,
+
+00:25:42.325 --> 00:25:45.055
+get the aggregated messages from the neighbors,
+
+00:25:45.055 --> 00:25:47.995
+and now we can further aggregate, uh,
+
+00:25:47.995 --> 00:25:51.835
+these messages into a single, uh, aggregated message.
+
+00:25:51.835 --> 00:25:57.265
+And the point here is now that we- when we learn these functions a^1, a^2, a^3,
+
+00:25:57.265 --> 00:26:01.000
+we are going to randomly initialize parameters of each one of them,
+
+00:26:01.000 --> 00:26:02.830
+and through the learning process,
+
+00:26:02.830 --> 00:26:07.090
+each one of them is kind of going to converge to some local minima.
+
+00:26:07.090 --> 00:26:10.195
+But because we are using multiple of them,
+
+00:26:10.195 --> 00:26:13.705
+and we are averaging their transformations together,
+
+00:26:13.705 --> 00:26:18.685
+this will basically allow our model to- to be- to be more robust,
+
+00:26:18.685 --> 00:26:21.610
+it will allow our learning process not to get
+
+00:26:21.610 --> 00:26:25.525
+stuck in some weird part of the optimization space,
+
+00:26:25.525 --> 00:26:26.815
+um, and, kind of,
+
+00:26:26.815 --> 00:26:28.360
+it will work, uh, better,
+
+00:26:28.360 --> 00:26:29.515
+uh, on the average.
+
+00:26:29.515 --> 00:26:33.775
+So the idea of this multi-head attention is- is simple.
+
+00:26:33.775 --> 00:26:36.790
+To summarize, is that we are going to have
+
+00:26:36.790 --> 00:26:41.215
+multiple attention weights on the- on the same edge,
+
+00:26:41.215 --> 00:26:43.375
+and we are going to use them, uh,
+
+00:26:43.375 --> 00:26:45.940
+separately in message aggregation,
+
+00:26:45.940 --> 00:26:48.805
+and then the final message that we get
+
+00:26:48.805 --> 00:26:51.820
+for a- for a node will be simply the aggregation,
+
+00:26:51.820 --> 00:26:56.950
+like the average, of these individual attention-based, uh, aggregations.
+
+00:26:56.950 --> 00:27:00.445
+One important detail here is that each of these different, uh,
+
+00:27:00.445 --> 00:27:05.215
+Alphas has to be predicted with a different function a,
+
+00:27:05.215 --> 00:27:06.865
+and each of these functions a,
+
+00:27:06.865 --> 00:27:09.610
+has to be initialized with a random, uh,
+
+00:27:09.610 --> 00:27:14.380
+different set of starting parameters so that each one gets a chance to,
+
+00:27:14.380 --> 00:27:16.195
+kind of, converge to some,
+
+00:27:16.195 --> 00:27:18.070
+uh, local, uh, minima.
+
+00:27:18.070 --> 00:27:22.555
+Uh, that's the idea and that adds to the robustness and stabilizes,
+
+00:27:22.555 --> 00:27:24.160
+uh, the learning process.
+
+00:27:24.160 --> 00:27:28.825
+So this is what I wanted to say about the attention mechanism,
+
+00:27:28.825 --> 00:27:30.730
+and how do we define it?
+
+00:27:30.730 --> 00:27:37.330
+So next, let me defi- let me discuss a bit the benefits of the attention mechanism.
+
+00:27:37.330 --> 00:27:41.650
+And the key benefit is that this allows implicitly for
+
+00:27:41.650 --> 00:27:46.045
+specifying different importance values to different neighbors.
+
+00:27:46.045 --> 00:27:51.190
+Um, it is computationally efficient in a sense that computation of attention,
+
+00:27:51.190 --> 00:27:55.870
+uh, coefficient can be parallelized across all the incoming messages, right?
+
+00:27:55.870 --> 00:27:56.995
+For every incoming message,
+
+00:27:56.995 --> 00:27:59.710
+I compute the attention weight, uh,
+
+00:27:59.710 --> 00:28:02.320
+by applying function a that only depends on
+
+00:28:02.320 --> 00:28:04.930
+the embedding of one node and the embedding of the other node,
+
+00:28:04.930 --> 00:28:06.670
+uh, in the previous layer,
+
+00:28:06.670 --> 00:28:08.665
+um, so this is good.
+
+00:28:08.665 --> 00:28:12.790
+It is, uh, in some sense storage-efficient because, um,
+
+00:28:12.790 --> 00:28:15.940
+sparse matrix operators do not require,
+
+00:28:15.940 --> 00:28:18.625
+um- um, too many non-zero elements.
+
+00:28:18.625 --> 00:28:22.870
+Basically, I need one entry per node and one entry per edge,
+
+00:28:22.870 --> 00:28:24.610
+so, uh, you know,
+
+00:28:24.610 --> 00:28:27.655
+that's cheap, that's linear in the amount of data we have, um,
+
+00:28:27.655 --> 00:28:29.649
+and it has a fixed number of parameters,
+
+00:28:29.649 --> 00:28:31.195
+meaning the, uh, mesh,
+
+00:28:31.195 --> 00:28:36.910
+the- the attention mechanism function a has a fixed number of parameters that is,
+
+00:28:36.910 --> 00:28:40.435
+uh, independent of the graph size.
+
+00:28:40.435 --> 00:28:43.210
+Another important aspect is that,
+
+00:28:43.210 --> 00:28:45.130
+uh, attention weights are localized.
+
+00:28:45.130 --> 00:28:47.830
+They attend to local network neighborhoods,
+
+00:28:47.830 --> 00:28:51.835
+so basically tell you what part of the neighborhood to focus on,
+
+00:28:51.835 --> 00:28:53.335
+um, and they generalize,
+
+00:28:53.335 --> 00:28:55.030
+meaning that they- they give me this, uh,
+
+00:28:55.030 --> 00:28:58.780
+inductive capability, which means that, um,
+
+00:28:58.780 --> 00:29:02.710
+this is a shared edge- edgewise mechanism and
+
+00:29:02.710 --> 00:29:06.580
+does not depend on the graph structure- so- on the global graph structure.
+
+00:29:06.580 --> 00:29:09.280
+So it means can I can transfer it across the graphs,
+
+00:29:09.280 --> 00:29:14.470
+so this function A is transferable between graphs or from one part of the graph,
+
+00:29:14.470 --> 00:29:16.105
+uh, to the next part of the graph.
+
+00:29:16.105 --> 00:29:19.570
+So, um, these are the benefits and kind of the discussion,
+
+00:29:19.570 --> 00:29:22.285
+uh, of the attention mechanism.
+
+00:29:22.285 --> 00:29:24.670
+To give you an example,
+
+00:29:24.670 --> 00:29:27.070
+um, here is, um, uh,
+
+00:29:27.070 --> 00:29:29.320
+an example of a, um,
+
+00:29:29.320 --> 00:29:32.455
+uh, of a network, uh, called Quora.
+
+00:29:32.455 --> 00:29:37.045
+This is a citation network of different papers coming from different disciplines.
+
+00:29:37.045 --> 00:29:38.890
+And different disciplines,
+
+00:29:38.890 --> 00:29:43.794
+different publication classes here are colored in different, uh, colors.
+
+00:29:43.794 --> 00:29:46.495
+And, uh, what we tried to show here is with
+
+00:29:46.495 --> 00:29:50.965
+different edge thickness is the attention score um,
+
+00:29:50.965 --> 00:29:53.620
+between a pair of nodes uh, i and j.
+
+00:29:53.620 --> 00:29:56.575
+So it's simply a normalized attention score by basically saying,
+
+00:29:56.575 --> 00:29:58.450
+what is the attention of i to j,
+
+00:29:58.450 --> 00:30:00.100
+and what's attention of uh,
+
+00:30:00.100 --> 00:30:03.475
+j to i across different uh, layers uh,
+
+00:30:03.475 --> 00:30:06.250
+k. Notice that attentions,
+
+00:30:06.250 --> 00:30:08.110
+um, can be asymmetric, right?
+
+00:30:08.110 --> 00:30:09.550
+One mes- the, uh,
+
+00:30:09.550 --> 00:30:12.745
+message from you to me might be very important,
+
+00:30:12.745 --> 00:30:15.415
+while message from me to you [LAUGHTER], for example,
+
+00:30:15.415 --> 00:30:16.480
+might be less important,
+
+00:30:16.480 --> 00:30:19.645
+so do- it doesn't have to be symmetric.
+
+00:30:19.645 --> 00:30:22.000
+And, um, if you look at,
+
+00:30:22.000 --> 00:30:24.085
+you know, in terms of improvements,
+
+00:30:24.085 --> 00:30:26.560
+for example, the graph attention networks can
+
+00:30:26.560 --> 00:30:28.990
+give you quite a bit of improvement over, let's say,
+
+00:30:28.990 --> 00:30:33.145
+the graph convolutional neural network, uh, because, uh,
+
+00:30:33.145 --> 00:30:37.360
+because of this attention mechanism and allowing you to learn what to
+
+00:30:37.360 --> 00:30:42.805
+focus- what to focus on and which sub-parts of the network, uh, to learn from.
+
+00:30:42.805 --> 00:30:45.985
+So this is an example of graph attention network,
+
+00:30:45.985 --> 00:30:47.665
+how it learns attentions,
+
+00:30:47.665 --> 00:30:51.565
+and of course there has been many, uh, upgrades, iterations,
+
+00:30:51.565 --> 00:30:55.060
+of this idea of attention on graph neural networks,
+
+00:30:55.060 --> 00:30:56.800
+but the graph attention network,
+
+00:30:56.800 --> 00:30:59.905
+you know, two years ago was, uh,
+
+00:30:59.905 --> 00:31:03.340
+was the one that first developed and proposed depth.
+
+00:31:03.340 --> 00:31:06.145
+So, um, this is, uh, quite exciting.
+
+00:31:06.145 --> 00:31:10.060
+So, uh, to summarize what have we learned so far.
+
+00:31:10.060 --> 00:31:12.520
+We have learned that, uh,
+
+00:31:12.520 --> 00:31:16.180
+about classical graph neural network layers and how
+
+00:31:16.180 --> 00:31:20.335
+they are defined and what kind of components do they include.
+
+00:31:20.335 --> 00:31:22.270
+Um, and they can often, you know,
+
+00:31:22.270 --> 00:31:25.780
+we can often get better performance by- by,
+
+00:31:25.780 --> 00:31:27.805
+uh, combining different aspects, uh,
+
+00:31:27.805 --> 00:31:29.215
+in terms of design,
+
+00:31:29.215 --> 00:31:31.360
+um, and we can also include,
+
+00:31:31.360 --> 00:31:32.875
+as I will talk about later,
+
+00:31:32.875 --> 00:31:37.990
+other modern deep learning modules into graph neural network design, right?
+
+00:31:37.990 --> 00:31:42.310
+Like for example, we'll- I'm going to talk more about batch normalization, dropout,
+
+00:31:42.310 --> 00:31:44.530
+you can choose different activation function,
+
+00:31:44.530 --> 00:31:47.200
+attention, as well as aggregation.
+
+00:31:47.200 --> 00:31:52.960
+So these are kind of transformations and components you can choose to pick,
+
+00:31:52.960 --> 00:31:59.605
+um, in order to design an effective architecture for your- for your problem.
+
+00:31:59.605 --> 00:32:02.125
+So as I mentioned,
+
+00:32:02.125 --> 00:32:05.500
+many kind of modern deep learning modules or techniques can
+
+00:32:05.500 --> 00:32:09.175
+be incorporated or generalized to graph neural networks.
+
+00:32:09.175 --> 00:32:11.215
+Um, there is- like for example,
+
+00:32:11.215 --> 00:32:14.890
+I'm going to talk about- next about batch normalization,
+
+00:32:14.890 --> 00:32:17.590
+which stabilizes neural network training.
+
+00:32:17.590 --> 00:32:22.405
+I'm going to talk about dropout that allows us to prevent over-fitting.
+
+00:32:22.405 --> 00:32:26.800
+Um, we talked about attention to- attention mechanism that
+
+00:32:26.800 --> 00:32:31.540
+controls the importance of messages coming from different parts of the neighborhood,
+
+00:32:31.540 --> 00:32:35.335
+um, and we can also talk about skip connections, uh, and so on.
+
+00:32:35.335 --> 00:32:39.385
+So, um, let me talk about some of these concepts,
+
+00:32:39.385 --> 00:32:41.755
+uh, in a bit more, uh, detail.
+
+00:32:41.755 --> 00:32:47.170
+So first, I wanna talk about the notion of batch normalization and
+
+00:32:47.170 --> 00:32:52.255
+the goal of batch normalization is to stabilize training of graph neural networks.
+
+00:32:52.255 --> 00:32:54.565
+And the idea is that given a batch of inputs,
+
+00:32:54.565 --> 00:32:57.160
+given a batch of data points, in our case,
+
+00:32:57.160 --> 00:32:58.600
+a batch of node embeddings,
+
+00:32:58.600 --> 00:33:05.020
+we wanna re-center node embeddings to zero mean and scale them to have unit variance.
+
+00:33:05.020 --> 00:33:07.945
+So to- to be very precise what we mean by this,
+
+00:33:07.945 --> 00:33:09.460
+I'm given a set of inputs,
+
+00:33:09.460 --> 00:33:12.945
+in our case this would be vectors of, uh, node embeddings.
+
+00:33:12.945 --> 00:33:17.115
+I then can compute what for- for every coordinate,
+
+00:33:17.115 --> 00:33:19.860
+what is the mean value of that coordinate and what is
+
+00:33:19.860 --> 00:33:22.830
+the variance along that coordinate, uh,
+
+00:33:22.830 --> 00:33:24.180
+of the vector, uh,
+
+00:33:24.180 --> 00:33:26.250
+acro- across this n, uh,
+
+00:33:26.250 --> 00:33:30.725
+input points, X, that are part of a- of a mini-batch.
+
+00:33:30.725 --> 00:33:35.185
+And then, um, I can also have, um, in this case,
+
+00:33:35.185 --> 00:33:37.429
+I can have, um, uh, um,
+
+00:33:37.429 --> 00:33:40.825
+uh, then, uh, you know, there is the input,
+
+00:33:40.825 --> 00:33:45.340
+there is the output that are two trainable parameters, gamma,
+
+00:33:45.340 --> 00:33:47.920
+uh, and beta, and then I can,
+
+00:33:47.920 --> 00:33:50.770
+uh, come up with the output that is simply,
+
+00:33:50.770 --> 00:33:53.110
+um, I take these inputs x,
+
+00:33:53.110 --> 00:33:57.640
+I standardize them in a sense that I subtract the mean and divide by
+
+00:33:57.640 --> 00:34:02.260
+the variance along that dimension so now these X's have, uh,
+
+00:34:02.260 --> 00:34:06.640
+0 mean and unit variance and then I can further learn how to
+
+00:34:06.640 --> 00:34:11.800
+transform them by basically linearly transforming them by multiplying with gamma and,
+
+00:34:11.800 --> 00:34:14.470
+uh, adding a bias factor,
+
+00:34:14.470 --> 00:34:17.620
+uh- uh, bias term, beta.
+
+00:34:17.620 --> 00:34:20.770
+And I do this independently for every coordinate,
+
+00:34:20.770 --> 00:34:22.540
+for every dimension of,
+
+00:34:22.540 --> 00:34:25.750
+uh, every data point of every embedding,
+
+00:34:25.750 --> 00:34:27.595
+i, that is in the mini batch.
+
+00:34:27.595 --> 00:34:32.800
+So to summarize, batch normalization stabilizes training,
+
+00:34:32.800 --> 00:34:35.440
+it first standardizes the data.
+
+00:34:35.440 --> 00:34:39.130
+So stand- to standardize means subtract the mean,
+
+00:34:39.130 --> 00:34:40.960
+divide by the, uh,
+
+00:34:40.960 --> 00:34:42.445
+by the standard deviation.
+
+00:34:42.445 --> 00:34:46.930
+So this means now X has 0 mean and variance of 1,
+
+00:34:46.930 --> 00:34:51.790
+so unit variance, and then I can also learn, uh, these parameters,
+
+00:34:51.790 --> 00:34:55.989
+beta and gamma, that now linearly transform X
+
+00:34:55.989 --> 00:35:02.330
+along each dimension and this is now the output of the, uh, batch normalization.
+
+00:35:03.120 --> 00:35:08.635
+Um, the second technique I wanna discuss is called, uh, dropout.
+
+00:35:08.635 --> 00:35:14.725
+And the idea- and what this allows us to do in neural networks is prevent over-fitting.
+
+00:35:14.725 --> 00:35:17.455
+Um, and the idea is that during training,
+
+00:35:17.455 --> 00:35:19.795
+with some small probability P,
+
+00:35:19.795 --> 00:35:23.275
+a random set of neurons will be set to 0.
+
+00:35:23.275 --> 00:35:25.960
+Um, and, uh, during testing,
+
+00:35:25.960 --> 00:35:28.450
+we are going to use all the neurons,
+
+00:35:28.450 --> 00:35:29.470
+uh, of the network.
+
+00:35:29.470 --> 00:35:30.835
+So the idea is if you have a,
+
+00:35:30.835 --> 00:35:32.950
+let's say, feed-forward neural network,
+
+00:35:32.950 --> 00:35:36.760
+the idea is that some of the neurons you set to 0 so
+
+00:35:36.760 --> 00:35:40.690
+that information now flows only between the neutrons that are not,
+
+00:35:40.690 --> 00:35:42.250
+uh, set to 0.
+
+00:35:42.250 --> 00:35:46.630
+And the idea here is that this forces the neural network to be
+
+00:35:46.630 --> 00:35:50.770
+more robust to corrupted data or to corrupted inputs.
+
+00:35:50.770 --> 00:35:54.340
+That's, uh, the idea and because the neural network is now more robust,
+
+00:35:54.340 --> 00:35:58.540
+you- it prevents neural network, uh, from over-fitting.
+
+00:35:58.540 --> 00:36:01.360
+In a graph neural network,
+
+00:36:01.360 --> 00:36:06.025
+dropout is applied to the linear layer in the message function.
+
+00:36:06.025 --> 00:36:10.300
+So the idea is that when we take the message from, uh,
+
+00:36:10.300 --> 00:36:15.940
+node u from the previous layer and we were multiplying it with this matrix W here,
+
+00:36:15.940 --> 00:36:17.995
+uh, to this linear layer,
+
+00:36:17.995 --> 00:36:21.850
+to this W, we can now apply dropout, right?
+
+00:36:21.850 --> 00:36:27.250
+Rather than saying here are the inputs multiplied with W to get the outputs m,
+
+00:36:27.250 --> 00:36:30.490
+you can now basically set some of the parts,
+
+00:36:30.490 --> 00:36:31.930
+uh, of the input, uh,
+
+00:36:31.930 --> 00:36:34.390
+um, as well as the output, uh,
+
+00:36:34.390 --> 00:36:38.815
+to 0, and this way, mimic the dropout.
+
+00:36:38.815 --> 00:36:41.260
+That's the- that's the idea,
+
+00:36:41.260 --> 00:36:43.225
+and, uh, as I said,
+
+00:36:43.225 --> 00:36:44.620
+in terms of dropout,
+
+00:36:44.620 --> 00:36:47.755
+what it does is it helps with, um,
+
+00:36:47.755 --> 00:36:52.060
+preventing over-fitting of, uh, neural networks.
+
+00:36:52.060 --> 00:36:56.890
+The next component of our graph
+
+00:36:56.890 --> 00:37:01.600
+neural network layer is in terms of non-linear activation function.
+
+00:37:01.600 --> 00:37:04.180
+Right, and the idea is that we apply this, uh,
+
+00:37:04.180 --> 00:37:07.390
+activation to each dimension of the,
+
+00:37:07.390 --> 00:37:10.210
+uh, of the embedding X.
+
+00:37:10.210 --> 00:37:14.125
+What we can do is apply a rectified linear unit,
+
+00:37:14.125 --> 00:37:17.800
+which is defined simply as the maximum of x and 0,
+
+00:37:17.800 --> 00:37:21.145
+so the way you can think of it based on the inputs- input x,
+
+00:37:21.145 --> 00:37:22.960
+the red line gives you the output.
+
+00:37:22.960 --> 00:37:24.535
+So if the x is negative,
+
+00:37:24.535 --> 00:37:25.720
+the output is 0,
+
+00:37:25.720 --> 00:37:28.080
+and if x is positive, the output is,
+
+00:37:28.080 --> 00:37:29.655
+uh, x itself, uh,
+
+00:37:29.655 --> 00:37:33.780
+and this is most commonly used, um, activation function.
+
+00:37:33.780 --> 00:37:38.340
+And we can also apply a sigmoid activation function.
+
+00:37:38.340 --> 00:37:40.290
+A sigmoid is defined here,
+
+00:37:40.290 --> 00:37:41.700
+here is its shape.
+
+00:37:41.700 --> 00:37:44.145
+So as a function of the input,
+
+00:37:44.145 --> 00:37:46.710
+the output will be- will be on value 0 to
+
+00:37:46.710 --> 00:37:49.525
+1 and this basically means that you can take a
+
+00:37:49.525 --> 00:37:54.280
+x that- that has a domain from minus infinity to plus infinity and kind
+
+00:37:54.280 --> 00:38:00.235
+of transform it into something- to- to the bounded output from 0 to 1.
+
+00:38:00.235 --> 00:38:03.250
+And this is used when you wanna restrict the range of
+
+00:38:03.250 --> 00:38:07.060
+your embeddings when you wanna restrict the range of your output.
+
+00:38:07.060 --> 00:38:13.270
+And then what empirically works best is called a parametric ReLU, uh,
+
+00:38:13.270 --> 00:38:16.675
+and parametric ReLU is defined as the maximum of
+
+00:38:16.675 --> 00:38:20.470
+x and 0 plus some trainable parameter alpha,
+
+00:38:20.470 --> 00:38:23.530
+minimum of x and 0.
+
+00:38:23.530 --> 00:38:26.635
+So this basically means that empirically,
+
+00:38:26.635 --> 00:38:29.215
+uh, if x is greater than 0, uh,
+
+00:38:29.215 --> 00:38:32.395
+you output x itself and if it's less than 0,
+
+00:38:32.395 --> 00:38:36.715
+you- you output some x multiplied by some coefficient,
+
+00:38:36.715 --> 00:38:38.350
+uh, a, in this case.
+
+00:38:38.350 --> 00:38:40.690
+This is not an attention weight,
+
+00:38:40.690 --> 00:38:43.330
+this is a different coefficient, uh, we trained,
+
+00:38:43.330 --> 00:38:47.800
+and now the shape of the parametric ReLU looks like I show
+
+00:38:47.800 --> 00:38:53.515
+here and empirically this works better than ReLU because you can train this,
+
+00:38:53.515 --> 00:38:55.855
+uh, parameter, uh, A.
+
+00:38:55.855 --> 00:39:00.955
+So, uh, to summarize what we have discussed and what we have learned so far,
+
+00:39:00.955 --> 00:39:02.470
+we talked about, uh,
+
+00:39:02.470 --> 00:39:05.260
+modern deep learning modules that can be included into
+
+00:39:05.260 --> 00:39:09.895
+graph neural network layers to achieve even better performance,
+
+00:39:09.895 --> 00:39:12.340
+we discussed about linear transformations,
+
+00:39:12.340 --> 00:39:17.545
+batch normalization, dropout, different activation functions,
+
+00:39:17.545 --> 00:39:19.465
+and we also discussed the, uh,
+
+00:39:19.465 --> 00:39:22.585
+attention mechanism as well as different ways,
+
+00:39:22.585 --> 00:39:25.350
+uh, then to aggregate, uh, the messages.
+
+00:39:25.350 --> 00:39:28.695
+Um, if you wanna play with these different,
+
+00:39:28.695 --> 00:39:31.605
+um, architectural choices in an easy way,
+
+00:39:31.605 --> 00:39:37.330
+we have actually developed a package called GraphGym that basically allows you to,
+
+00:39:37.330 --> 00:39:40.720
+very quickly and easily try out, uh,
+
+00:39:40.720 --> 00:39:45.835
+and test out different design choices to find the one that works best,
+
+00:39:45.835 --> 00:39:48.760
+uh, on your, uh, individual, uh, problem.
+
+00:39:48.760 --> 00:39:50.650
+So, uh, if you click this, this is a link,
+
+00:39:50.650 --> 00:39:52.900
+it will lead you to GitHub, um,
+
+00:39:52.900 --> 00:39:56.170
+and you can play with this code to see
+
+00:39:56.170 --> 00:39:59.815
+how different design choices make a practical difference,
+
+00:39:59.815 --> 00:40:01.180
+uh, to your own, uh,
+
+00:40:01.180 --> 00:40:03.980
+application or use case.
+

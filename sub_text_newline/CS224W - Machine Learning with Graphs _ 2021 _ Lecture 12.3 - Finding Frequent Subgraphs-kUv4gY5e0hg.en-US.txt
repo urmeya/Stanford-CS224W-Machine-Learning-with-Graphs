@@ -1,0 +1,857 @@
+So far, we have been
+talking about the problem
+where we are given
+a query graph and we
+want to predict
+or identify a way
+that a given query graph is
+a subgraph in a larger target
+graph.
+Now, we are going to generalize
+this approach we just
+talked about to the problem
+of finding frequent subgraphs.
+So let me tell you
+what this problem is.
+What we would like to do is to
+talk about frequent subgraph
+mining.
+So first, we discussed
+in the previous lecture
+about subgraphs and motifs
+and we defined them.
+And then we talked about the
+problem of a neural subgraph
+representation and be
+able to quickly say
+whether a given query graph is
+a subgraph in a bigger target
+graph.
+Now, we are going to
+further expand this
+to frequent subgraph mining.
+So here is the problem, the
+idea is that given a large graph
+we would like to identify
+what are the building blocks?
+What are the
+frequently occurring
+subgraphs that are part of
+this bigger target graph?
+And this is called the
+frequent subgraph mining
+where basically we
+want to identify
+these frequently occurring
+building blocks of a big graph.
+And generally, using
+combinatorial approaches
+the way you would approach this
+problem is that, by the finding
+most frequent size-k
+subgraphs requires
+solving two challenges.
+First is that, we want
+to enumerate or consider
+all size-k connected
+subgraphs, right, and then
+each of these connected
+subgraphs of size-k acts
+like a query which we then want
+to identify in the target graph
+to count its occurrence.
+So basically this
+means that, in order
+to identify frequent subgraphs
+of a given size we first
+have to identify what is
+the universe of subgraphs
+of a given size.
+And then for each
+of these subgraphs
+find its frequency in
+the given target graph.
+So this is how traditional
+approaches to this would work.
+So for example,
+if I'm interested
+in connected subgraphs
+undirected of size-3
+then there are two possible such
+subgraphs that are shown here.
+I generated them so this is step
+1, and then for each of them
+I would want to ask, what is the
+frequency of them in the larger
+target graph?
+And here basically I
+would need to count them.
+So for example, for this let's
+say motif subgraphs of size-3
+here these different
+green polygons
+show the instances
+of this given motif,
+so its frequency equals to 3.
+So this is a hard
+combinatorial problem
+because just knowing if
+a certain subgraph exists
+in a given larger graph is a
+hard computational problem,
+right?
+This is essentially a
+subgraph isomorphism problem.
+The frequent subgraph
+counting is even bigger,
+it's kind of even a harder
+problem because first we
+want to know the frequency
+of a given subgraph
+and then we want to
+find the subgraphs that
+are the most frequent out of all
+possible subgraphs of a given
+size.
+So because the number of
+subgraphs of a given size
+increases
+super-exponentially, you
+are basically battling two
+exponential algorithms.
+First is the counting
+and the second one
+is the number of possible
+things you have to count, right?
+We saw how the number of motifs
+or how the number of subgraphs
+increases super-exponentially
+with their size.
+So traditional
+combinatorial approaches
+can only handle subgraphs
+between size, let's say 3,
+to 5, 6, maybe 7.
+Because the number of them
+increases so drastically
+and then just counting
+each one of them
+to determine their
+frequency is computationally
+expensive as well.
+So what we are going to
+do in this lecture is
+we are going to talk about
+how can we use representation
+learning and graph
+neural networks to solve
+this hard combinatorial problem?
+As I said finding
+frequent subgraphs
+is computationally hard because
+there are two problems that
+are both exponential.
+First is you get a
+combinatorial explosion
+in the number of
+possible patterns,
+possible subgraphs
+of a given size.
+And then given one of
+these possible subgraphs
+you have to count it, you
+have to find its frequency
+in the big target graph
+so that then you can say,
+here are the let's say
+10 most frequent when
+you kind of sort them by
+their decreasing frequency.
+So both of these by
+themselves are hard.
+So we are going to
+elegantly sidestep
+these hard
+combinatorial problems
+by using representation
+learning and show how
+we can tackle these challenges.
+The combinatorial explosion
+will be of possible subgraphs
+will be attained by organizing
+the search space cleverly.
+And then the problem of subgraph
+isomorphism and subgraph
+counting will be tackled
+by graph neural networks.
+So let me give you a bit
+more details about how
+we are going to do this.
+So for counting, we are actually
+using the graph neural network
+to predict a frequency
+of a given subgraph.
+So basically what
+we are going to do
+is we are going to take a big
+target graph and embed it.
+And then when a small
+query graph comes
+we are going to
+predict its frequency.
+So that rather than
+directly counting it
+we are just going to
+predict its frequency.
+So that will be the
+first innovation.
+And then the second
+innovation, now,
+rather than predicting the
+frequency of all size scale
+let's say k's 5, 10,
+20, connected subgraphs
+because there is super
+exponentially many of them,
+we are actually going to
+develop a search procedure that
+will start with a
+small subgraph and grow
+it node by node until it
+reaches a desirable size,
+and this way we will also
+try to grow it in such a way
+that its frequency
+will be higher.
+The important point
+here is because we
+are talking about
+frequency subgraph mining,
+we are only interested in
+the most frequent subgraphs
+and the most frequent
+motifs and not
+the frequency of all the motifs.
+So that's why the search
+procedure will be useful.
+So let's look into
+this problem more,
+let's try to
+understand it better.
+So the problem set up for
+the frequent motif mining
+is the following.
+We are given a
+large target graph
+G sub T and a subgraph
+size parameter k,
+as well as the number
+of desired results r.
+And the goal is to identify
+among all possible graphs
+on k node out of them that have
+the highest frequency in G sub
+T, right?
+So I want to find r most
+frequent subgraphs on k nodes
+in a given target graph G sub T.
+And here for the
+frequency definition
+we are going to use what we
+call the node level frequency
+definition, where this is the
+number of nodes u in target
+graph T, G sub T for which
+some subgraph of G sub T
+is isomorphic to our query and
+the isomorphism maps node u
+to node v.
+And perhaps the best way
+to understand this is,
+imagine I have my
+target graph, it's
+a kind of a star with
+100 spokes and imagine
+I have a query graph that
+is a star on 6 spokes.
+And imagine that I say this
+is the anchor I care about,
+then the frequency of this
+given query in the target graph
+will be exactly 1 because
+the anchor is going
+to map to the center node
+and that's the only way how
+to map this query graph
+to the target graph
+while also mapping
+the anchor node to one
+of the nodes in the
+target graph, right?
+So rather here having G
+sub Q frequency of 100 to 6
+it will have just frequency
+of 1 because there
+is only one way to map this
+anchor node to the underlying G
+sub T. So this
+frequency definition
+is more robust to this
+combinatorial explosion
+when like I try to
+illustrate here.
+So that's the frequency
+definition we care about.
+So now the method that
+we talk about is SPMiner
+and it's a neural network model
+to identify frequent motifs.
+And the way this is going
+to work is the following.
+We are going to give
+an input graph G sub T
+and we are going to
+decompose it into
+node anchored neighborhoods.
+And then we are going to use a
+graph neural network to embed
+each of these neighborhoods.
+And this is exactly what we have
+been talking in lecture 12.2,
+right, where we talked
+about how do you basically
+take the graph, decompose
+it into node overlapping
+node anchored neighborhoods--
+and then use the encoder,
+use the graph neural network to
+basically embed every dot here
+as a different neighborhood
+and you embed it
+in the embedding space.
+So this will be
+the encoder part.
+What is new in this
+part of the lecture
+is the last part
+where we will have
+what we call a search procedure
+to find frequent subgraphs
+by growing our motif.
+So we are going to start
+with a trivial motif of two
+nodes and an edge
+and then we are
+going to iteratively
+grow it while trying
+to preserve its frequency.
+We are going to say, how
+do I grow this motif so
+that its frequency remains high?
+And when I reach the
+desired size of the motif,
+the size-k I'm going to stop
+and say, here is the motif,
+this is its predicted frequency.
+So the point is that,
+rather than trying out
+let's say all possible
+graphs on 10 nodes,
+we are going to grow
+a graph on 10 nodes
+iteratively while trying
+to maximize its frequency.
+That is the idea,
+this is the overview.
+So now let's dive deeper
+into this lecture.
+So the key idea of SPMiner is
+to decompose the input graft
+Gt into a lot of
+small neighborhoods.
+And we are going to embed these
+neighborhoods into an order
+embedding space.
+And the key benefit of
+order embedding space
+will be that we'll be
+able to quickly predict
+the frequency of a
+given subgraph G sub Q.
+So essentially rather
+than taking G sub Q
+and trying to match it in many
+different places in the G sub
+T, we are just going
+to encode G sub Q
+and then predict its
+frequency in the G sub T.
+That's the kind of
+the idea is that we
+have a very fast
+frequency predictor that
+will use graph neural networks.
+So here is how we are
+going to do this frequency
+prediction, right?
+So the idea is that we take
+a set of subgraphs, these
+are our node anchored
+neighborhoods G sub
+N of big target graph G sub T.
+And the idea will be that
+we are going to estimate now
+the frequency of our given
+subgraph of a given target
+graph G sub Q by counting
+the number of neighborhoods
+such that their embedding
+satisfies the order embedding
+property.
+So basically we are going to
+say, for a given graph G sub Q
+we are going to embed it into
+some point in the embedding
+space, and we are going to ask
+how many neighborhoods of G sub
+T are to the upper
+right of it, right?
+Basically with
+this notation I try
+to say how many
+neighborhoods N sub
+I are there whose
+individual coordinates are
+all greater than the embedding
+coordinates of my query graph
+Q.
+And this is exactly
+a consequence
+of order embedding
+space property
+that we have discussed, right?
+So intuitively when my G sub Q
+arrives, I'm going to embed it
+and I'm going to say
+its frequency is simply
+the number of node
+anchored neighborhoods
+that are embedded into the
+top right of it, right?
+So number of node anchor
+neighborhoods whose embedding
+coordinates are greater
+than the embedding
+coordinates of my query point.
+So basically there is this
+what we call a super graph
+region, where basically all the
+points, all the neighborhoods
+in the red shaded region
+corresponds to neighborhoods
+in G sub T that contain G
+sub Q as a subgraph, right?
+So basically this will be
+now our frequency estimation
+and the benefit
+will be that now we
+have a super fast subgraph
+counting frequency estimation
+method because when a new
+motif arrives we just embed
+it and then determine
+how many points
+fall to the top right of it and
+this can be done super fast.
+So now that we know how
+to estimate the frequency,
+now let's talk about
+the search procedure
+that is actually going
+to find the motif.
+So the way we are going to
+do this is the following.
+We are going to randomly pick
+a starting node u in the target
+graph G sub T and then we
+are going to basically expand
+the neighborhood around this
+target node u in the G sub T
+to get the query
+graph, and we are
+going to use the
+graph neural network
+to estimate its frequency.
+And we are going to
+grow it in G sub T
+while trying to keep the
+frequency as high as possible.
+And the way you can
+think of this as that,
+we are going to start
+with an individual node u
+and its embedding will
+be somewhere all the way
+to the lower level because an
+individual node is a subgraph
+of all neighborhoods, right?
+Because the neighborhoods
+are composed of nodes
+so this individual node is a
+subgraph in all neighborhoods,
+right?
+So here the point is
+that each dot here
+represents a neighborhood
+in the target graph
+that contains the
+motif pattern, right?
+And whatever is in the
+red shaded three regions.
+These are the neighborhoods
+that contain that motif.
+And of course, initially
+all neighborhoods
+contain the motif because
+the motif is a single node.
+So now that we have a
+partially built motif S
+we want to grow it
+until it reaches
+size-k such that its
+frequency of this size-k motif
+will be as large as possible.
+So the way we are
+going to do this is we
+are going to do it through
+an iterative procedure that
+is going to grow the motif
+iteratively meaning node
+by node and edge by edge,
+by basically traversing
+the neighborhood of this
+chosen node u in G sub T
+and adding neighbors
+of that node.
+The neighbors of neighbors
+to S and at the same time
+we are going to use the order
+embedding space to now take
+S, embed it, and ask what is
+the frequency of that bigger
+subgraph, right?
+So the way you
+can think of it is
+we are going to start
+with the individual node
+and we are going now to say,
+an individual node and that's
+our S, and then we are going
+to add one neighbor of it to S,
+so now S will be bigger.
+And for every possible way
+to add this new node or this
+to the S we are going to ask,
+what is the best node to add
+to the S so that the frequency
+remains as high as possible?
+And we can use this kind of
+gritty search procedure that
+is going to grow our motif
+node by node until it
+reaches the desirable size.
+And now of course,
+what we need to decide
+is how do we decide what
+node to include next, right?
+How precisely do we grow this
+underlying motif, node by node?
+And the way we are
+going to do this
+is that, we are going
+to grow it with the goal
+to maximize the number
+of neighborhoods
+that are in the red shaded
+region after the k steps,
+right?
+So basically in the end,
+we want to reach out
+some point which that
+describes a graph of a given
+size-k such that the
+number of neighborhoods
+that are to the top
+right of it, meaning
+that are in these red-shaded
+regions is as high as possible.
+Because whatever are
+the neighborhoods
+to the top right of it,
+these are the neighborhoods
+that our red dot
+is a subgraph of,
+that's the order
+embedding property that we
+have worked so hard to establish
+in the previous lecture.
+So that's the idea.
+So right then we'll be growing
+this motif node by node
+until it reaches the
+desired motif size,
+until it reaches size-k.
+And then we are
+going to terminate,
+and what we are
+going to return, we
+are going to return whatever is
+the motif we terminated and we
+are going to return its
+predicted frequency, which
+is the number of neighborhoods
+in this red shaded region.
+The reason why we are--
+just kind of
+noticed that, we are
+only interested in
+the subgraph's motifs
+that have high frequency.
+So as we are building it we
+are kind of greedily deciding
+how to grow that motif so that
+its frequency will remain high.
+So to now answer the most
+important question, which
+is how do I decide which
+node to pick and add
+to my current subgraph motif S?
+And the way we are
+going to do this
+is, we are going to define
+the notion of total violation
+of a subgraph, let's
+call it G which
+is the number of
+neighborhoods that
+do not contain this subgraph G.
+So this is the number
+of neighborhoods
+that do not satisfy my
+order embedding property.
+Which basically it would be the
+number of neighborhoods where
+at least one of the
+coordinates in the embedding
+space of the neighborhood
+is less than the embedding
+coordinate of my graph G.
+So this is the same thing,
+this G is this cubed.
+And this means that basically
+minimizing the total violation,
+means maximizing the frequency.
+And you can then use many
+different search heuristics
+but one possible such
+heuristic is greedy, right?
+Basically, at
+every step you want
+to add a node to the subgraph
+S that results in the smallest
+total violation.
+Basically, you want
+to add a node that
+will keep the number
+of neighborhoods
+to the top right
+of that subgraph S
+to be as high as possible.
+And you can think of this,
+right, we start with one node,
+we add the second node,
+we add the third one,
+we add the fourth one, and
+you are kind of dancing,
+as you are building the motif
+you are kind of moving up.
+And the goal is to reach a
+motif of a given size that
+has the largest number
+of neighborhoods
+in the red shaded region,
+so in the region that
+is up and above from it.
+And that's essentially the idea.
+I can show you some
+experimental results
+to show that this really
+works quite remarkably well.
+Where for example, we can
+say let the ground truth
+be the most frequent top
+10 most frequent motifs
+in a given target graph.
+And we are going to do these
+four motifs of size 5 and 6
+because this is what
+kind of this brute force
+exact enumeration counting is
+able to do in a couple of days,
+right?
+So then we can ask is, what
+are the frequency of the top 10
+most frequent motifs
+that this search
+procedure is able to identify?
+Where basically we pick a random
+node u in the target graph G,
+we kind of grow the motif
+around it and at the same time
+as we are of growing
+that motif we
+ask what its frequency as
+predicted with the order
+embedding space?
+And then this graph
+tries to illustrate this,
+these are the top 10
+most frequent motifs
+just rank ordered, and the
+y-axis is their frequency.
+And exact is the
+ground truth, right,
+so this would be the frequency
+of the most frequent motif,
+the second most frequent, third
+most frequent, fourth, fifth,
+all the way down to tenth.
+Now, what we also
+did in our case,
+is we use this neural
+network order embedding
+space based method to identify
+top 10 most frequent motifs
+that it finds.
+And let's compare
+their frequency
+to what the exact
+counting finds.
+And of course, the frequencies
+drop as the rank of the motif
+gets higher, that's okay.
+But you notice, for example
+that SPMiner is basically able
+to identify the top in this
+case, top eight motifs perfect
+out of the top ten.
+And then the other two
+are their frequency
+are just a bit lower so these
+two were not exactly identified
+so their frequencies are lower.
+Here is top eight are
+perfectly identified here,
+for size 6 it's
+actually top nine that
+are perfectly identified.
+And these are some traditional
+approximate searching methods.
+You see that they fail
+much, much, much worse.
+And perhaps, if
+the mfinder method
+finds the top 10th,
+the motif at rank 10,
+its frequency is only 5,
+raised to the times 1,000.
+Our SPMiner is able to
+find the tenth motif that
+has the frequency of around
+let's say, 15,000, right?
+So much, much more accurate.
+So this is for small
+motifs, you can also
+do this for very large motifs
+because the search procedure
+is very cheap.
+So you can identify large motifs
+for example, motifs of size 14,
+17, 20, that still have
+very high frequencies.
+And you can do this in two
+different real world networks
+and really find large
+motifs with high frequencies
+computationally
+very, very cheaply.
+And the motifs you find
+tend to be much, much
+more frequent than what
+kind of random search
+traditional kind of
+heuristic-based baselines
+can do.
+So to summarize this
+lecture, here we
+talked about
+subgraphs and motifs
+that are important concepts
+that provide insights
+into the structure of
+large graphs, right?
+And the frequency of
+these subgraphs or motifs
+can be used as features
+of nodes or graphs.
+And they can kind
+of also tell us
+what is the organization of
+networks, what are the building
+blocks of a given graph?
+And I talked to you about how
+it is computationally hard
+combinatorially to
+identify frequently
+occurring subgraphs of a given
+size in a big target graph.
+And we covered neural
+approaches for prediction
+of subgraph isomorphism
+relationship.
+We developed this notion
+of an order embedding space
+that has a desirable property
+and allows us to quickly say
+whether a given graph is a
+subgraph of a bigger graph,
+or it allows us to
+quickly say, what
+is the frequency of a given
+subgraph in a bigger target
+graph.
+So that prediction happens
+super quickly and is accurate.
+And then the last
+thing we did was
+we talked about this neural
+embedding guided search that
+starts with a small
+motif, iteratively
+grows it n node by
+node such that it
+allows us to identify
+a large motif that
+also has a high frequency.
+And we saw that these methods
+are extremely practical,
+they are extremely fast
+and lead to high accuracy
+of identified motifs and
+identified subgraphs.
+So with this we have
+finished the treatment
+of subgraph identification,
+subgraph counting,
+and frequent subgraph mining.
+Thank you very much.

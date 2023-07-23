@@ -1,0 +1,572 @@
+Welcome to the class.
+Today we are going to
+discuss deep generative
+models for graphs.
+So let me explain
+that in more detail.
+So, so far we talked about how
+to classify nodes and edges
+and perhaps entire graphs.
+But now we are going to
+talk about a new task, which
+is the task of
+generating the graph.
+The idea is that we want to
+have a generative model that
+is going to generate
+a synthetic graph that
+will be similar to
+the real-world graph.
+An application of this
+type of graph generation
+happens in many
+different places.
+You can imagine that you can
+represent molecules as graphs
+of bonds between the atoms.
+And then in this case,
+you want to generate
+novel molecular structures
+based on this generative model.
+Or for example in
+material design,
+you may want to generate
+optimal material structures
+and this is what you can do.
+In social network
+modeling, you may
+want to generate
+synthetic social networks
+so that you can then use
+them for various kinds
+of downstream tasks.
+And even in some other
+applications for example,
+if you think about generating
+realistic road layouts.
+If you want to think
+about generating
+realistic layouts of cities,
+all these types of things
+you can model as a graph
+generation process.
+And even for example, some
+combinatorial problems
+like the satisfiability problem
+or the Boolean satisfiability
+problem, you can generate
+artificial instances
+of that problem by representing
+the satisfiability instance
+as a graph and then learning
+how to generate those graphs.
+So in all of these
+cases basically,
+the goal is that
+we want to learn
+how to generate a
+graph that is somehow
+similar to the underlying
+real-world graph.
+And the field of
+graph generation
+has a rich tradition.
+And the way this
+started, it started
+with the study of properties
+of complex networks
+like real-world networks.
+And identifying what are
+the fundamental properties
+that these real-world
+networks have
+like power or scale-free
+degree distributions
+and also like the
+small world property
+and so on and so forth.
+Based on these fundamental
+properties of complex networks,
+then there have been
+a lot of development
+of generative models
+for graphs, which
+generally fell into two camps.
+One camp was very
+mechanistic generative models
+like the preferential attachment
+model, that basically allowed
+us to explain how could
+certain properties
+like the scale-free
+property of networks
+arise from this microscopic
+preferential attachment type
+model.
+Another set of models
+for generating graphs,
+came mostly from the statistics
+and the social networking
+literature where basically, the
+idea was that there is maybe
+some, that there might be
+some latent social groups
+and based on those
+latent social groups,
+edges of the social
+network get created.
+And then the question is,
+how can you take that model,
+fit it to the data and
+perhaps discover the groups?
+However, today and
+in this lecture,
+we are going to
+use deep learning
+and representation
+learning to learn
+how to generate the graphs.
+So in contrast to prior work in
+some sense that either assumed
+some mechanistic
+generative process
+or assumed some statistical
+model that was motivated
+by the-- let's say
+social science, here
+we want to be kind of
+agnostic in this respect.
+And the goal will be that,
+can we basically given a graph
+or given a couple of graphs,
+can we learn how to gene--
+what the properties
+of those graphs are,
+and how can we
+generate more instances
+of those types of graphs?
+So we'll be kind of
+completely general,
+we'll just learn from the data
+in this kind of representation
+learning framework.
+So this is one way how
+we can look into this.
+Another way how we
+can look into this
+is that, so far in
+this class we've
+been talking about the deep
+graph encoders, where basically
+the idea was that, we have a
+complex network, complex graph,
+complex relational
+structure on the input
+and you want to pass it
+through several layers
+of this representation and
+a deep learning network that
+at the end produces-- let's
+say node embeddings, edge
+embeddings, entire
+graph embeddings, right?
+So this is what we call
+a deep graph encoder
+because it takes the
+graph as the input
+and encodes it into some
+kind of representation.
+The task of graph
+generation actually
+goes in the other direction.
+It wants to start on
+the right-hand side
+and then through a series of
+complex nonlinear transforms
+wants to output the
+entire graph, right?
+So our input perhaps will be
+a little small noise parameter
+or something like
+that and we'll want
+to kind of expand
+that until we have
+the entire graph on the output.
+So we will be kind of decoding
+rather than encoding, right?
+We'll take a small
+piece of information
+and expand it into
+the entire graph
+rather than taking
+a complex structure
+and compress it into or
+into its representation.
+So we are talking about
+deep graph decoders,
+because on the output we want
+to generate an entire network.
+So in order for us to do
+that, I want to first tell you
+about kind of how are we going
+to set up the problem in terms
+of its set up, in
+terms of its kind
+of mathematical
+statistical foundation.
+And then I'm going to talk
+about what methods allow
+us to achieve the goal
+of graph generation
+using representation learning.
+So let's talk about
+graph generation.
+Generally, we have two
+tasks we will talk about
+in this lecture.
+First, is what we will call
+realistic graph generation,
+where we want to
+generate the graphs that
+are similar to a
+given set of graphs.
+And I'm going to define
+this much more rigorously
+in a second.
+And then the second
+task, I'm also
+going to talk about is what
+we call goal-directed graph
+generation.
+What basically you want
+to generate a graph
+that optimizes a
+given constraint
+or a given objective.
+So if you are generating
+a molecule you could say,
+I want to generate molecules
+that have a given property,
+maybe the property
+is solubility,
+maybe the property is that
+these molecules are non-toxic.
+And you say I want to generate
+molecules that are non-toxic.
+So how do I generate the
+most non-toxic molecule?
+Or how do I generate the
+molecule that is most soluble
+and still looks like drugs?
+Imagine another case
+I was giving example
+before if I want to generate a
+road network-- a realistic road
+network of a city, that is
+a graph generation problem.
+I could say, I want to
+generate the optimal road
+network of a city,
+right, whatever
+the optimality constraint is
+that is kind of, we assume
+it is given to us, right?
+So that's what we mean by
+goal-directed graph generation
+where you want to generate
+a graph with a given--
+with a given goal that optimizes
+a given black box objective
+function.
+So that's the two parts
+of the lecture today.
+But first, let's
+talk about how do we
+set up this graph generation
+task as a machine learning
+task?
+So we are going to proceed
+in the following way.
+We are going to assume that the
+graphs are sampled from this p
+data distribution.
+So basically nature is
+sampling from p data
+and is giving us graphs.
+Our goal will be to learn
+a distribution p model
+and then be able to learn how
+to sample from this p model.
+So basically, given
+the input data,
+we are going to learn a
+probability distribution p
+model over the
+graphs, and then we
+are going to sample new
+graphs from that probability
+distribution.
+And right, and our
+goal somehow will
+be, that we want this p model
+distribution to be as close as
+possible to this unknown
+p data distribution
+that we don't have access to,
+that only nature has access to,
+right, the data set creator
+has access to this p data.
+We want to approximate
+p data with p model.
+And then as we have approximated
+p data with p model,
+we want to draw
+additional instances,
+we want to generate
+additional graphs,
+we want to generate additional
+samples from the p model
+and those would be the graphs
+we will want to generate.
+So if we want to do
+this, then there are--
+this is an instance of what we
+call generative models, right?
+We assume we want to learn a
+generative model for graphs
+from a set of input graphs,
+let's call them x i.
+Here, as I said before p data
+is the data distribution which
+is not known to us and we
+don't have access to it,
+all we have access
+to it are samples
+x that are sampled from
+this unknown p data.
+We also will have another family
+of probability distributions,
+let's call them p model
+that are defined by theta,
+theta are parameters
+of our model.
+And we will want to use
+this p model distribution
+to approximate p data.
+And then, what
+would be our goal?
+We have two-step goal.
+First goal is to find parameters
+theta so that p model closely
+approximates p data, and this
+is called a density estimation
+task.
+And then we also want to be
+able to sample from p model.
+Basically means, we want to
+be able to generate new graphs
+from this now p model
+distribution to which we
+have access to, right?
+We want to generate new
+samples, new graphs from it.
+So let me give you
+more details, right?
+Our goal is to make p model be
+as close to p data as possible.
+And the key principle we
+are going to use here,
+is the principle of maximum
+likelihood estimation,
+which is a fundamental approach
+to modeling distributions.
+Basically the way you can
+think of it is the following,
+we want to find parameters
+theta star of our p model
+distribution such that the
+log likelihood of the data
+points x of the graphs x that
+are sampled from this p data
+distribution, their log
+likelihood under our model--
+under p model that is basically
+defined or parameterized
+by theta, is as large
+as possible, right?
+So our goal is to
+find parameters theta
+star, such that the
+observed data points x.
+So basically, the
+observed graphs
+have the highest log likelihood
+among all possible choices
+of theta, right?
+And of course here,
+the important thing
+will be that p model needs
+to be flexible enough
+that it's able to model p data.
+And then the question
+is, how do we search over
+all the instances of probability
+distributions captured
+by this p model?
+So we actually kind of capture
+by these parameters theta, so
+that the likelihood of
+the data that we observe
+is as high as possible, right?
+And in other words,
+the goal is to find
+the model that is most likely
+to have generated the observed
+data x, right?
+Find the p model that
+is most likely to have
+generated the observed data x.
+Now, this is the
+first part, which
+is the density estimation.
+The second part
+is also important,
+because once we have the
+density that's not enough.
+We need to be able to draw
+samples from it, right?
+We want to create samples from
+this complex distribution.
+And a common approach how
+you can generate samples
+from a complex distribution
+would be the following.
+Is that first, you start with
+the simple noise distribution
+just like a simple,
+let's say a scalar value
+that's a normally distributed
+0 mean unit need to variance.
+And then you want to have
+this complex function that
+will take this
+little noise kernel
+and is going to expand it
+until you have the sample x.
+So in our case, we'll start
+with a little random seed,
+and we are going to expand
+it into a full graph x.
+Where of course, now the
+hope is that x will follow
+the distribution of p model.
+So in our case, how do we
+design this function f?
+We are going to use
+deep neural networks,
+and train them so that they can
+start with the little kernel
+and generate the graph.
+So that's how we are
+going to do this.
+So now in terms of
+deep generative models,
+our model will be an instance
+of an auto-regressive model.
+Where this p model will be used
+both for density estimation
+and sampling, right, because
+we have these two goals, right?
+And in general you don't have
+to use the same neural network
+to both do the
+density estimation
+and to do the sampling and
+there are other approaches
+that you could choose to do here
+like variational autoencoders
+or generative adversarial
+networks and so on.
+But in our case, we are going
+to use an auto-regressive model.
+And the idea is
+that, we are going
+to model this complex
+distribution as a product
+of simpler distributions.
+And the reason why
+we can do this,
+is of the chain rule in
+probability and Bayesian
+networks.
+So we're basically--
+which basically tells us,
+that any joint distribution
+on a set of variables
+can be exactly
+modeled or expressed
+as a product over the
+conditional distribution,
+right?
+So basically I'm
+saying this p model
+that is a complex
+distribution over my x, which
+may be a set of
+random variables,
+I can write it out as a product
+over all these random variables
+from the first one
+to the last one,
+where all I have
+to now express is
+this probability of a
+random variability t given
+the values instances of all
+the previous random variables,
+right?
+So in our case for example,
+if x would be a vector,
+then x sub t is the t-th
+coordinate of that vector,
+right?
+If x is a sentence, then x sub
+t would be the word, right?
+So I'm basically saying,
+rather than generating
+an entire sentence or to write
+out the probability of a given,
+let's say sentence,
+I'm going to--
+I can model that
+as a product where
+I say, given the words
+so far, how likely
+or what is the probability
+of the next word?
+And if I multiply this
+out, I have the probability
+of the entire sentence.
+And we can do this without
+any loss of generality
+or any approximation,
+if we really
+condition on all the
+previous words, all
+the previous elements, right?
+In our case, what this
+means is that the way
+we apply these two
+graphs is that, we
+are going to represent
+a graph as a sequence
+as a set of actions.
+And we are going to say, a-ha,
+the probability of next action
+is conditioned on all
+the previous actions.
+And now what will the actions
+be, it will be add a node,
+add an edge, right?
+That's the way we are
+going to think of this.

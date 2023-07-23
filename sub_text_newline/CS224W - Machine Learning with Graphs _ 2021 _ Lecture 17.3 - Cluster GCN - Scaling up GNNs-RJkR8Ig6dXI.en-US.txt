@@ -1,0 +1,363 @@
+Now we are going to talk about the second method in this idea of neighborhood, uh,
+sampling and trying to limit, uh, the- the,
+uh, batch size, uh,
+issues, uh, in graph neural networks.
+Um, and the way we are going to do this is,
+uh, to start with the following observation, right?
+That the size of computational graphs, um,
+can still become very big, uh,
+or increases exponentially with the number of, uh, GNN layers.
+And what we can also observe and notice is that, um,
+computation in these, uh- computational graphs
+can be very much redundant because of shared neighbors.
+Like if you think for example, two nodes,
+A and B, and you think about the computation graphs,
+then they have, uh- because they share- they have a lot of friends in common,
+these computation graphs are heavily redundant, right?
+Like the- the, uh,
+both to compute A and compute B,
+the subgraphs the comp- the parts of the computation graphs
+between- below node C and D are identical.
+So this would be the duplicate- this will be duplicated, uh, um, computation.
+And, uh, there are two approaches to do this.
+One is to, uh, realize that this, uh,
+computation is duplicated then computed only once.
+Uh, there is a very nice paper about this at last year KDD called,
+uh, uh, HAGs, hierarchical, um,
+aggregation, uh, graphs that basically prevent,
+um, uh, multiple computations, so redundant computations.
+Um, and the- the second case will be about Cluster-GCN,
+which is what I'm going to talk about today.
+And the way we are, uh, motivating Cluster-GCN is to remember what is a full ba- batch,
+uh, graph neural network, right?
+A full batch graph neural network is that all the embeddings
+for all the nodes are embedded together in a- in a single pass.
+So basically, um, embeddings of all the nodes are computed for layer 1,
+embeddings for all the nodes are then computed for layer 2,
+uh, and so on, right?
+The point is you need to have the embeddings of
+all the nodes at lab- at layer L minus 1 to be
+able to compute the embeddings for all the other nodes- for
+all the nodes at layer L. So it means that,
+uh, in each layer,
+2 times number of edges,
+uh, messages need to be, uh,
+exchanged because every node needs to connect-
+collect the- the message is from its neighbors,
+so there are two messages along each undirected edge, you know,
+for both, uh, endpoints,
+and, uh, what is the observation?
+The observation is that, uh,
+the amount of computation we need to do in a single layer of, uh, let's say,
+uh, full batch, uh,
+implementation is linear in the size of the graph.
+It's linear in the number of edges.
+So it means it is very fast.
+But the problem is that the graphs are too big.
+Uh, so we cannot do this kind of at once,
+uh, in the GPU.
+So the insight from full-batch GNN is that
+layer-wise node embedding updates allow us to reuse embeddings from the previous layer.
+Um, and this significantly reduces the computational redundancy of,
+uh, neighborhood sampling, right?
+Uh, this means that this layer-wise update to generate
+embeddings from one layer to the next is very cheap, right?
+All I need to do is previous layer embeddings.
+I need to aggregate them,
+combine them with the previous layer embedding of a given node
+and I have a new, uh- a new embedding.
+So what this means is that,
+uh, this can be done very fast.
+It's only linear time operation in the size of the graph because it's aggregation,
+uh, uh, basically takes time linear because
+it's linear number of edges over which we aggregate.
+So this sig- means that the computations are very fast.
+But of course the problem is that layer-wise update is not feasible
+for the entire graph at once because of the GPU memory.
+So now, what the idea is in the Cluster-GCN is that can we sample
+the entire graph into small sub-parts and then
+perform full batch implementation on those subgraphs.
+All right. So the idea is the following.
+I'll take the large graph.
+I'm going to sample a subgraph of it.
+I don't know maybe I'll just say I'll sample the subgraph,
+and then I'm going, uh, in this subgraph I'm able to fit it on a GPU.
+So now I can apply a full batch implementation,
+uh, in the GPU on that sampled subgraph.
+All right? So that's essentially the idea.
+So the difference between neighborhood sampling is that
+there we compute the computation graph for each individual node.
+Um, here, we are going to sample an entire subgraph of the original graph and
+then pretend that this is the graph of interest and
+just perform GNN on that, uh, subgraph.
+Right? So then the question is,
+how should I sample these subgraphs?
+What are good subgraphs for training GNNs?
+Um, and here's the reasoning.
+The important point to remember is that GNN performs
+embedding by passing messages via the edges of the network, right?
+Every node computes its embedding by collecting
+information from the neighbors, uh, right?
+So the idea is now if I wanna have a good subgraph,
+the good subgraph have- have- has to retain as many of the edges of the original graph as
+possible so that my computations mimic
+the computations on the big graph as well as possible.
+So our subgraphs should retain
+edge connectivity structure of the ne- original graph as much as possible.
+Which means that the GNN over the subgraph generates embeddings that are close,
+uh, to the- to the GNN over the original graph.
+So to give you- to give you an idea,
+if I have an original graph and let's say I sample, uh,
+I- I sample a subgraph on four nodes like I show here on the left
+or I sample another subgraph on four nodes like I show on the right,
+then it's clear that the left subgraph is kind of much better for training.
+Because if I now say,
+let's compute the embedding of this corner node up here,
+here, all the three neighbors of it are in the- in the subgraph.
+So I'll be able to get a quite good estimate of the embedding of this,
+uh, node, um, corner node up here.
+So right, it's- all of its, um, uh,
+uh, neighbors are- are part of my subgraph.
+While if I take this other subgraph here,
+we- denoted by green nodes.
+And I wanna predict or generate an embedding for this green node as well,
+then- then I- all I'm able to do is aggregate message from one of its neighbors,
+because only one of its neighbors is part of my, uh, subgraph, right?
+So the right subgraph drops many- many edges,
+um, and leading to isolated nodes,
+which means my computation graphs over this subgraph won't
+be representative of the computation graphs in the original graph.
+So left choice is far better,
+uh, than the right choice.
+And this now brings us back to
+the network community structure because real world graphs exhibit community structure.
+They exhibit clustering structure.
+So large graphs can be decomposed into many small, uh, communities.
+And the key insight would be that we can sample these subgraphs based on
+the community structure so that each subgraph
+retains most of the edges and only few edges, uh, are dropped.
+So a Cluster-GCN, the way it works,
+it has, uh, uh, a two-step process.
+In the preprocessing step,
+we take the original graph and split it,
+cut it into many small,
+uh- small, uh, subgraphs.
+Uh, and then, uh, mini-batch training means that we sample one node,
+group 1 subgraph, uh, and, uh,
+perform the- the full batch message passing over that entire subgraph,
+compute the node embe- uh- node embeddings of all the nodes in the subgraph,
+evaluate the loss, compute the gradient,
+and update the parameters, right?
+So the idea is input graph,
+split into many subgraphs.
+We take one subgraph,
+fit it into the GPU memory,
+do the full computation on the subgraph, compute the loss,
+update model parameters, load in another subgraph,
+do the, uh, a full- full batch,
+uh, layer embeddings of all the nodes in the subgraph.
+Compute the loss, update the gradient,
+load, uh, the next subgraphs.
+So that's how vanilla Cluster-GCN, uh, would work.
+So to give you more- more details,
+the idea is that given a large, uh, graph,
+we're going to partition it into,
+let's say, capital C groups.
+Um, we can use some scalable community detection method like Louvain, uh,
+like METIS method, um,
+or we can use, uh,
+even BIGCLAM is fine,
+um, and then basically this,
+um, set of, uh,
+node groups V. Uh,
+we are going to take an induced subgraph on the subset of nodes,
+um, and basically these induced subgraphs will
+include all the edges between the members, ah,
+of the- of the group, and of course,
+these edges that go across the subgraphs,
+those will be dropped.
+[NOISE] So between group edges are going to be dropped in these,
+uh, uh, graphs, G1 to GC which are these subgraphs we sampled.
+So now, for each, uh, mini-batch,
+we are going to sample one such node group, one such subgraph,
+create an induced subgraph over that set of nodes,
+and this is now our graph that we are going to use,
+um, as a computation in the GPU.
+So the point is that this induced subgraph has to fit into the GPU memory.
+So now, we do layer-wise node update
+basically the same thing as what we do in the full batch, uh,
+GNN to compute now the embeddings of all the nodes in the subgraph, recompute, uh,
+the loss, uh, and then do the, uh,
+compute the gradient with respect to the loss and then do the gradient update.
+So the point here is that when we were doing GraphSAGE neighborhood sampling, our nodes,
+we were able to kind of sample them all- all- all across the graphs.
+But in this case, um,
+we are going to sample a subgraph of
+the original graph and now only compute on those nodes,
+uh, we have sampled, and that's the big difference between,
+ah, the neighborhood sampling that can be kind of,
+those neighborhoods can be distributed across the entire network while here,
+we are going to create those neighborhoods basically just being limited to
+the subgraph we sample and we feed that subgraph into the GPU memory.
+So what are some issues and how do we fix them?
+The issue with Cluster-GCN is that these induced subgraphs are removed in- in,
+uh, between the group links, between subgraph links.
+And as a result, messages from other groups
+will be lost during message-passing which will hur- which can hurt,
+uh, GNN performance, right?
+So for example, if I sample this red graph here and I just zoom in into the node- uh,
+into it, what I see is that,
+for example, whenever, ah,
+this particular node aggregates information,
+it will never aggregate information from these two edges because these two- uh,
+the node endpoints are part of the se- the different subgraphs.
+So all the message aggregation will happen only between these four nodes,
+uh, and the five,
+uh, edges between them,
+so there will be in some sense, uh, lost messages.
+So, uh, the issue will be because the-
+the graph community detection put similar nodes together into the same group,
+uh, sample node groups tend to cover
+only a small concentrated portion of the entire graph, right?
+So we are going to learn only on a small concentrated portions of the graph while
+neighborhood sampling allows us to kind of learn on small but very diverse,
+uh, set of, uh, neighborhoods.
+Um, and this means that because this sample node,
+sample subgraph vor- will be- will be our concentrated part of the entire graph,
+it won't be kind of diverse or a representative to
+represent the entire, uh, training graphs.
+So what this means is that when we compute the gradient and the loss, uh,
+this is going to fluctuate a lot from one node group to
+another because- because of the social communities,
+uh, if you think of it that way.
+Each subgroup will be very concentrated in one given
+aspect and the- the model will have hard time to learn, right?
+You will- I know- you know,
+you have a cluster of computer scientists,
+so you will learn how to make- you will compute
+the gradient with respect to computer scientists,
+then you have a cluster of, let's say, uh,
+music students and now your gradient that
+you have just- your models that were just computed over
+the computer scientists in your social network are now going to
+be computed over music people which are very, very different.
+And then I don't know, you have mathematicians who are
+different- community of mathematicians who are different from the two.
+So the gradients are going to fluctuate quite a lot,
+and training is quite unstable which in practice leads to slow convergence of,
+uh, gradient descent or stochastic gradient descent.
+So, uh, a way to improve this is to- is what is called Advanced Cluster-GCN.
+And the idea is that here,
+we wanna aggregate multiple node groups per mini-batch, right?
+So the idea is to- to make the graphs we sampled even
+smaller but then we are going to sample multiple of these,
+uh, subgraphs, uh, into the mini-batch.
+Um, and we are going to create, uh,
+induced subgraph on the aggregated node group that is now composed of many small, uh,
+node groups, and the rest will be the same is- I- as in the Cluster-GCN,
+which is take now the induced subgraph,
+put it into the GPU memory,
+and create the update.
+But the point is now that the subgroups can be more
+diverse so the induced subgraph will be more diverse,
+so your gradients will be more stable and more, uh, representative.
+So here is the picture,
+the picture is that now my node groups are smaller than what I had before,
+but I can sample more of them.
+So I sample here two node groups and now
+the sample subgraph is the induced subgraph on the nodes belonging to the two groups.
+So I will also include, uh, this,
+uh, uh, blue, uh, edge that kind of connects the two groups.
+So it means that, um, uh,
+this makes the sample nodes more representative, more diverse.
+They are more representative of the entire node population,
+which will lead to better gradient estimate,
+less variance in gradients,
+and faster training, uh, and convergence.
+So, uh, just to say more, right?
+This is again a two-step approach.
+I take the nodes, um,
+I- I separate them into very small, uh,
+subgroups, much smaller than the original version, but, uh,
+when I'm doing mini-batch training,
+I will sample multiple groups of nodes, um,
+and then I will aggregate these groups of nodes into one super group,
+and then I'm going to create an induced subgraph on the entire, uh, super group.
+And then, um, I'm going to include the edges between all the members of the super group,
+which means it will be edges between the- the small, uh,
+subgroups as well as the edges between the small, uh, subgroups.
+Um, and then I will perfo- perform, uh,
+Cluster-GCN, uh, the same way as we did before.
+So now, um, if I compare the Cluster-GCN approach,
+with the neighborhood sampling approach,
+here is how the two compare.
+The neighborhood sampling says,
+uh, sample H, uh,
+nodes per layer, um,
+and let's do this for,
+uh, M nodes in the network.
+So the total size of the mini-batch will be
+M times H raised to the power of K. M is the number of computation graph,
+uh, H is the fan out of computation graphs,
+and K is the number of layers of the GNN.
+So for M, uh,
+nodes in the computation graph,
+our cost in terms of memory as well as computation will be M times, uh, H_K.
+In the Cluster-GCN, um, uh, the- uh,
+the- we are performing message passing over a subgraph induced by M nodes,
+and the subgraph over M nodes is going to
+include M times average degree number of edges, right?
+Each node in the subgraph has an average degree of, uh, D average,
+so in total, we- we'll have M times,
+uh, average degree, uh,
+number of edges in the graph.
+And because we are doing K hop, uh, message-passing,
+the computational cost of this approach will be
+K times M size of the subgraph times the average degree.
+So if you compare the two, in summary,
+the cost to generate embeddings from M nodes in a K layer GNN is M to the- M times H_K.
+In Cluster-GCN, it is, um,
+K times M times average degree,
+um, and, um, if you assume, let's say, uh,
+H to be half of the average degree,
+uh, then it would mean that, ah,
+Cluster-GCN is much more computationally efficient,
+um, than neighborhood sampling.
+So, um, it is linear ins- instead of
+exponential with respect to the- to the- to the depth.
+So what do we do in practice?
+It depends a bit on the- on the dataset.
+Usually, we set H to be bigger than the half average degree,
+uh, perhaps, you know, two times,
+three times, ah, average degree, um, and, uh,
+and because number of layers K is not- uh,
+is not that deep, um,
+the- the neighborhood sampling approach tends to be kind of more,
+uh, used, uh, in practice.
+So to summarize, Cluster-GCN first partitions the entire,
+um, set of nodes in the graph into small node groups.
+In each mini-batch, multiple node groups are sampled, um, and their,
+uh, and their nodes are kind of,
+um, uh, aggregated together.
+Then an induced subgraph on this, uh, uh, um,
+node- nodes, uh, from the union of
+the- of the groups that we have sampled, uh, is created.
+And then the GNN performs
+layer-wise node embeddings update over this induced, uh, subgraph.
+Generally, Cluster-GCN is more computationally efficient,
+than neighborhood sampling, especially when the number of layers is large, um,
+but Cluster-GCN leads to systematically biased gradients
+because of missing cross-community edges and also because,
+uh, if, uh, number of layers is deep,
+then in the original graph,
+um, if you do neighborhood sampling,
+you can really go deep.
+But in the Cluster-GCN,
+you are only going to go to the edge of the original of the sampled graph,
+and then you'll kind of bounce back.
+And even though you have a lot of depth,
+this depth would be kind of oscillating over the subgraph
+and won't even ec- really explore the real depth,
+uh, of the underlying original graph.
+So, uh, overall, um,
+I would say neighborhood sampling is used more because of additional, uh, flexibility.

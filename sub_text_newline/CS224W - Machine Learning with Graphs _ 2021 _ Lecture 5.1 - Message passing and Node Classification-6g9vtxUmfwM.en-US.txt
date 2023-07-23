@@ -1,0 +1,347 @@
+Thank you so much everyone for attending,
+exciting to be here and to talk about,
+uh, the next topic in this class.
+Today we are going to discuss, uh,
+message passing and node classification.
+Um, and this is an intermediate topic that we are going to use, um,
+uh, so that we can then move to,
+uh, graph, uh, neural networks.
+Um, so let's talk about how,
+uh, we are going to think about this.
+So the idea for today is that we are given a network with labels on some nodes.
+And the question is, how do we assign labels to all other nodes in the network?
+Um, so the example is that in a network,
+some nodes are, let's say,
+fraudsters or un- untrustworthy nodes,
+and some other nodes are trusted, fully trusted.
+The question becomes, how do we find other fraudsters or trustworthy nodes,
+uh, in the network?
+Um, and we have already, for example,
+discussed node embeddings method,
+um, in lecture 3.
+And we could say, let's use this node embedding methods to simply build
+a classifier that predicts which node is trusted,
+and which node is, uh, not trusted.
+Uh, however, today, we are going to think about this a bit differently.
+We are going to de- think about this in what is
+called semi-supervised node classification,
+where we will be given both, uh,
+some nodes that are labeled,
+let's say labeled with the green and the red color,
+and some other nodes that are unlabeled and they will be all part of the same network.
+So the question will be,
+how do we predict labels of the unlabeled node?
+Uh, and this is called,
+uh, semi-supervised node classification,
+semi-supervised because we are both given the supervised signal, so the labels,
+as well as the unsupervised signal,
+as well as the non-labels,
+uh, all at the same time.
+And the idea is that we wanna do this
+in what is called a message passing framework, right?
+We would like to- basically,
+given one big network partially labeled,
+we'd like to infer the labels,
+uh, of the unlabeled nodes.
+Uh, and we are going to do this by doing what is called message passing over the network.
+Uh, and the intuition here will be that we wanna exploit,
+uh, correlations that exist in the network.
+So what I mean by correlations,
+I mean that nodes that share labels tend to be connected, right?
+So we will have this notion of collective classification,
+where basically the idea will be that nodes are going to, uh, um,
+update what they believe is their own labels based on the labels of the neighbors,
+uh, in the network.
+And here, conceptually, this is also similar to what we were discussing, uh, in, uh,
+pager link lecture, where the pager link score has- was updated,
+uh, based on the scores,
+uh, of the neighbors.
+But here we are not going to update the score,
+we're going to update the belief,
+the prediction about what is the label about a given node.
+And we are going to talk about three classical techniques.
+One is called relational classification,
+the other one is iterative classification,
+and then last we are going to talk about belief propagation.
+And all these methods,
+are kind of a bit old school methods,
+but they give us a lot of intuition for what we are going to talk in
+the next few weeks when we are going to focus
+on deep learning on graphs and in particular,
+uh, graph neural networks.
+So today, kind of as a starter topic into that,
+we are going to talk about, um, uh,
+these three topics of, uh, collective classification.
+So when I said correlations exist in networks,
+what I mean by this is that individual behaviors
+are often correlated in the network structure.
+And correlation means that nearby nodes tend to have the same color,
+tend to have the same label.
+They tend to be- uh- uh,
+belong to the same class.
+Um, and there are two reasons, specially, for example,
+in social networks, but also in other types of networks,
+for why this might be happening.
+First is this notion of homophily,
+where basically individual characteristics, um,
+uh, um mean that people of similar characteristics tend to link each other.
+This is notion of homophily from social science.
+And then there is also this notion of influence,
+where the idea is that, uh,
+social connections influence our own characteristics or our own behaviors.
+So let me kind of give you a bit of motivation from the social science point of view,
+why these correlations exist in networks and why network data,
+um, is so useful.
+So homophily is defined as the tendency of
+individuals to associate or bond with similar others.
+And one way to think of this is to say,
+birds of feather flock together, so right?
+People that are similar tend to bond,
+they tend to link with each other.
+And this phenomenon has been observed in a vast array of different,
+uh, social networks studies, uh,
+on a variety of attributes in terms of age,
+gender, organization, a little social status, um,
+any kind of preferences,
+political preferences, food preferences, and so on.
+Um, and one example would be, for example,
+that researchers who focus, uh,
+on the same research area are more li- more likely to collaborate with each other.
+Or researchers who focus on the same area are more likely to know each other
+or be friends with each other naturally because they attend the same conference,
+they interact with each other, and, uh,
+connections between them, uh, get formed.
+So this is in terms of, um, homophily.
+And to give you an example,
+this is an online social network,
+uh, from a high school, uh, where,
+uh, nodes are people,
+uh, edges are friendships,
+and color denotes their interests in terms of sports and arts.
+And what you notice immediately from this visualization is that there
+seems to be kind of four groups, uh, of people.
+And it seems that they are very much grouped
+based on this node color or based on interests, right?
+Is that green nodes tend to link with each other and, um,
+and ye- uh, yellow nodes,
+uh, tend to leak- link, uh, with each other.
+So it means that people with same interests are more
+likely or more closely connected due to this,
+um, effect of or this phenomena called homophily.
+Another, um, phenomena, or another, uh,
+force that creates these correlations in networks is kind of the other way around, right?
+If in homophily we say people have characteristics
+and people with similar characteristics tend to link to each other,
+the notion of social influence kind of flips the a- the,
+uh, the- the arrow in some sense, right?
+So it says that social connections can
+influence the individual characteristics of a person, right?
+So for example, if I recommend my musical preferences to my friends and I'm, you know,
+very, very, uh, persistent,
+perhaps one of them will- will grow to like my favorite genres, my favorite music.
+So this means that now this person just became more similar to me, right?
+It means we're very connected.
+And I influence them to kind of change their behavior,
+to change their preference so that the two of us are more similar.
+Which- which one explanation would be is, you know,
+this makes our bond even stronger,
+even easier to maintain.
+So here it was the social connection that
+affected or influenced the individual characteristic.
+And both of these phenomena are very,
+very common and very strong in, um, social networks.
+Um, and the correlations also exist in many other types of networks.
+And this is really the main intuition that we
+are going to exploit in today's, uh, lecture.
+So the question will be,
+how do we leverage this notion of correlation across the edges of the network,
+observe the networks, uh,
+to help to predict node labels, right?
+When I say correlation, I mean nodes that are connected tend to have the same label,
+tend to have the same preferences.
+So the question is,
+given this partially labeled network, you know, green,
+let's call that a positive class a- a- a label 1,
+and red will be what I'll call our negative class,
+and let's label it with label 0.
+And the gray nodes are the nodes that don't have the color yet.
+And the question is, how would I come up with an algorithm to learn,
+uh, or to predict the colors of, um, gray nodes?
+So the motivation is that similar nodes are
+typically close together or directly connected in the network.
+So the principal we are going to, uh,
+use is also known as guilt by association,
+in a sense that if I'm connected to a node we'd label X,
+then I'm likely to have that label X as well.
+And that's this notion of correlation I was saying about, right?
+So if you could say about, let's say,
+um, the malicious and benign web pages, you could say,
+malicious web- webpages tend to link to one another to increase visibility,
+uh, and look credible,
+and rank higher in search engines.
+So we find out that one web page is malicious,
+then perhaps other pages that link towards it also tend to be,
+uh, malicious. All right?
+Um, that's intuition.
+So the way we are going to think of this is that we are going to, uh,
+determine the classification label of a node v in the network,
+that it will depend on two factors.
+It will depend on the properties,
+features of the node V. And it will also depend on the labels,
+um, of the neighbors of- of the node v of interest.
+Uh, and of course, because the v's label depends on the labels of, um,
+nodes in the neighborhood,
+those labels will also depend on the features of those nodes in the neighborhood.
+So- so kind of- um,
+this means that also the label of node v will depend on the features of the nodes,
+uh, in its, uh, neighborhood.
+So here is how we are thinking about this, uh, graphically.
+Given a graph and a few,
+uh, labeled nodes, um,
+right we want to find labeled class of, ah, remaining nodes.
+When I say label, in this case it will be positive or negative,
+it will be, um,
+green or it will be red.
+Um, and the main assumption,
+the main modeling assumption,
+the main inductive bias in this, in our approach,
+will be to assume that there is some degree of homophily in the network.
+So that basically these, uh,
+labels tend to cluster,
+meaning that nodes of the same label tend to link to each other.
+So to give you an example task,
+let A be an adjacency matrix over n nodes.
+This is basically captures the structure of the graph.
+This adjacency matrix can be unweighted,
+can be also weighted,
+all methods generalize to weighted graphs as well,
+can be undirected or directed.
+All the methods generalize to both types of graphs.
+And we will use the Y as a vector of node labels, right?
+So we'll say Y_v equals 1, if the, um,
+node V belongs to class 1,
+to the green color,
+and Y_v equals 0.
+If the node V belongs to the class 0,
+meaning it is labeled with a red color.
+And of course there may be also other unlabelled nodes
+that- that need to be- whose label needs to be predicted,
+whose labeling needs to be classified.
+And right now, they- we don't know, ah, the label.
+And the goal is predict which labeled nodes are likely to be of class
+1 and which ones are likely to be of class 0.
+So that's the idea of what we wanna do.
+Um, there are many examples of this notion of collective classification, right?
+You can think about, I wanna do
+document classification and documents linked to each other.
+I wanna do link prediction in, in, in graphs.
+And the links will depend on the properties,
+labels of the neighbors.
+Um, even like you can take certain other domains where you have
+optical character recognition and you can represent that as a graph and say, you know,
+the label of what character I am also
+depends on the labels what are the characters around me,
+meaning that I can,
+I-I know how to form let's say English,
+English words and you know what,
+some random character, sequence of characters is very unlikely.
+So, you know, whether I'm letter A or letter
+G will depends what my neighbors here in the,
+let's say the line graph think about.
+So there is a lot of different cases where you can basically want to
+make prediction about one object based on the relationships of the object to its,
+uh, nearby, uh, objects in terms of nodes,
+images, letters in OCR, part-of-speech tagging.
+In many other cases,
+knowing what- what- what are the labels of
+the nodes around you helps you determine your own label.
+That's essentially the idea.
+So collective classification that we are going to talk about today is going to have,
+um, three different parts, right?
+So the intuition we are going to have is that you wanna simultaneously classify, ah,
+linked nodes using address and propagate information across the edges of the network.
+And this will be our probabilistic framework.
+Where do we will be making what is called a Markov assumption.
+And a Markov assumption means that the label of a node,
+um, only depends on the labels of its neighbors, right?
+So this is a first-order Markov assumption because we only
+assume that a label depends on the label of the neighbors.
+And we don't- for example,
+assume that the label depends on the label of neighbors, of neighbors, right.
+Like degree 2 neighborhood.
+We only look at the degree 1 neighborhood.
+And this notion of collective classification,
+the reason why we use this experiment is because we are- we will be
+altogether classifying all the nodes on the graph because every,
+every nodes labeled depends on other nodes labeled.
+So we are going to iteratively,
+ah, reclassify, reclassify nodes.
+Nodes are going to update the belief for a prediction about
+the labels until the process will converge.
+And in order for us to do this kind of collective iterative classification,
+we will need three types of, ah, classifiers.
+We'll have these local classifier that assigns the initial label to the node,
+we'll then have what we call a relational classifier that
+captures between- correlations between nodes and you will basically say,
+aha, what are the labels of other nodes in
+the network of the neighbors of the node of interest.
+And then we'll have this notion of collective inference,
+where we will be- where we will be propagating these correlations,
+these beliefs over the network until the labels wi- will
+converge to some stable state or until some fixed number of iterations,
+um, will be achieved.
+So what are these three pieces that we need to define?
+First, we have this notion of our local classifier that
+will assign initial labels to unlabeled nodes.
+So this is used for initial label assignment.
+And it will predict label of node based on its attributes or features.
+Um, it is just a standard classification task where given a set of,
+ah, given features of a node,
+we wanna predict it's labeled.
+And these does not use the network information yet.
+So this is applied only once at the beginning to give initial labels to the gray nodes.
+Then we will define this notion of
+a relational classifier that will capture the correlations between the nodes.
+So what does this mean?
+Is that we learn another predictor that will predict a label of
+one node based on the labels or attributes of other nodes in its neighborhood.
+And this is where the network information will be used
+because this relational classifier will say what is,
+what is given nodes label based on the labels of the nodes that are connected to it.
+And this is where the network information is used.
+And then we won't only apply this relational classifier once,
+but we are going to apply it in rounds.
+So we'll- we will have this collective inference stretch,
+where we are going to keep updating
+the predictions based on the updated predictions on the neighbors, right?
+So we are going to apply a relational classifier to each node iteratively
+and iterate until the inconsistency between neighboring nodes is minimize,
+meaning network structure is going to affect the predictions and
+these predictions are going to converge and the predictions are going to stabilize.
+And usually we will either run this, ah,
+iteration until it stabilizes or until some maximum number of iterations, ah, is reached.
+And I will give you specific examples,
+ah, what I mean by that.
+So the problem setting is how do we predict labels Y_v of unlabeled node V?
+Here denoted in Grey color.
+Each node V will have a feature vector F_v. Labels of some nodes will be given to us.
+Ah, you know, we'll use label 1 for green nodes and labeled 0 for red nodes.
+Ah, and the task is find the probability that a given node, um, is,
+let's say positive is green based on the features it has,
+as well as the network structure and the colors,
+ah, of the nodes around it.
+So that's the problem we are trying to solve.
+And we are going to solve this by propagating the beliefs,
+the propagating the information, ah,
+across the underlying network structure in an iterative way.
+So what's the overview of what is coming?
+We are going to focus on this notion of semi-supervised node classification.
+Semi-supervised in a sense that we are given
+both labeled and unlabeled data at the same time,
+we are given a partially labeled network.
+Ah, we are going to use this notion- this intuition of the notion of homophily,
+that similar nodes are typically close together or directly connected in the network.
+And we are going to talk about three techniques,
+about the relational classification,
+iterative classification, and then last,
+I'm going to talk about belief propagation.

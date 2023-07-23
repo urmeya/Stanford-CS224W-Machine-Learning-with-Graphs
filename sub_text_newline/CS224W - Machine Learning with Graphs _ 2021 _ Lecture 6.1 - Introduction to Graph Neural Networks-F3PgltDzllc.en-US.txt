@@ -1,0 +1,204 @@
+Great. So, uh, welcome back to the class.
+Uh, we're starting a very exciting, uh,
+new topic, uh, for which we have been building up,
+uh, from the beginning of the course.
+So today, we are going to talk about, uh,
+deep learning for graphs and in particular,
+uh, techniques around graph neural networks.
+And this should be one of the most central topics of the- of the class.
+And we are going to spend the next, uh, two weeks, uh,
+discussing this and going, uh,
+deeper, uh, into this exciting topic.
+So the way we think of this is the following: so far,
+we have been talking about node embeddings,
+where our intuition was to map nodes of
+the graph into d-dimensional embeddings such that,
+uh, nodes similar in the graph are embedded close together.
+And our goal was to learn this, uh,
+function f that takes in a graph and gives us the positions,
+the embeddings of individual nodes.
+And the way we thought about this is,
+we thought about this in this encoder-decoder framework where we said
+that we want the similarity of nodes in the network,
+uh, denoted as here to be similar or to
+match the similarity of the nodes in the embedding space.
+And here, by similarity,
+we could measure distance.
+Uh, there are many types of distances you can- you can quantify.
+One type of a distance that we were interested in was cosine distance, a dot products.
+So we say that, you know,
+the dot product of the embeddings of the nodes
+has to match the notion of similarity of them in the network.
+So the goal was, that given an input network,
+I want to encode the nodes by computing
+their embeddings such that if nodes are similar in the network,
+they are similar in the embedding space as well.
+So their similarity, um, is higher.
+And of course, when we talked about this,
+we were defining about what does it mean to be
+similar and what does it mean, uh, to encode?
+And, ah, as I mentioned,
+there are two key components in
+this node embedding framework that we talked to- in- in the class so far.
+So our goal was to make each node to a low-dimensional vector.
+And, um, we wanted to encode the embedding of a node in this vector, uh, z_v.
+And this is a d-dimensional embedding.
+So, you know, a vector of d numbers.
+And, uh, we also needed to specify the similarity function that specifies how
+the relationships in the vector space
+mapped to the relationships in the original network, right?
+So we said, um, you know,
+this is the similarity defined in terms of the network.
+This is the similarity defined, uh,
+in terms of the, um, embedding space,
+and this similarity computation in the embedding space,
+we can call this a dot,
+uh, uh, we can call this a decoder.
+So our goal was to encode the coordinate so that when we decode them,
+they decode the similarity in the network.
+Um, so far, we talked about what is called shallow encoding,
+which is the simplest approach to, uh,
+learning that encoder which is that basically encoder is just an embedding-look- look-up,
+which means we said we are going to learn this matrix z,
+where every node will have our column,
+uh, reserved in this matrix.
+And this- the way we are going to decode the- the embedding of a given node will simply
+be to basically look at the appropriate column of
+this matrix and say here is when it's embedding the store.
+So this is what we mean by shallow because basically,
+you are just memorizing the embedding of every node.
+We are directly learning,
+directly determining the embedding of every node.
+Um, so what are some of the limitations of the approaches?
+Um, like deep walk or nodes to end that we have talked about, uh,
+so far that apply this, uh,
+shallow approach to- to learning node embeddings.
+First is that this is extremely expensive in
+terms of the number of parameters that are needed, right?
+The number of parameters that the model has,
+the number of variables it has to
+learn is proportional to the number of nodes in the network.
+It is basically d times number of nodes.
+This- the reason for this being is that for every node we have
+to determine or learn d-parameters,
+d-values that determine its embedding.
+So, um, this means that, uh,
+for huge graphs the parameter space will be- will be giant.
+Um, there is no parameter sharing, uh, between the nodes.
+Um, in some sense, every node has to determine its own unique embedding.
+So there is a lot of computation that we need to do.
+Then, um, this is what is called, uh, transductive.
+Um, this means that in transductive learning,
+we can only make predictions over the examples that we have actually seen,
+uh, during the training phase.
+So this means, in this case,
+if you cannot generate an embedding for
+a node that- for a node that was not seen during training.
+We cannot transfer embeddings for one graph to another because for every graph,
+for every node, we have to directly learn- learn that embedding in the training space.
+And then, um, another important,
+uh, uh, drawback of this shallow encoding- encoders,
+as I said, like a deep walk or, uh,
+node correct, is that they do not incorporate node features, right?
+Many graphs have features,
+properties attached to the nodes of the network.
+Um, and these approaches do not naturally, uh, leverage them.
+So today, we are going to talk about deep graph encoders.
+So we are going to discuss graph neural networks that are examples of deep, um,
+graph encoders where the idea is that this encoding of, uh, er, er,
+of an embedding of our node v is
+a multi-layers of nonlinear transformations based on the graph structure.
+So basically now, we'll really think about
+deep neural networks and how they are transforming
+information through multiple layers of
+nonlinear transforms to come up with the final embedding.
+And important to note that all these deep encoders
+can be combined also with node similarity functions in Lecture 3.
+So we could say I want to learn a deep encoder that encodes the similarity function,
+uh, for example, the random walk similarity function that we used,
+uh, in the previous lectures.
+Or in this case,
+we can actually directly learn the- the-
+the encoder so that it is able to decode the node labels,
+which means we can actually directly train these models for, uh,
+node classification or any kind of,
+uh, graph prediction task.
+So intuitively, what we would like to do,
+or what we are going to do is we are going to develop
+deep neural networks that on the left will- on the input will take graph,
+uh, as a structure together with, uh, properties,
+features of nodes, uh,
+and potentially of edges.
+We will send this to the multiple layers of
+non-linear transformations in the network so that at the end,
+in the output, we get, for example,
+node embeddings, we also embed entire sub-graphs.
+We can embed the pairs of nodes and make various kinds of predictions, uh, in the end.
+And the good thing would be that we are able to train this in an end-to-end fashion.
+So from the labels, uh,
+on the right all the way down to the,
+uh, graph structure, uh, on the left.
+Um, and this would be in some sense,
+task, uh, agnostic or it will be applicable to many different tasks.
+We'll be able to do, uh, node classification,
+we'll be able to do, uh, link prediction,
+we'll be able to do any kind of clustering community detection,
+as well as to measure similarity, um, or,
+um, compatibility between different graphs or different sub-networks.
+So, uh, this, uh, will really, uh,
+allow us to be applied to any of these,
+uh, different, uh, tasks.
+So why is this interesting or why is it hard or why is it different from,
+let's say, classical, uh,
+machine learning or classical deep learning?
+If you think about the classical deep learning toolbox,
+it is designed for simple data types.
+Essentially, what tra- traditional or current toolbox is really good at is,
+we know how to process fixed-size matrices, right?
+So basically, I can resize every image and I represent it as
+a fixed-size matrix or as a fixed-size grid graph.
+And I can also take,
+for example, texts, speech,
+and represent- think of it basically as a linear sequence,
+as a chain graph.
+And we know how to process that, uh, really, really well.
+So kind of the claim, uh,
+and motivation for this is that
+modern deep learning toolbox is designed for simple data types,
+meaning sequences, uh, linear sequences,
+and, uh, fixed-size grids.
+Um, and of course the question is,
+how can we generalize that?
+How can we apply deep learning representation learning to more complex data types?
+And this is where graph neural networks come into play because they allow
+us to apply representation learning to
+much more complex data types than just the span of two very simple,
+uh, uh, data types,
+meaning the fixed size grids,
+uh, and linear sequences.
+And why is this hard?
+Why this non-trivial to do?
+It's because networks have a lot of complexity, right?
+They have arbitrary size and they have complex topological structure, right?
+There is no spatial locality like in grids.
+Uh, this means there is also no reference point or at no fixed orderings on the nodes,
+which means that in a graph there is no top left or bottom right as there is in a grid,
+or you know there is no left and right,
+as you can define in a text because it's a sequence.
+In a graph, there is no notion of a reference point.
+There is no notion of direction.
+Um, and more interestingly, right,
+these graphs are often dynamic and have multiple,
+um multi-modal features assigned to the nodes and edges of them.
+So this becomes, uh,
+very- very interesting because it really, um, expands, uh,
+ways in which we can describe the data and in which we
+can represent the underlying domain in underlying data.
+Because not everything can be represented as
+a ma- fixed size matrix or as a linear sequence.
+And there are- as I showed in the beginning,
+right, in the first lecture,
+there is a lot of domains,
+a lot of use cases where, um,
+proper graphical representation is,
+uh, very, very important.

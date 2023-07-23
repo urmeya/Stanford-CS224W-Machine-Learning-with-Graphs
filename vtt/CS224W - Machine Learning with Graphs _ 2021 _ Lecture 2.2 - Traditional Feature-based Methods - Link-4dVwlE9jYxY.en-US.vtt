@@ -1,0 +1,931 @@
+WEBVTT
+Kind: captions
+Language: en-US
+
+00:00:04.070 --> 00:00:10.005
+We continue with our investigation of traditional machine learning approaches uh,
+
+00:00:10.005 --> 00:00:12.375
+to uh, graph level predictions.
+
+00:00:12.375 --> 00:00:15.855
+And now we have- we are going to focus on
+
+00:00:15.855 --> 00:00:19.605
+link pre- prediction tasks and features that capture,
+
+00:00:19.605 --> 00:00:21.450
+uh, structure of links,
+
+00:00:21.450 --> 00:00:23.790
+uh, in a given, uh, network.
+
+00:00:23.790 --> 00:00:28.815
+So the link le- level prediction tasks is the following.
+
+00:00:28.815 --> 00:00:33.350
+The task is to predict new links based on the existing links in the network.
+
+00:00:33.350 --> 00:00:35.445
+So this means at test time,
+
+00:00:35.445 --> 00:00:39.555
+we have to evaluate all node pairs that are not yet linked,
+
+00:00:39.555 --> 00:00:41.535
+uh, rank them, and then, uh,
+
+00:00:41.535 --> 00:00:45.160
+proclaim that the top k note pairs, as, um,
+
+00:00:45.160 --> 00:00:47.494
+predicted by our algorithm,
+
+00:00:47.494 --> 00:00:49.400
+are the links that are going to occur,
+
+00:00:49.400 --> 00:00:50.660
+uh, in the network.
+
+00:00:50.660 --> 00:00:54.965
+And the key here is to design features for a pair of nodes.
+
+00:00:54.965 --> 00:00:57.650
+And of course, what we can do, um, uh,
+
+00:00:57.650 --> 00:01:00.050
+as we have seen in the node level, uh,
+
+00:01:00.050 --> 00:01:02.360
+tasks, we could go and, uh,
+
+00:01:02.360 --> 00:01:04.280
+let say concatenate, uh,
+
+00:01:04.280 --> 00:01:07.130
+uh, the features of node number 1,
+
+00:01:07.130 --> 00:01:08.720
+features of the node number 2,
+
+00:01:08.720 --> 00:01:12.380
+and train a model on that type of, uh, representation.
+
+00:01:12.380 --> 00:01:14.540
+However, that would be very, um,
+
+00:01:14.540 --> 00:01:18.245
+unsatisfactory, because, uh, many times this would, uh,
+
+00:01:18.245 --> 00:01:23.380
+lose, uh, much of important information about the relationship between the two nodes,
+
+00:01:23.380 --> 00:01:24.545
+uh, in the network.
+
+00:01:24.545 --> 00:01:29.465
+So the way we will think of this link prediction task is two-way.
+
+00:01:29.465 --> 00:01:31.625
+We can formulate it in two different ways.
+
+00:01:31.625 --> 00:01:34.100
+One way we can formulate it is simply to say,
+
+00:01:34.100 --> 00:01:35.390
+links in the network are,
+
+00:01:35.390 --> 00:01:37.010
+let say missing at random,
+
+00:01:37.010 --> 00:01:38.870
+so we are given a network,
+
+00:01:38.870 --> 00:01:40.470
+we are going to remove, uh,
+
+00:01:40.470 --> 00:01:43.890
+at random some number of links and then trying to predict,
+
+00:01:43.890 --> 00:01:46.380
+uh, back, uh, those links using our,
+
+00:01:46.380 --> 00:01:47.700
+uh, machine learning algorithm.
+
+00:01:47.700 --> 00:01:49.710
+That's one type of a formulation.
+
+00:01:49.710 --> 00:01:55.190
+And then the other type of a formulation is that we are going to predict links over time.
+
+00:01:55.190 --> 00:01:59.480
+This means that if we have a network that naturally evolves over time, for example,
+
+00:01:59.480 --> 00:02:01.880
+our citation network, our social network,
+
+00:02:01.880 --> 00:02:03.725
+or our collaboration network,
+
+00:02:03.725 --> 00:02:05.180
+then we can say, ah,
+
+00:02:05.180 --> 00:02:09.450
+we are going to look at a graph between time zero and time zero,
+
+00:02:09.450 --> 00:02:13.310
+uh, prime, and based on the edges and the structure up to this uh,
+
+00:02:13.310 --> 00:02:15.305
+the time t 0 prime, uh,
+
+00:02:15.305 --> 00:02:18.710
+we are going then to output a ranked list L of
+
+00:02:18.710 --> 00:02:22.100
+links that we predict are going to occur in the future.
+
+00:02:22.100 --> 00:02:26.215
+Let's say that are going to appear between times T1 and T1 prime.
+
+00:02:26.215 --> 00:02:30.830
+And the way, uh, we can then evaluate this type of approach is to say ah,
+
+00:02:30.830 --> 00:02:32.810
+we know that in the future, um,
+
+00:02:32.810 --> 00:02:35.720
+n new links will appear, let's, uh,
+
+00:02:35.720 --> 00:02:39.440
+let's rank, uh, the- the potential edges outputed by
+
+00:02:39.440 --> 00:02:42.320
+our algorithm and let's compare it to the edges
+
+00:02:42.320 --> 00:02:45.470
+that actually really appeared, uh, in the future.
+
+00:02:45.470 --> 00:02:49.010
+Uh, this type of formulation is useful or natural
+
+00:02:49.010 --> 00:02:52.745
+for networks that evolve over time like transaction networks,
+
+00:02:52.745 --> 00:02:55.985
+like social networks, well, edges, uh, keep,
+
+00:02:55.985 --> 00:02:58.685
+um- keep adding, while for example,
+
+00:02:58.685 --> 00:03:03.440
+the links missing at random type formulation is more useful, for example,
+
+00:03:03.440 --> 00:03:07.400
+for static networks like protein- protein interaction networks,
+
+00:03:07.400 --> 00:03:09.259
+where we can assume,
+
+00:03:09.259 --> 00:03:12.590
+even though this assumption is actually heavily violated, that, you know,
+
+00:03:12.590 --> 00:03:17.510
+biologists are testing kind of at random connections between proteins,
+
+00:03:17.510 --> 00:03:21.125
+um, and we'd like to infer what other connections in the future, uh,
+
+00:03:21.125 --> 00:03:25.610
+are going for- for biologists are going to discover, uh, in the future,
+
+00:03:25.610 --> 00:03:28.380
+or which links should they probe with the,
+
+00:03:28.380 --> 00:03:30.375
+uh- that lab, uh, experiments.
+
+00:03:30.375 --> 00:03:31.984
+Of course, in reality,
+
+00:03:31.984 --> 00:03:34.790
+biologists are not exploring the physical, uh,
+
+00:03:34.790 --> 00:03:38.690
+protein-protein interaction network, uh, um, at random.
+
+00:03:38.690 --> 00:03:42.785
+Um, you know, they are heavily influenced by positive results of one another.
+
+00:03:42.785 --> 00:03:46.280
+So essentially some parts of this network suddenly well explored,
+
+00:03:46.280 --> 00:03:49.540
+while others are very much, uh, under explored.
+
+00:03:49.540 --> 00:03:52.515
+So with these two formulations, uh,
+
+00:03:52.515 --> 00:03:55.260
+let's now start thinking about, um,
+
+00:03:55.260 --> 00:03:57.060
+how are we going to, uh,
+
+00:03:57.060 --> 00:03:59.295
+provide a feature descriptor,
+
+00:03:59.295 --> 00:04:01.395
+uh, for a given, uh, pair of nodes?
+
+00:04:01.395 --> 00:04:04.160
+So the idea is that for a pair of nodes x, y,
+
+00:04:04.160 --> 00:04:06.279
+we are going to compute some score,
+
+00:04:06.279 --> 00:04:08.550
+um, uh, c, uh, x, y.
+
+00:04:08.550 --> 00:04:10.155
+For example, a score, uh,
+
+00:04:10.155 --> 00:04:14.735
+could be the number of common neighbors between nodes, uh, X and Y.
+
+00:04:14.735 --> 00:04:17.630
+And then we are going to sort all pairs x,
+
+00:04:17.630 --> 00:04:19.970
+y according to the decreasing, uh,
+
+00:04:19.970 --> 00:04:25.490
+score C, um, and we will predict top end pairs as the new links that are going to appear,
+
+00:04:25.490 --> 00:04:26.725
+uh, in the network.
+
+00:04:26.725 --> 00:04:28.950
+And then we can end, uh, the test-time, right,
+
+00:04:28.950 --> 00:04:33.080
+we can actually go and observe which links actually appear and compare these two lists,
+
+00:04:33.080 --> 00:04:35.705
+and this way determine how well our approach,
+
+00:04:35.705 --> 00:04:37.775
+our algorithm, um, is working.
+
+00:04:37.775 --> 00:04:39.455
+We are going to review, uh,
+
+00:04:39.455 --> 00:04:42.350
+three different ways how to, uh,
+
+00:04:42.350 --> 00:04:47.130
+featurize or create a descriptor of the relationship between two nodes in the network.
+
+00:04:47.130 --> 00:04:49.730
+We are going to talk about distance-based features,
+
+00:04:49.730 --> 00:04:51.785
+local neighborhood overlap features,
+
+00:04:51.785 --> 00:04:55.385
+as well as global neighbor- neighborhood overlap, uh, features.
+
+00:04:55.385 --> 00:04:57.650
+And the goal is that for a given pair of nodes,
+
+00:04:57.650 --> 00:05:00.630
+we are going to describe the relationship, um,
+
+00:05:00.630 --> 00:05:02.250
+between the two nodes, uh,
+
+00:05:02.250 --> 00:05:04.850
+so that from this relationship we can then predict or
+
+00:05:04.850 --> 00:05:08.810
+learn whether there exists a link between them or not.
+
+00:05:08.810 --> 00:05:13.040
+So first, uh, we talk about distance-based feature.
+
+00:05:13.040 --> 00:05:14.510
+Uh, this is very natural.
+
+00:05:14.510 --> 00:05:15.740
+We can think about
+
+00:05:15.740 --> 00:05:19.200
+the shortest path distance between the two nodes and characterize it in this way.
+
+00:05:19.200 --> 00:05:22.070
+So for example, if we have nodes B and H,
+
+00:05:22.070 --> 00:05:25.415
+then the shortest path length between them, uh, equals two.
+
+00:05:25.415 --> 00:05:27.950
+So the value of this feature would be equal to two.
+
+00:05:27.950 --> 00:05:30.390
+However, if you look at this, uh, this does,
+
+00:05:30.390 --> 00:05:33.675
+uh- what this- what this metric does not capture it, it captures the distance,
+
+00:05:33.675 --> 00:05:35.385
+but it doesn't measure,
+
+00:05:35.385 --> 00:05:40.250
+kind of capture the degree of neighborhood overlap or the strength of connection.
+
+00:05:40.250 --> 00:05:42.680
+Because for example, you can look in this network
+
+00:05:42.680 --> 00:05:45.560
+nodes B and H actually have two friends in common.
+
+00:05:45.560 --> 00:05:49.580
+So the- the connection here in some sense is stronger between them.
+
+00:05:49.580 --> 00:05:51.995
+Then for example, the connection between, uh,
+
+00:05:51.995 --> 00:05:54.515
+node D and, uh, node, uh,
+
+00:05:54.515 --> 00:05:57.350
+F, um, because they only have kind of- there is
+
+00:05:57.350 --> 00:06:00.395
+only one path while here there are two different paths.
+
+00:06:00.395 --> 00:06:02.360
+So the way we can, um,
+
+00:06:02.360 --> 00:06:05.870
+try to capture the strength of connection between two nodes would be to ask, okay,
+
+00:06:05.870 --> 00:06:07.820
+how many neighbors, uh,
+
+00:06:07.820 --> 00:06:09.635
+do you have in common, right?
+
+00:06:09.635 --> 00:06:12.785
+What is the number of common friends between a pair of nodes?
+
+00:06:12.785 --> 00:06:16.745
+And this is captured by the notion of local neighborhood overlap,
+
+00:06:16.745 --> 00:06:21.020
+which captures the number of neighboring nodes shared between two nodes,
+
+00:06:21.020 --> 00:06:23.380
+v and, uh- v1 and v2.
+
+00:06:23.380 --> 00:06:26.055
+Uh, one way to capture this is you simply say,
+
+00:06:26.055 --> 00:06:28.460
+what is the- what is the number of common neighbors, right?
+
+00:06:28.460 --> 00:06:31.205
+We take the neighbors of node V1,
+
+00:06:31.205 --> 00:06:32.960
+take the neighbors of node V2,
+
+00:06:32.960 --> 00:06:36.355
+and take the intersection of these two sets.
+
+00:06:36.355 --> 00:06:39.795
+Um, a normalized version of this, uh,
+
+00:06:39.795 --> 00:06:42.180
+same idea is Jaccard coefficient,
+
+00:06:42.180 --> 00:06:44.265
+where we take the intersection-
+
+00:06:44.265 --> 00:06:47.360
+the size of the intersection divided by the size of the union.
+
+00:06:47.360 --> 00:06:49.760
+The issue with common neighbors is that, of course,
+
+00:06:49.760 --> 00:06:53.840
+nodes that have higher degree are more likely to have neighbors with others.
+
+00:06:53.840 --> 00:06:56.600
+While here in the Jaccard coefficient, in some sense,
+
+00:06:56.600 --> 00:07:00.065
+we are norma- we are trying to normalize, um,
+
+00:07:00.065 --> 00:07:02.150
+by the degree, uh,
+
+00:07:02.150 --> 00:07:05.450
+to some degree by saying what is the union of the number of,
+
+00:07:05.450 --> 00:07:07.330
+um, neighbors of the two nodes.
+
+00:07:07.330 --> 00:07:08.775
+Uh, and then, uh,
+
+00:07:08.775 --> 00:07:10.650
+the other type of, uh,
+
+00:07:10.650 --> 00:07:12.585
+uh, local neighborhood overlap, uh,
+
+00:07:12.585 --> 00:07:16.235
+metric that is- that actually works quite well in practice is called,
+
+00:07:16.235 --> 00:07:17.930
+uh, Adamic- Adar index.
+
+00:07:17.930 --> 00:07:19.610
+And simply what this is saying is,
+
+00:07:19.610 --> 00:07:20.900
+let's go over the,
+
+00:07:20.900 --> 00:07:26.120
+um- let's sum over the neighbors that nodes v1 and v2 have in common,
+
+00:07:26.120 --> 00:07:29.810
+and let's take one over the log, uh, their degree.
+
+00:07:29.810 --> 00:07:33.520
+So basically, the idea here is that we count how many neighbors,
+
+00:07:33.520 --> 00:07:35.295
+um, the two nodes have in common,
+
+00:07:35.295 --> 00:07:37.955
+but the importance of uneven neighbor is,
+
+00:07:37.955 --> 00:07:42.650
+uh- is low, uh- decreases, uh, with these degrees.
+
+00:07:42.650 --> 00:07:43.670
+So if you have a lot of,
+
+00:07:43.670 --> 00:07:47.315
+um, neighbors in common that have low degree,
+
+00:07:47.315 --> 00:07:50.780
+that is better than if you have a lot of high-
+
+00:07:50.780 --> 00:07:54.260
+highly connected celebrities as a set of common neighbors.
+
+00:07:54.260 --> 00:07:59.335
+So this is a- a net- a feature that works really well in a social network.
+
+00:07:59.335 --> 00:08:02.950
+Of course, the problem with, uh, local, um,
+
+00:08:02.950 --> 00:08:07.805
+network neighborhood overlap is the limitation is that this, uh,
+
+00:08:07.805 --> 00:08:13.145
+metric always returns zero if two- two nodes are not- do not have any,
+
+00:08:13.145 --> 00:08:14.525
+uh, neighbors in common.
+
+00:08:14.525 --> 00:08:16.265
+So for example, in this case,
+
+00:08:16.265 --> 00:08:20.315
+if we would want to say what is the neighborhood overlap between nodes A and E,
+
+00:08:20.315 --> 00:08:22.230
+because they have no neighbors in common,
+
+00:08:22.230 --> 00:08:24.170
+they are more than, um,
+
+00:08:24.170 --> 00:08:26.040
+uh, two hops away from each other.
+
+00:08:26.040 --> 00:08:28.185
+Then the- if only in such cases,
+
+00:08:28.185 --> 00:08:33.500
+the return- the value of that it will be returned to will always be, zero.
+
+00:08:33.500 --> 00:08:38.240
+However, in reality, these two nodes may still potentially be connected in the future.
+
+00:08:38.240 --> 00:08:40.625
+So to fix this problem,
+
+00:08:40.625 --> 00:08:44.020
+we then define global neighborhood overlap matrix.
+
+00:08:44.020 --> 00:08:47.450
+That is all of this limitation by only, uh,
+
+00:08:47.450 --> 00:08:50.330
+focusing on a hop- two hop distances and
+
+00:08:50.330 --> 00:08:54.085
+two-hop paths between a pairs- pair of nodes and consider,
+
+00:08:54.085 --> 00:08:57.895
+um, all other distances or the entire graph as well.
+
+00:08:57.895 --> 00:09:03.465
+So let's now look at global neigh- neighborhood overlap type, uh, metrics.
+
+00:09:03.465 --> 00:09:07.960
+And the metric we are going to talk about is called Katz index,
+
+00:09:07.960 --> 00:09:10.955
+and it counts the number of all paths, uh,
+
+00:09:10.955 --> 00:09:15.510
+of all different lengths between a given pair of nodes.
+
+00:09:15.510 --> 00:09:18.325
+So now we need to figure out two things here.
+
+00:09:18.325 --> 00:09:22.495
+First is, how do we compute number of paths of a given length,
+
+00:09:22.495 --> 00:09:25.485
+uh, between, uh, two, uh, nodes?
+
+00:09:25.485 --> 00:09:28.850
+This can actually be very elegantly computed by
+
+00:09:28.850 --> 00:09:31.700
+using powers of the graph adjacency matrix.
+
+00:09:31.700 --> 00:09:36.260
+So let me give you a quick illustration or a quick proof why this is true.
+
+00:09:36.260 --> 00:09:38.135
+So the uh, first,
+
+00:09:38.135 --> 00:09:41.990
+I wanna give you the intuition around the powers of adjacency matrix, right?
+
+00:09:41.990 --> 00:09:44.450
+The point is that what we are going to show is
+
+00:09:44.450 --> 00:09:48.800
+that computing number of paths between uh, two nodes um,
+
+00:09:48.800 --> 00:09:52.730
+reduces down to computing powers of the graph adjacency matrix or
+
+00:09:52.730 --> 00:09:57.335
+essentially taking the graph adjacency matrix and multiplying it with itself.
+
+00:09:57.335 --> 00:10:00.500
+So first graph adjacency matrix recall,
+
+00:10:00.500 --> 00:10:07.760
+it has a value 1 at every entry uv if- if nodes u and v are connected.
+
+00:10:07.760 --> 00:10:09.665
+Then let's say that p,
+
+00:10:09.665 --> 00:10:14.780
+uv uh superscript capital K counts the number of paths of
+
+00:10:14.780 --> 00:10:20.000
+length K between nodes u and v. And our goal is to show that uh,
+
+00:10:20.000 --> 00:10:22.950
+uh, if we are interested in the number of paths uh,
+
+00:10:22.950 --> 00:10:25.145
+uh, of length K,
+
+00:10:25.145 --> 00:10:26.765
+then we have to uh,
+
+00:10:26.765 --> 00:10:32.615
+compute A to the power of k and that entry uv will tell us the number of pets.
+
+00:10:32.615 --> 00:10:35.960
+The capital K here is the same as uh,
+
+00:10:35.960 --> 00:10:37.190
+uh, a small case,
+
+00:10:37.190 --> 00:10:42.875
+so the Kth power of A measures the number of paths of a given length.
+
+00:10:42.875 --> 00:10:44.810
+And if you think about it right,
+
+00:10:44.810 --> 00:10:47.630
+how many paths of length 1 are there between a pair of
+
+00:10:47.630 --> 00:10:51.230
+nodes that is exactly captured by the graph adjacency matrix, right?
+
+00:10:51.230 --> 00:10:53.120
+If a pair of nodes is connected,
+
+00:10:53.120 --> 00:10:54.755
+then there is a value 1,
+
+00:10:54.755 --> 00:10:57.215
+and if a pair of nodes is not connected,
+
+00:10:57.215 --> 00:10:59.855
+then there is the value 0.
+
+00:10:59.855 --> 00:11:03.590
+Now that we know how to compute um,
+
+00:11:03.590 --> 00:11:07.505
+the number of paths of length 1 between a pair of nodes.
+
+00:11:07.505 --> 00:11:10.100
+Now we can ask how many- how do we compute
+
+00:11:10.100 --> 00:11:13.040
+the number of paths of length 2 between a pair of nodes u.
+
+00:11:13.040 --> 00:11:16.460
+And we are going to do this via the two- two-step procedure.
+
+00:11:16.460 --> 00:11:20.810
+Uh, and we are going to do this by decompose the path of
+
+00:11:20.810 --> 00:11:25.430
+length 2 into a path of length 1 plus another path of length 1.
+
+00:11:25.430 --> 00:11:29.555
+So the idea is that we compute the number of paths of length 1
+
+00:11:29.555 --> 00:11:33.995
+between each of u's neighbors and v,
+
+00:11:33.995 --> 00:11:36.650
+and then um, add one to that.
+
+00:11:36.650 --> 00:11:38.660
+So the idea is the following,
+
+00:11:38.660 --> 00:11:43.850
+the number of paths between nodes u and v of length 1- of length 2 is
+
+00:11:43.850 --> 00:11:49.335
+simply a summation over the nodes i that are the neighbors of the starting node u,
+
+00:11:49.335 --> 00:11:52.270
+um, times the number of paths now from
+
+00:11:52.270 --> 00:11:56.320
+this neighbor i to the target node v. And this will
+
+00:11:56.320 --> 00:12:03.680
+now give us the number of paths of length 2 between u and v. And now what you can see,
+
+00:12:03.680 --> 00:12:07.190
+you can see a substitute here back, the adjacency matrix.
+
+00:12:07.190 --> 00:12:09.155
+So all these is a sum over i,
+
+00:12:09.155 --> 00:12:13.790
+u- A _ui times A_iv.
+
+00:12:13.790 --> 00:12:16.505
+So if you see this,
+
+00:12:16.505 --> 00:12:19.580
+this is simply the product of matrices uh,
+
+00:12:19.580 --> 00:12:23.090
+of made- of adjacency matrix A_ iu itself.
+
+00:12:23.090 --> 00:12:24.455
+So this is now uh,
+
+00:12:24.455 --> 00:12:29.420
+the entry uv of the adjacency matrix A uh, squared.
+
+00:12:29.420 --> 00:12:31.370
+Um, this is uh,
+
+00:12:31.370 --> 00:12:32.900
+now by basically by induction,
+
+00:12:32.900 --> 00:12:41.090
+we can keep repeating this and get a higher powers that count paths of longer lengths um,
+
+00:12:41.090 --> 00:12:43.700
+as- as this is uh, increasing.
+
+00:12:43.700 --> 00:12:45.950
+Another way to look at this,
+
+00:12:45.950 --> 00:12:47.960
+here is a visual proof is that uh,
+
+00:12:47.960 --> 00:12:49.220
+what is A squared?
+
+00:12:49.220 --> 00:12:52.460
+A squared is A multiplied by itself,
+
+00:12:52.460 --> 00:12:55.040
+so when we are interested in a given,
+
+00:12:55.040 --> 00:12:57.740
+let's say entry, here these are entry,
+
+00:12:57.740 --> 00:12:59.990
+these are neighbors of Node 1.
+
+00:12:59.990 --> 00:13:02.735
+These are um, now the,
+
+00:13:02.735 --> 00:13:08.960
+the number of paths of length 1 between one- one's neighbors and node number 2.
+
+00:13:08.960 --> 00:13:11.090
+So after the multiplication,
+
+00:13:11.090 --> 00:13:12.530
+the value here will be 1,
+
+00:13:12.530 --> 00:13:19.565
+which we mean that there is one path of length 2 between node 1 uh, and Node 2.
+
+00:13:19.565 --> 00:13:23.420
+So this is how powers of adjacency matrix give
+
+00:13:23.420 --> 00:13:29.090
+account paths of length K between a pair of nodes uh, in the network.
+
+00:13:29.090 --> 00:13:34.400
+What this means is that now we can define the- we have developed
+
+00:13:34.400 --> 00:13:39.650
+the first component that will allow us to count- to compute the cuts index,
+
+00:13:39.650 --> 00:13:45.275
+because it allows us to count the number of paths between a pair of nodes for a given K.
+
+00:13:45.275 --> 00:13:51.560
+But what we still need to decide is how do we do this for all the path lengths,
+
+00:13:51.560 --> 00:13:53.285
+from one to infinity.
+
+00:13:53.285 --> 00:13:55.760
+So to compute the pets, as we said,
+
+00:13:55.760 --> 00:13:58.880
+we are going to use powers of the adjacency matrix uh,
+
+00:13:58.880 --> 00:14:03.545
+you know, uh, the adjacency matrix itself tells us powers of length 1,
+
+00:14:03.545 --> 00:14:05.300
+square of it tells us power of,
+
+00:14:05.300 --> 00:14:09.005
+uh squared tells us paths of length 2,
+
+00:14:09.005 --> 00:14:12.470
+and the adjacency matrix raised to
+
+00:14:12.470 --> 00:14:17.840
+the power l counts the number of paths of length l between a pair of nodes.
+
+00:14:17.840 --> 00:14:24.050
+NOW, the Katz index goes over from 1 path lengths all the way to infinity.
+
+00:14:24.050 --> 00:14:27.215
+So the- the Katz index uh,
+
+00:14:27.215 --> 00:14:30.230
+global neighborhood overlap between nodes v1 and
+
+00:14:30.230 --> 00:14:34.535
+v2 is simply a summation of l from one to infinity.
+
+00:14:34.535 --> 00:14:37.850
+We have this Beta raised to the power of l by basically
+
+00:14:37.850 --> 00:14:42.650
+a disc- discount factor that gives lower- lower importance
+
+00:14:42.650 --> 00:14:46.670
+to paths of longer lengths and A to b_l counts
+
+00:14:46.670 --> 00:14:51.440
+the number of paths of length l between nodes of v1 and v2.
+
+00:14:51.440 --> 00:14:56.120
+And now what is interesting about Katz index is that, um,
+
+00:14:56.120 --> 00:15:01.205
+um,uh, we can actually compute this particular expression in a closed-form.
+
+00:15:01.205 --> 00:15:05.180
+And here is- here is the- the formula for the Katz index again,
+
+00:15:05.180 --> 00:15:06.635
+and basically what uh,
+
+00:15:06.635 --> 00:15:10.805
+here is a closed form expression that will exactly compute the sum,
+
+00:15:10.805 --> 00:15:12.275
+and the reason um,
+
+00:15:12.275 --> 00:15:15.095
+why this is true or y there is inequality is this.
+
+00:15:15.095 --> 00:15:16.775
+We notice that this is simply uh,
+
+00:15:16.775 --> 00:15:19.654
+geometric series uh, for matrices,
+
+00:15:19.654 --> 00:15:21.350
+and for that there exists
+
+00:15:21.350 --> 00:15:26.180
+a closed form expression that all that it requires us is take the identity matrix
+
+00:15:26.180 --> 00:15:29.510
+minus Beta times adjacency matrix inverted that and
+
+00:15:29.510 --> 00:15:33.020
+then again then subtract the identity matrix again.
+
+00:15:33.020 --> 00:15:37.895
+And the entries of this matrix S will give us
+
+00:15:37.895 --> 00:15:44.000
+the Katz neighborhood overlap scores for any pair uh, of nodes.
+
+00:15:44.000 --> 00:15:47.795
+So to summarize, uh, link level features.
+
+00:15:47.795 --> 00:15:50.450
+Uh, we- we described three types of them.
+
+00:15:50.450 --> 00:15:53.990
+We talked about distance-based features that users, for example,
+
+00:15:53.990 --> 00:15:58.535
+shortest path between a pair of nodes and does not capture neighborhood overlaps.
+
+00:15:58.535 --> 00:16:03.560
+Then we talked about this neighborhood overlap metrics like common neighbors, Jaccard,
+
+00:16:03.560 --> 00:16:08.225
+and the Dmitry data that captures find- in a fine-grained wait,
+
+00:16:08.225 --> 00:16:12.455
+how many neighbors does a pair of nodes have in common?
+
+00:16:12.455 --> 00:16:15.815
+But the problem with this is that nodes that are more than two hops apart,
+
+00:16:15.815 --> 00:16:17.855
+nodes that have no neighbors in common,
+
+00:16:17.855 --> 00:16:20.345
+the metric will return value 0.
+
+00:16:20.345 --> 00:16:23.360
+So the global neighborhood overlap type metrics,
+
+00:16:23.360 --> 00:16:25.775
+for example, like Katz, uh,
+
+00:16:25.775 --> 00:16:31.910
+uses global graph structure to give us a score for a pair of nodes and Katz index counts
+
+00:16:31.910 --> 00:16:35.000
+the number of pets of all lands between a pair of
+
+00:16:35.000 --> 00:16:38.600
+nodes where these paths are discounted um,
+
+00:16:38.600 --> 00:16:42.480
+exponentially with their length.
+

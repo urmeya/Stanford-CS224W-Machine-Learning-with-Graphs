@@ -1,0 +1,396 @@
+So. Now, we are ready to look
+about our generative model for graphs, and this generative
+model is called graphRNN. And, it will allow us to
+generate realistic graphs without making any kind of
+inductive bias assumptions. And the model will
+be as we will see-- extremely general and
+scalable, and being able to generate
+a vast diversity of different types of graphs,
+of different sizes and shapes, and structures, and so on. So the key idea that
+this is-- that we are going to harness
+here, is that we want to generate
+graphs via sequential adding of nodes and edges. And why do we want
+to do it this way? We want to do it this
+way-- exactly what I explained at the end of
+the previous segment. Which is, that
+basically, we want to model a complex distribution
+that captures distribution over graphs. Modeling that complex
+distribution-- we don't know how to do. So we are going to break
+that complex distribution into many small parts. And the way we break
+creation of the graph, we are going to break it
+into many small parts, into many small actions. And we are simply-- all we'll have to do is model a
+model transition probabilities. Basically saying,
+given the graph, given the actions we have made
+so far, conditioning on that, what is the next
+action we want to take? And this way, by
+multiplying these together, we are able to model the
+entire distribution-- all the dependencies in it. So in our case, the
+idea is that, imagine I have this graph, and
+I want to generate it. The way I'm going to describe
+the generation process, is that, I'll start
+with the first node, and then, I'll add
+the second node. The second node will
+link to the first one. Now I have already built
+a bit of the graph, a third node is added and
+links to the first node, then node number 4 is added
+and links to two and three, and then node number 5 is added
+and it links to three and four. So that's basically,
+the generative process I want to model
+and I want to capture. And in this part
+of the lecture, I'm going to explain to you
+the model called graphRNN. And, here is the
+link to the paper, so if you want more details
+you can read the paper that I'm citing here. So let's think about this
+modeling graphs or generating graphs as sequences. A graph with node
+ordering pi can be uniquely mapped into a
+sequence of nodes and edge additions S. What
+do I mean by this? Graph is a set of nodes
+and a set of objects, and apriori graph has
+no ordering to it. So we need to this node
+ordering, this permutation pi, that determines the order
+in which the nodes appear. And given that ordering
+in which the nodes appear, then the sequence to generate
+the graph is uniquely defined. Because, first, I
+add the second node. Sorry. First, I add the first node,
+then I add the second node, I add the third node. And then, in terms of adding
+edges I can always say I go-- I ask, should the
+link the node 1? Yes, no. Should I link to node 1? Yes, no. Until all the nodes after
+already present in the graph. So that is basically the
+key-- the key idea is that we need some node
+ordering, and given that no node ordering,
+then generating the graph is simply a sequence problem. Another observation that is
+important for graph generation, is that, this sequence is
+actually a two-level sequence. There is a sequence
+of adding nodes, and there is a sequence
+of adding edges. Right at node level sequence,
+at each step we add a new node. And then, we also
+have the second level after a node is added the edges
+need to be added for that given node. So this means we s a two-level
+sequence where we will first have the-- we have the high
+level node level sequence. And then, the low level
+edge level sequence. Node level, a step-- we do one node
+level step and then we do a lot of edge level steps. And then, we do a
+node level step, and we do a lot of
+edge level steps. And each edge level
+step is simply an addition of a new edge. So you can think of node
+level steps being, add node 1, add node 2, and node 3. While the sequence elements
+in the edge level are, should I add this node-- this new node that I have added,
+should be connect it to node 1? Should I connect it to node 2? Should I connect it to node 3? And you can think of
+this as generating a binary sequence that says,
+don't connect, connect, connect, So that's the idea. So a summary of what
+we have learned so far, is that, a graph
+plus a node ordering gives us a unique
+sequence of sequences to generate a given graph. A node ordering for now, let's
+assume is randomly selected or somehow it's given to us,
+will come to this question later. And the way you can think
+of this is right if-- basically is to say, Oh, if I
+have a partially built graph and I want to add a new
+node, then adding this node to the graph simply
+means I have to print out this particular column
+of the adjacency matrix. So I'd basically
+saying, node 4 doesn't link to node 1, node
+4 links to node 2, and node 4 links to node 3. This is first node,
+second node, third node, and we just generated the
+column of the adjacency matrix for the node number 4. So node level sequence is
+going to add one new column to the adjacency matrix. And edge level sequence is
+going to kind of print out the rows-- the entries
+of this column, where 0 means the edge
+does not exist and 1 means that the edge exists. So. So far we have transformed
+the graph generation problem into a sequenced
+generation problem. Now, we need to model the
+two processes, the process of adding new nodes, where
+basically, we want to generate a state for a new node. And then, we want to generate
+edges for the new node based on it's state. And will be the
+edge level sequence. So the point will be that, an
+approach we are going to use is-- we are going
+to use what are called recurrent neural
+networks to model this two-level sequence. And we are going to do use a
+nested recurrent neural network as I'm going to explain. So the idea is the
+following, what are recurrent neural networks? Recurrent neural networks are
+designed for sequential data. And a recurrent neural
+network sequentially takes an input sequence to
+update its hidden state. And based on the hidden state-- the idea is that
+this hidden state summarizes all the information
+input to the RNN so far. And then, the
+update is conducted via what is called RNN
+cells, for every time step I have a new RNN cell. So the way you can
+think of it is, I initialize the RNN
+with some hidden state, I give it the input. The RNN is going to update its
+hidden state and put it here, and it's going also
+to create an output. And now, the second time
+step this hidden state-- next cell is going
+to take as the input. It's going to take as the input
+the input from the environment, it's going to update its hidden
+state, here denoted as S2, and it's going also to
+produce me an output. So basically, the idea
+is that this hidden state s keeps memory of what the
+RNN-- what kind of inputs the RNN has seen so far. So to tell you more and
+give you more mathematics, S sub t is the state of
+the RNN at the step t. X sub t is the input to
+the RNN at that time, and Y sub t is the output
+of the RNN under that time. And the RNN is-- has
+several parameters, and these parameters
+are called W, U, and V. These are trainable
+parameters, this could be trainable vectors,
+trainable matrices. And the way the
+update equations go is the following, hidden state
+gets updated by basically saying, what is the hidden
+state in the previous time step? Let's transform it. What is the new input
+of the current time? Let's transform it. Pass It through
+the nonlinearity, and that is my
+updated hidden state. And then, the output Y is
+simply a transformation of the hidden state
+and this is what the-- what we are going to output. In our case, S, X,
+o t will be scalars. So basically, we
+are going to output a scalar that will tell us
+whether there is an edge or not. Of course you can have
+more expressive cells like GRU, LSTM, and so on. But here I am talking
+about RNN, which basically, is the most basic
+of this sequence based models. So. So far we learned what is RNN. Now, we want to talk
+about how to use the RNN to model the node level
+and the edge level sequence. And the relationship between
+two RNNs is the following, is that, node level RNN
+generates the initial state for the edge level RNN,
+and then, edge level RNN is going to produce the sequence
+of edges for that new node. And then, it's going to pass
+its state back to the node level RNN, who's going to generate
+a new node, update the state, and push it down to
+the edge level RNN. So this is how this
+is going to work. So to give you an idea, we will
+initialize the node level RNN with a start of a
+sequence, and we will-- the node level RNN is
+going to create a node. Now, the edge level RNN-- given this node is
+created a node level RNN will add a new node, and
+then, ask the edge level RNN to generate edges for it. So node 1 is already there. Now, node level
+RNN decides to add one more node, node number 2. Now, the edge level RNN has
+to say, does 2 link to 1, and this number 1 here,
+would say that 1 links to 2. And, here is now the new graph. Now the node RNN says, OK,
+let's add a new node, number 3. Now, we ask the edge
+level RNN to generate the edges for the node 3. And node 3 will say, it
+links to the first node, but does not link
+to the second node. So now our new
+graph is like this. And again, the node
+level RNN decides, let's add one more
+node, let's add node 4. And the edge level RNN
+prints out-- basically, a sequence of zeros
+and ones that will mean does falling to node 1? Does it link to node two? Or does it link to node 3? And 4 links to 2 and 3. So, here is now
+the current graph. And then, node level RNN says,
+OK, let's add one more node, node 5. Edge level RNN
+outputs the-- four every previous node it tells
+us, whether 5 should link to it or not. And that's how we get the graph. And the generation
+will stop when the node level RNN
+we'll say, I'm done, I won't create any new nodes. So this is the idea, where
+edge level RNN sequentially predicts if a new
+node will connect to each of the previous nodes. Now, how do we do this with RNN? So let me give you more ideas. So in terms of how we use the
+RNN to generate the sequence, we are basically going
+to take the output from-- of the previous
+cell, and put it as an input of the next cell. So whatever the
+previous decision output was, for example, whatever
+was the previous edge-- that would be the input to
+the next cell or the next time step. How do we initialize
+the input sequence? We initialize it to
+have a special token. We basically train
+the neural network that when it gets
+this special token-- we'll call this token
+SOS, so start of sequence. As the initial
+input, the network started generating the output. Usually, SOS-- when I
+say a special token, it could be a
+vector of full zeros or it could be a
+vector full ones. For example, just
+something you reserve. And then, when do we
+stop the generation-- we stop the generation when
+the end of sequence token is produced. And if end of sequence is
+0, then RNN will continue generation , and if end of
+sequence is one the RNN will stop the generation. So to give you an idea now. How do this-- how does
+this fit together? Will somehow initialize the
+hidden state, will input the start of sequence token. The RNN is going to
+generate some output and then we are going
+to connect this output as the input to the next step. And of course, the hidden
+state will get updated. And now, given the
+hidden state, and given the output from
+the previous state, this is again going
+to be combined here, another output is
+going to be produced, and another hidden state
+is going to be updated. This is all good. But the problem with the model
+as I've wrote it right now, is that, it's all deterministic. It's all a set of
+deterministic equations that are in a deterministic
+way generating these edges and nodes. So what we want is, we
+want the stochastic model. We want a model that will
+have some randomness to it. So our goal is to use RNN to
+do-- to model this p model and RNN really is--
+we are using it to model this product of
+conditional distributions. So this marginal distribution of
+p of Xt given everything else. And let's write that
+Y sub t is the p model of X sub t
+given all the X's that were previously generated. Then this means we need to
+be able to sample Xt plus 1 from Yt. So essentially, we
+want to be able to get to sample from this p model,
+from this single dimensional distribution. This means that
+each step of RNN-- Now, it's going to output a
+probability of a single edge. So each step of
+the edge level RNN is going to output the
+probability of a single edge. And then, based on
+that probability, we are going to
+flip a coin, if we are going to sample from
+the Bernoulli defined by that probability. And then, whether
+we get 0 or 1, that is actually going to be
+input to the next step. So rather than saying the
+RNN generates an edge, RNN generates a
+probability, and then, we have a stochastic event,
+a coin flip without bias, that then lands heads
+or tails, zero or one, and we use that as an
+input to the next step. So that is essentially the idea. So at the generation
+time, at the test time, let's assume we have
+already trained the model. Then, how this is
+going to work, is that, our Y sub t will be a
+probability, will be a scalar, will be basically a
+Bernoulli distribution. And let's use this square to
+mean that this is a probability and this square takes
+value 1 with probability p, and it takes value 0 with
+probability 1 minus p. So the idea will be
+that, we will start-- we'll start our RNN, it
+will output a probability. And now, we are going to
+flip a coin without bias to create-- to decide whether
+there is an edge or not. And whatever is the
+output of this coin, we are going to use this as
+an input to the next state-- to the next cell. And again, we are going to
+get another probability, flip the coin, get
+the realization, and include that as an input
+to the RNN cell who's going to give me another probability. So this is how we are
+going to generate, or how we are going
+to unroll this RNN. Now, the question is, how
+do we use the training data? How do we use the training
+graphs that we are given? Write this Xs. And, in order to
+train the model, we are assuming that
+we are observing the graph that was given to us. So this means we observe
+a sequence of edges, we basically assume-- we observe how the given
+graph was generated. So we observe zeros
+and ones whether-- that corresponds to where
+the edges exist or edges don't exist. And we are going to use this
+notion of teacher forcing, this technique of feature
+forcing that place-- that replaces the input and the
+output by the real sequence. So the point will
+be the following. We are going to start
+the model, and the model is going to output some
+probability of an edge. But at the training time, we
+are not going now to flip a coin and use that as an
+input to the next cell. We're actually going to say, OK,
+what was the true value there? Oh, the true value
+was, there was no edge. So we are going to force this
+as an input to the next step. So teacher is kind of,
+forcing the student, whatever the student does
+in the next step-- teacher correct the
+student and the student starts from the right-- with the right input
+for the next step. So the point, is
+that, the inputs will be the correct sequence,
+not the sequence generated by the model, and this is
+called teacher forcing. Now, of course we need
+to define the laws that measures the discrepancy
+between the output of the model, the output of the student,
+and the ground truth sequence that we try to
+teach the model to generate. And we are going to use binary
+cross entropy, loss function, which you can write
+out the following. You can-- the star is the-- why is a binary variable 0, 1. 1 means edge exist, 0 doesn't--
+means that does not exist. And Y without the star is
+the probability of the edge. And basically, the idea is
+that because Y star is either 0 or 1-- if only one of
+these two terms is going to survive when we
+actually implement it, because when the
+Y star comes in. And basically, the idea is, if Y
+star is 1, then we are really-- the loss really boils
+down to minus log Y1. So basically, in order for
+us to minimize the loss, we want to make log of Y1 to
+be as close to 0 as possible. Which means we want to make
+Y as close to 1 as possible. And then, if we want to--
+now, on the other hand if the edge is not
+present, then we want to minimize minus
+log of 1 minus Y1. And here we want
+to make Y1 lower so that the entire expression
+again is log of something close to 1, which
+will be close to 0. So this way, Y1 is fitting
+to the data samples Y star. And again, just to remind you
+Y1 or this Y's are computed by RNN, and the loss is going
+to adjust the RNN parameters, those matrices W, U, and
+V, using back propagation to try to minimize the loss. Minimize the discrepancy
+between the true sequence and the generated
+probabilities . And basically, the point
+is that the loss will say, wherever there is a 0,
+generate a probability that's close to 0, and
+wherever there is a 1, generate a probability
+that is close to 1. OK. So we do this, let's
+put things together. So do-- our plan
+is the following, we want to have two RNNs. First, we want to
+have an RNN that will add one node
+at each step, and we will use the output of it to
+initialize the edge level RNN. And then, the edge
+level RNN is going to predict what other nodes--
+what existing nodes does the new connect to? And then, we are going
+to add another node, and we will use the last hidden
+state of the edge level RNN to initialize the node
+level RNN for one more step. And then, how is this-- how are we going to
+stop the generation-- if the edge level RNN is going
+to output the end of sequence at step 1, we know that no edges
+are connected to the new node, and we are going to
+stop the generation. So it's actually the edge level
+RNN, and that, we have decided will determine whether we stop
+generating the graph or not. So let me give you
+now an example. So that you see how
+all this fits together. So this is what is going to
+happen under the training time. For, let's say, a
+given training-- observed training graph. We are starting with the start
+of sequence and a hidden state. The node level RNN
+will add the node, and then, the edge
+level RNN will be asked, shall this node that
+has just been added, shall it link to
+the previous nodes? Yes or no. It will update the probability. And we are then going to flip
+a coin that will determine-- with this given bias that will
+determine whether the edge is added or not. And then, and then, we'll take
+this and use it as an input-- as an initialization
+back to the node level RNN who's now going to
+add the second node, and this would be node number 3. And then, the edge
+level RNN is going to tell us, will node
+3 link to node 1, will node 3 link to node 2. And again, it's
+outputting probabilities, we are flipping
+the coins, whatever is the output of that coin is
+the input to the next level RNN. So here are the
+probabilities 0.6. Perhaps you were lucky,
+the output was 1, so this is the input
+for the next state. And then, after
+we have traversed with all the previous
+edges, we are going over all the previous
+nodes, we are again going to ask node RNN
+to generate a new node. And so on and so forth. And this is going to continue
+right until the last node has been added, then the node
+RNN will add one more node, but the edge level
+RNN will say, I'm not willing to connect
+it to anyone else. So this is the end of
+sequence and we stop. So basically, it's like,
+when we add an isolated node, we know that's the signal
+that we want to stop. So that's the idea. And then, for each
+prediction, here we are going to get
+supervision from the ground, from the ground truth. So the point is that, we will
+be doing teacher forcing. So, even for example,
+here, when this was 0.6 and we did a coin flip
+and maybe we were unlucky and we got a zero, we are going
+to output the true edge as we said, the teacher-- the teacher forcing. And then, the structure
+of our neural network when we do back propagation,
+will be basically doing back propagation through time. We are going to basically back
+prop from all these events all the way to the beginning--
+to the beginning of time, to the firr-- to the first
+node in the graph to update the parameters of the RNN. And then, how about at the test
+time, at the generation time? We are basically going to
+sample the connectivity based on the predicted distributions,
+predicted probabilities, and we are going to replace
+the input at each step by the RNNs own
+prediction or own output. So here we are going
+to flip the coin, the coin will say what it will
+say, and it will go as an input to the next one. And I think, here, we are
+going to do the coin, whatever is the output here, should be
+the input to the next step, so it should be a 0
+here, it's a mistake. OK. So that's the idea. So the summary is we have costed
+the problem of graph generation as a problem of
+sequence generation. Actually, a problem of a
+two-level sequence generation, node level sequence, and
+an edge level sequence, and we use recurrent
+neural networks to generate the sequences. And what I want to
+discuss next is, how do we make the RNN tractable? And how do we evaluate? 

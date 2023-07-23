@@ -1,0 +1,333 @@
+Let's talk about neighborhood sampling.
+And this is really,
+the key idea of the GraphSAGE,
+uh, paper or the GraphSAGE architecture.
+So what the GraphSAGE, uh,
+what brought to the field of graph neural networks,
+is a way to think about mini-batch implementations.
+Before all the implementations were full batch and
+people would then run- run graph neural networks on you know, 3,
+4, 5,000 node graphs because that's what they could fit into GPU memory.
+And what GraphSAGE , uh,
+changed is they, it changed the way we think of graph neural networks,
+the way we can think of creating minibatches,
+and this also means that we can scale them up to graphs of,
+uh, tens of billions of nodes and edges.
+So, uh, let me now tell you about what do I mean by,
+um, a- a neighborhood sampling.
+So, uh, let's recall,
+let- let's remember how, uh,
+graph neural networks work and they operate through this notion of a computational graph.
+Where GNN generate node embeddings via neighborhood aggregation,
+meaning they aggregate features information from the neighbors,
+and then they create a new message and pass it on.
+So the way you can think of it,
+if you say I want to create an embedding for this node, uh,
+0, I will take neighbors and neighbors of neighbors.
+Here is now my computation graph, um,
+where nodes start with their individual feature vectors at the level 0.
+Uh, these feature vectors get aggregated,
+transformed, passed to the next level, um.
+And then again, the same thing gets aggregated
+transformed all the way to node- node of interest,
+node 0, that makes the prediction.
+Notice here that these nodes, you know, er,
+the node 0 here,
+means this is the feature vector of the node, uh,
+0, um, er, for example,
+here this means that this will be now a layer 1,
+er, representation of nodes,
+er, 1, 2, 3.
+And here I have now a layer 2 representation of node ze- of node 0.
+So what- what do I mean by this is that,
+actually nodes have multiple representations,
+uh, one for each, uh, layer.
+And that's the- that's why when you do full batch,
+you want to take level 0 embeddings to create level
+1 embeddings of everyone, to create level 2 embeddings from everyone.
+But here, because we have this local view,
+we will only need to create level 1 embeddings for nodes 1, 2,
+and 3, because we need those to create a level 2 embedding,
+uh, for node uh, 0.
+So that's, uh, the idea, right?
+So the important observation is that a two layer GNN generates embedding for this node 0,
+using got two-hop neighborhood structure and features around, uh, this graph.
+So if I wanted to compute the layer, uh,
+the embedding of node 0,
+what I need is the graph structure,
+plus features of this two-hop neighborhood around the- the node,
+and I can ignore the rest of the graph.
+I don't need to know the rest of the graph, right?
+The embedding of node 0 will be independent of how
+the graph structure is beyond the two-hop, uh, neighborhood.
+And that's an important insight.
+Because this means if I want to have a K layer GNN to emb- to generate
+an embedding of a node using these K-hop neighborhood structure and features,
+this means I only need to, um,
+know at the time and I'm generating that the embedding that K-hop neighborhood.
+And I can ignore the rest of the network.
+And now, if the level k is, uh,
+a relatively small or the neighborhood size is not too big,
+which means that it is let say constant size,
+but the entire graph can be much, much bigger,
+then it means I need relatively little information,
+or relatively little memory to use to generate or create the embedding,
+uh, of node, uh, 0.
+And, uh, this is the main insight.
+The main insight is that we wanna- that to compute the embedding of a single node,
+all we need is the K-hop neighborhood structure, uh,
+around that node, and we can ignore the rest of the network.
+The rest of the network does not affect the embedding of this node of interest,
+um, all that affects it is the K-hop neighborhood around that node.
+So what this means is that now we can generate minibatches in such a way that we say,
+let's sample M different nodes in a mini-batch,
+but we won't only put,
+we won't put nodes into the mini-batch,
+but we are going to put entire computation graphs into the mini-batch.
+So it means that I would pick a first node and I'll
+take its K-hop neighborhood computation graph,
+and this is one element in the batch.
+And then I'm going to sample the second node,
+create its computation graph and put this into my mini-batch.
+And so on and so forth.
+So now this means perhaps my batches will be smaller
+because batches are not now composed of individual nodes,
+but batches are composed of network neighborhoods,
+batches are composed from computation graphs.
+So we are going to sample M computation graphs, um,
+and then put these M computation graphs into the GPU memory,
+so that we can compute the loss over this mini batch of M computation graphs.
+So to emphasize again,
+you know, what is the key idea?
+The key idea is the following.
+It starts with the insight that in order to compute the embedding of a given node,
+all that we need to know is the K-hop neighborhood of that node.
+So this means if I create a mini
+batching not based on the nodes but based on the K-hop neighborhoods,
+then I will be able to compute- um,
+I will be able to compute the gradient in a reliable way.
+So basically, rather than putting nodes into mini-batches,
+we are putting, uh,
+computational graphs, or in other words,
+K-hop neighborhoods into the-,
+uh, into the mini-batches.
+Now, um, because we have put, um,
+uh, we have put, uh,
+uh, entire computation graphs,
+entire network neighborhoods of K-hops into the, into the mini-batch,
+we can, uh, consider the following, uh,
+stochastic gradient descent strategy to train the model parameters, right?
+We are going to sample,
+um, let say M nodes.
+For each node, we are going now to sample
+the entire K-hop neighborhood to construct the computation graph.
+And the we are, uh,
+assuming that we have enough memory, um,
+that we can fit into the mini-batch
+both the nodes as well as their entire computation graphs.
+Now, we have the complete set of information we need
+to compute an embedding of every- every node in the mini-batch,
+so we can then compute the loss over the- this mini-batch,
+and we can then perform stochastic gradient descent to
+basically update the model parameter with respect to the gradient,
+um, er, to that,
+uh, mini-batch, uh, loss.
+And this is stochastic gradient because,
+um, the batches are randomly created, so uh,
+the- the gradient will have a bit of,
+uh, randomness in it, but that's all fine.
+It just means we can do, uh, great,
+um, updates very, very fast.
+So that's the, that's the idea.
+So, um, if we, uh,
+do it the way I explained it,
+then we have, uh, still an issue with this notion of, uh,
+mini-batches and stochastic training because for each node,
+we need to get the entire K-hop neighborhood and pass it through
+the computation graph and load it into the GPU memory.
+So this means we need to aggregate a lot of information just to compute one- one node,
+uh, e- e- embedding for a single node.
+So computation will be expensive.
+So let me tell you why it will be expensive.
+First, it will be expensive because,
+um, um, uh, the deeper I go,
+the bigger these computation graphs and
+these computation graphs are going to increase- um,
+their size is going to increase exponentially, uh,
+with the- with the depth of
+the computation graph because even if every node has just three children,
+it's going to increase, uh,
+exponentially with the number of layers.
+So that's one issue.
+So the computation graphs are going to get very big if they get
+very deep and then the second thing is that in natural graphs,
+think of the lecture when we talked about
+Microsoft Instant Messenger network when we talked about degree distribution,
+we have these celebrity nodes,
+these high degree nodes, uh,
+that a lot of other people connect to or a lot of other nodes collect- connect to.
+We have such nodes even in knowledge graphs.
+If you think about, you know,
+a node corresponding to a large country,
+let's say like, uh, USA, um,
+it will have a huge degree because there is
+so many other entities related to it and of course,
+a small country will have a much smaller degree
+because there will be a smaller number of entities related to it.
+So the point is, we'll have these hub nodes.
+And now if a hub node has degree 1 million, uh,
+which is nothing out of ordinary,
+then you'll have to aggregate here information from 1 million nodes.
+So this computation graph will get huge very quickly and you are
+most likely going to hit these hub nodes, uh, very often.
+So the point is,
+you cannot take the entire K-hop neighborhood in most of the cases. So what do you do?
+What do you do, is to do- is to
+ap- apply on a project that is called neighborhood sampling.
+Where the key idea is to cra- construct
+a computational graph by sampling at most H neighbors,
+uh, of every node.
+So it means that every- every node- every node in the tree- in
+the computation graph is going to have at most- is going to aggregate from at most,
+uh, H other nodes.
+So in our case, just to give you an example,
+if I say, let's say H equals 3,
+then my original computation graph is now going to be pruned in such a way that
+every- every aggregation is going to aggregate from at most two other nodes.
+So here, this entire branch is going to be cut out and you know,
+some other nodes are going to be cut out as well.
+And what this means is that now our, um,
+computation graph will be much more manageable because we have just,
+um, even if we hit the high degree hub node,
+we are only to take,
+uh, a fixed number of its neighbors,
+uh, in the aggregation.
+So the point is that you can use these print
+computational graphs to more efficiently compute, uh, node embedding.
+Um, so now, uh,
+how do you do this computational graph sampling, right?
+Basically the idea is for every node, for every layer, uh,
+for every internal, um,
+node of the- of the computation graph,
+uh, we are going to, uh,
+first basically compute the K-hop neighborhood, uh,
+from the starting node and then for every, uh,
+node in the computation graph,
+we are going to pick at most, uh,
+K, uh, H random, uh, neighbors.
+Um, and this means that the K-layer GNN will, uh, involve, uh,
+at most, uh, um, uh,
+the product of the- of, uh,
+H leaf nodes in the computation graph.
+So our computation graphs are still gro- gro- going to grow, uh,
+exponentially but the, uh,
+but the point will be that,
+uh, their fan out,
+will be- will be, uh,
+upper bounded by H. So the- the growth won't be uh,
+that bad or that fast and we'll still be able to go,
+uh, quite, uh, deep.
+Now, let me make a few,
+uh, remarks about these.
+Uh, first remark is that there is, uh, the trade-off,
+uh, in- in how many neighbors do we sample, right?
+The smaller, uh, H leads to more efficient neighborhood aggregation
+because computation graphs would be smaller but results in more unstable,
+uh, training because we are ignoring
+entire subparts of the network when we are doing message aggregation.
+So our, uh, um, uh,
+gradient estimates will be more, uh,
+noisy, they will have higher, uh, variance.
+Uh, another thing is that in terms of computation time,
+even the neighborhood sampling,
+the size of the computational graph,
+as I said is still exponential with respect to the number of layers but
+if H is not that large and we don't go too deep in terms of K,
+uh, then it is still man-, uh,
+uh, uh, manageable, right?
+Um, so, you know, adding one more layer to the, uh,
+to the GNN makes the computation H times,
+uh, more expensive and now,
+you know, if, uh,
+H is maybe an order of 5-10,
+and K is also, I don't know, on order of, you know,
+5 plus minus, then you can still,
+uh, keep, uh, doing this.
+And then, uh, the last, uh,
+the last important thing I want to mention is remark number 3 which is
+this- this approach gives you a lot of freedom how you select the nodes,
+uh, to sample and so far I don't- I call it a random sampling, right?
+Just uniformly at random pick e- at H neighbors,
+uh, of a given node.
+Uh, but the- the issue is with this approach is that,
+uh, real-world networks have these highly skewed degree distributions.
+So there is a lot of kind of single- single nodes or low degree nodes in the network.
+And if you are taking an, uh,
+a given node of interest,
+and sample H of its neighbors,
+you are most likely going to sample this like degree 1, uh,
+nodes that are not perhaps the most important nodes in
+the network and perhaps very noisy, not the most informative.
+This could be users that are not very engaged,
+this could be pieces of content that are
+not very important and you don't have a good signal on.
+So what you can do,
+and this works much better in practice,
+is that you'll do a random walk with restart from the node of interest,
+here, the green node.
+And then your sampling strategy is to take, uh, uh,
+H neighbors but not at- let's say not at random,
+but based on, uh,
+their random walk with restart scores.
+So it means that at every layer you are going to take H most important neighbors,
+uh, of a given node.
+And, uh this means that the graph
+you are going to select will be kind of much more representative,
+much better connected, um,
+and it will have- it will be based on
+these more important nodes which have better and more reliable feature information,
+these are more active users,
+so they kind of provide you more information for predictions.
+So in practice, this strategy of sampling the computation graph,
+um, works much better,
+um, and, you know, there is- I think here to say,
+there is room to do a proper investigation about
+how would you define what are different strategies to sample,
+to define the computation graphs,
+to sample the computation graphs and ha-
+what are their strategies in which kind of cases?
+I think this still hasn't been, uh,
+systematically investigated but such a study would be very important,
+uh, for the field of,
+uh, graph machine learning.
+So, uh, to summarize the pro- the neighborhood sampling approach,
+the idea is that the computational graph is constructed for each node, um,
+and the computational graphs are put into the mini- mini-batch because
+computational graphs can become very big very
+quickly by hitting a high degree hub node, um,
+neighborhoods- we then proposed neighborhood sampling
+which is where the computational graph is created
+stochastically or is pruned sub-sampled to increase computational efficiency.
+It also increases the model robustness because now the GNN architecture is,
+uh, stochastic by it's self,
+so it's almost like a form of dropout if you want to think of it that way, uh,
+and the computa- pruned computational graph is used to generate node embeddings.
+Um, here, uh, caveat is that if- if your network,
+uh, GNN- number of GNN layers is very deep,
+these computation graphs may still become large which means
+your batch sizes will have to be smaller, um,
+which means, uh, your gradient will be, um,
+uh, uh, kind of more, uh, less reliable.
+So if the batch size is small,
+the, uh, the gradient is less reliable,
+and if the pruning is too much,
+then again the, uh,
+gradient, uh, gradients are not too reliable.
+So it's important to find a good balance between the batch size and, uh,
+the pruning factor or sampling factor for the computation graphs.
+But that's essentially the idea and this is really, I would say,
+what most of the large-scale industrial implementations of graph neural networks use,
+uh, to achieve, uh,
+scaling gap to industrial size graphs.
+For example, this is what is used at Pinterest,
+at Alibaba and so on.

@@ -1,0 +1,1150 @@
+WEBVTT
+Kind: captions
+Language: en-US
+
+00:00:04.160 --> 00:00:09.750
+In this part of, uh, Stanford, CS 224 W, um,
+
+00:00:09.750 --> 00:00:11.880
+machine-learning with graphs course,
+
+00:00:11.880 --> 00:00:15.540
+I wanna talk about the choice of graph representation.
+
+00:00:15.540 --> 00:00:20.760
+[NOISE] So what are components of a graph or a network?
+
+00:00:20.760 --> 00:00:23.670
+So network is composed of two types of objects.
+
+00:00:23.670 --> 00:00:26.970
+We- first, we have objects or entities themselves called,
+
+00:00:26.970 --> 00:00:29.385
+uh, referred to as nodes, uh,
+
+00:00:29.385 --> 00:00:33.680
+and vertices, and then we have interactions or edges between them,
+
+00:00:33.680 --> 00:00:36.230
+uh, called links or, uh, edges.
+
+00:00:36.230 --> 00:00:39.380
+And then the entire system, the entire, um,
+
+00:00:39.380 --> 00:00:41.950
+domain we then call a- a network,
+
+00:00:41.950 --> 00:00:43.105
+uh, or a graph.
+
+00:00:43.105 --> 00:00:45.940
+Usually, for nodes, we will use, uh, uh,
+
+00:00:45.940 --> 00:00:49.330
+the word- the letter capital N or capital V,
+
+00:00:49.330 --> 00:00:50.865
+um, and then for edges,
+
+00:00:50.865 --> 00:00:53.070
+we- we are usually using the-
+
+00:00:53.070 --> 00:00:57.800
+the letter capital E so that the graph G is then composed of a set of nodes,
+
+00:00:57.800 --> 00:01:00.065
+uh, N and a set of edges, uh,
+
+00:01:00.065 --> 00:01:05.570
+E. What is important about graphs is that graphs are a common language,
+
+00:01:05.570 --> 00:01:07.910
+meaning that I can take, for example, uh,
+
+00:01:07.910 --> 00:01:11.510
+actors and connect them based on which movies they appeared in,
+
+00:01:11.510 --> 00:01:16.430
+or I can take people based on the relationships they have with each other,
+
+00:01:16.430 --> 00:01:19.265
+or I can take molecules, like proteins,
+
+00:01:19.265 --> 00:01:23.390
+and build a network based on which proteins interact with each other.
+
+00:01:23.390 --> 00:01:25.520
+If I look at what is the structure of this network,
+
+00:01:25.520 --> 00:01:28.250
+what is the underlying mathematical representation,
+
+00:01:28.250 --> 00:01:29.660
+in all these cases,
+
+00:01:29.660 --> 00:01:32.750
+we have the same underlying mathematical representation,
+
+00:01:32.750 --> 00:01:36.020
+which means that the same machine learning algorithm will be
+
+00:01:36.020 --> 00:01:40.220
+able to make predictions be it that these nodes,
+
+00:01:40.220 --> 00:01:44.165
+um, uh, correspond to actors, correspond to, uh,
+
+00:01:44.165 --> 00:01:47.900
+people, or they correspond to molecules like proteins.
+
+00:01:47.900 --> 00:01:54.680
+[NOISE] Of course, choosing a proper graph representation is very important.
+
+00:01:54.680 --> 00:01:57.230
+So for example, if you have a set of people,
+
+00:01:57.230 --> 00:01:59.510
+we can connect individuals that work with each
+
+00:01:59.510 --> 00:02:02.890
+other and we will have a professional network.
+
+00:02:02.890 --> 00:02:05.975
+However, we can also take the same set of individuals
+
+00:02:05.975 --> 00:02:09.140
+and connect them based on sexual relationships, but then,
+
+00:02:09.140 --> 00:02:12.950
+we'll ab- creating a sexual network, or for example,
+
+00:02:12.950 --> 00:02:14.990
+if we have a set of scientific papers,
+
+00:02:14.990 --> 00:02:17.390
+we can connect them based on citations,
+
+00:02:17.390 --> 00:02:19.400
+which paper cites which other paper.
+
+00:02:19.400 --> 00:02:21.830
+But for example, if we were to connect them based
+
+00:02:21.830 --> 00:02:24.530
+on whether they use the same word in the title,
+
+00:02:24.530 --> 00:02:28.475
+the- the quality of underlying network and the underlying,
+
+00:02:28.475 --> 00:02:31.400
+uh, representations might be, uh, much worse.
+
+00:02:31.400 --> 00:02:37.060
+So the choice of what the- the nodes are and what the links are is very important.
+
+00:02:37.060 --> 00:02:39.600
+So whenever we are given a data set,
+
+00:02:39.600 --> 00:02:44.040
+then we need to decide how are we going to design the underlying graph,
+
+00:02:44.040 --> 00:02:46.630
+what will be the objects of interest nodes,
+
+00:02:46.630 --> 00:02:49.495
+and what will be the relationships between them,
+
+00:02:49.495 --> 00:02:50.965
+what will be the edges.
+
+00:02:50.965 --> 00:02:55.750
+The choice of this proper network representation of a given domain or a given problem
+
+00:02:55.750 --> 00:03:00.865
+deter- will determine our ability to use networks, uh, successfully.
+
+00:03:00.865 --> 00:03:03.775
+In some cases, there will be a unique,
+
+00:03:03.775 --> 00:03:07.570
+unambiguous way to represent this, um, problem,
+
+00:03:07.570 --> 00:03:09.140
+this domain as a graph,
+
+00:03:09.140 --> 00:03:10.960
+while in other cases,
+
+00:03:10.960 --> 00:03:14.380
+this representation may, by no means, be unique.
+
+00:03:14.380 --> 00:03:19.950
+Um, and the way we will assign links between the objects will determine, uh,
+
+00:03:19.950 --> 00:03:24.410
+the nature of the questions we will be able to study and the nature of the,
+
+00:03:24.410 --> 00:03:28.075
+um, predictions we will be able to make.
+
+00:03:28.075 --> 00:03:35.345
+So to show you some examples of design choices we are faced with when co-creating graphs,
+
+00:03:35.345 --> 00:03:38.600
+I will now go through some concepts and different types of graphs,
+
+00:03:38.600 --> 00:03:41.590
+uh, that we can- that we can create from data.
+
+00:03:41.590 --> 00:03:46.175
+First, I wi- I will distinguish between directed and undirected graphs, right?
+
+00:03:46.175 --> 00:03:48.740
+Undirected graphs have links,
+
+00:03:48.740 --> 00:03:50.930
+um, that- that are undirected, meaning,
+
+00:03:50.930 --> 00:03:55.860
+that they are useful for modeling symmetric or reciprocal relationships,
+
+00:03:55.860 --> 00:03:58.820
+like collaboration, friendship, um,
+
+00:03:58.820 --> 00:04:01.070
+and interaction between proteins,
+
+00:04:01.070 --> 00:04:03.950
+and so on, while directed, um,
+
+00:04:03.950 --> 00:04:07.370
+relationships are captured by directed links,
+
+00:04:07.370 --> 00:04:10.160
+where every link has a direction, has a source,
+
+00:04:10.160 --> 00:04:14.000
+and has a destination denoted by a- by an arrow.
+
+00:04:14.000 --> 00:04:16.550
+And examples of these types of, um,
+
+00:04:16.550 --> 00:04:19.565
+links occurring in real-world would be phone calls,
+
+00:04:19.565 --> 00:04:22.970
+financial transactions, uh, following on Twitter,
+
+00:04:22.970 --> 00:04:27.000
+where there is a source and there is a destination.
+
+00:04:27.150 --> 00:04:30.995
+The second type of, um- um, uh,
+
+00:04:30.995 --> 00:04:35.955
+graphs that we are going to then talk about is that as we have, um,
+
+00:04:35.955 --> 00:04:39.125
+created undirected graphs, then,
+
+00:04:39.125 --> 00:04:41.870
+um, we can talk about the notion of a node degree.
+
+00:04:41.870 --> 00:04:45.500
+And node degree is simply the number of edges,
+
+00:04:45.500 --> 00:04:48.125
+um, adjacent to a given, uh, node.
+
+00:04:48.125 --> 00:04:51.920
+So for example, the node a in this example has degree 4.
+
+00:04:51.920 --> 00:04:55.050
+The average node degree is simply the- is
+
+00:04:55.050 --> 00:04:58.310
+simply the average over the degrees of all the nodes in the network.
+
+00:04:58.310 --> 00:05:00.275
+And if- if you work this out,
+
+00:05:00.275 --> 00:05:04.700
+it turns out to be twice number of edges divided by the number of nodes,
+
+00:05:04.700 --> 00:05:05.840
+uh, in the network.
+
+00:05:05.840 --> 00:05:08.000
+The reason there is this number 2 is
+
+00:05:08.000 --> 00:05:10.790
+because when we are computing the degrees of the nodes,
+
+00:05:10.790 --> 00:05:13.260
+each edge gets counted twice, right?
+
+00:05:13.260 --> 00:05:16.290
+Each endpoint of the n- of the edge gets
+
+00:05:16.290 --> 00:05:19.550
+counted once because the edge has two end points,
+
+00:05:19.550 --> 00:05:21.230
+every edge gets counted twice.
+
+00:05:21.230 --> 00:05:25.455
+This also means that having a self edge or self-loop, um,
+
+00:05:25.455 --> 00:05:28.610
+adds a degree of two to the node,
+
+00:05:28.610 --> 00:05:34.765
+not a degree of one to the node because both end points attach to the same, uh, node.
+
+00:05:34.765 --> 00:05:37.080
+This is for undirected networks.
+
+00:05:37.080 --> 00:05:39.930
+In directed networks, we distinguish between, uh,
+
+00:05:39.930 --> 00:05:42.265
+in-degree and out-degree, meaning
+
+00:05:42.265 --> 00:05:45.030
+in-degree is the number of edges pointing towards the node.
+
+00:05:45.030 --> 00:05:49.970
+For example, node C has in-degree 2 and the out-degree, um, 1,
+
+00:05:49.970 --> 00:05:53.629
+which is the number of edges pointing outside- outward
+
+00:05:53.629 --> 00:05:58.065
+from the- from the node, uh, c. Um,
+
+00:05:58.065 --> 00:06:01.520
+another, uh, very popular type of graph structure
+
+00:06:01.520 --> 00:06:05.045
+that is- that is used a lot and it's very natural in different domains,
+
+00:06:05.045 --> 00:06:07.085
+it's called a bipartite graph.
+
+00:06:07.085 --> 00:06:12.695
+And bipartite graph is a graph generally of nodes of two different types,
+
+00:06:12.695 --> 00:06:16.580
+where nodes only interact with the other type of node,
+
+00:06:16.580 --> 00:06:17.890
+but not with each other.
+
+00:06:17.890 --> 00:06:22.550
+So for example, a bipartite graph is a graph where nodes can be split
+
+00:06:22.550 --> 00:06:27.560
+into two partitions and the- the edges only go from left,
+
+00:06:27.560 --> 00:06:31.465
+uh, to the right partition and not inside the same partition.
+
+00:06:31.465 --> 00:06:35.510
+Examples of, uh, bipartite graphs that naturally occur are,
+
+00:06:35.510 --> 00:06:40.135
+for example, uh, scientific authors linked to the papers they authored,
+
+00:06:40.135 --> 00:06:43.310
+actors linked to the movies they appeared in,
+
+00:06:43.310 --> 00:06:47.845
+users linked to the movies they rated or watched,
+
+00:06:47.845 --> 00:06:49.500
+um, and so on.
+
+00:06:49.500 --> 00:06:51.155
+So- or for example,
+
+00:06:51.155 --> 00:06:53.750
+customers buying products, uh,
+
+00:06:53.750 --> 00:06:57.080
+is also a bipartite graph where we have a set of customers,
+
+00:06:57.080 --> 00:06:58.235
+a set of products,
+
+00:06:58.235 --> 00:07:03.625
+and we link, uh, customer to the product, uh, she purchased.
+
+00:07:03.625 --> 00:07:06.950
+Now that we have defined a bipartite network,
+
+00:07:06.950 --> 00:07:11.750
+we can also define the notion of a folded or projected network, where we can create,
+
+00:07:11.750 --> 00:07:14.360
+for example, author collaboration networks,
+
+00:07:14.360 --> 00:07:17.000
+or the movie co-rating network.
+
+00:07:17.000 --> 00:07:20.630
+And the idea is as follows: if I have a bipartite graph,
+
+00:07:20.630 --> 00:07:25.920
+then I can project this bipartite graph to either to the left side or to the right side.
+
+00:07:25.920 --> 00:07:28.400
+And when- and when I project it, basically,
+
+00:07:28.400 --> 00:07:32.565
+I only use the nodes from one side in my projection graph,
+
+00:07:32.565 --> 00:07:35.510
+and the way I connect the nodes is to say,
+
+00:07:35.510 --> 00:07:37.775
+I will create a connection between a pair of nodes
+
+00:07:37.775 --> 00:07:40.205
+if they have at least one neighbor in common.
+
+00:07:40.205 --> 00:07:44.015
+So if these are authors and these are scientific papers,
+
+00:07:44.015 --> 00:07:45.305
+then basically, it says,
+
+00:07:45.305 --> 00:07:49.790
+I will create a co- collaboration or a co-authorship graph where I will
+
+00:07:49.790 --> 00:07:54.380
+connect a pair of authors if they co-authored at least one paper in common.
+
+00:07:54.380 --> 00:07:55.905
+So for example, 1, 2,
+
+00:07:55.905 --> 00:07:58.130
+and 3 co-authored this paper,
+
+00:07:58.130 --> 00:08:00.185
+so they are all connected with each other.
+
+00:08:00.185 --> 00:08:04.370
+For example, 3 and 4 did not co-author a paper,
+
+00:08:04.370 --> 00:08:06.275
+so there is no link between them.
+
+00:08:06.275 --> 00:08:09.755
+But for example, 5 and 2 co-authored a paper,
+
+00:08:09.755 --> 00:08:12.800
+so there is a link between them because they co-authored this,
+
+00:08:12.800 --> 00:08:14.385
+uh, this paper here.
+
+00:08:14.385 --> 00:08:16.130
+And in analogous way,
+
+00:08:16.130 --> 00:08:18.380
+you can also create a projection of
+
+00:08:18.380 --> 00:08:21.650
+this bipartite network to the- to the right-hand side,
+
+00:08:21.650 --> 00:08:24.590
+and then you will- you would obtain a graph like this.
+
+00:08:24.590 --> 00:08:28.610
+And as I said, bipartite graphs or multipartite graphs,
+
+00:08:28.610 --> 00:08:30.560
+if you have multiple types of edges,
+
+00:08:30.560 --> 00:08:32.270
+are very popular, especially,
+
+00:08:32.270 --> 00:08:34.240
+if you have two different types of nodes,
+
+00:08:34.240 --> 00:08:36.740
+like users and products, um,
+
+00:08:36.740 --> 00:08:38.765
+uh, users and movies, uh,
+
+00:08:38.765 --> 00:08:40.910
+authors and papers, um,
+
+00:08:40.910 --> 00:08:42.020
+and so on and so forth.
+
+00:08:42.020 --> 00:08:49.010
+[NOISE] Another interesting point about graphs is how do we represent them,
+
+00:08:49.010 --> 00:08:51.410
+um, and representing graphs,
+
+00:08:51.410 --> 00:08:53.255
+uh, is an interesting question.
+
+00:08:53.255 --> 00:08:58.385
+One way to represent a graph is to represent it with an adjacency matrix.
+
+00:08:58.385 --> 00:09:00.440
+So essentially, if for a given,
+
+00:09:00.440 --> 00:09:02.420
+uh, undirected, for example, graph,
+
+00:09:02.420 --> 00:09:06.290
+in this case on end nodes, in our case,
+
+00:09:06.290 --> 00:09:08.864
+4, we will create a square matrix,
+
+00:09:08.864 --> 00:09:10.730
+where this matrix will be binary.
+
+00:09:10.730 --> 00:09:13.430
+It will o- only take entries of 0 and 1.
+
+00:09:13.430 --> 00:09:20.225
+And essentially, an entry of matrix ij will be set to 1 if nodes i and j are connected,
+
+00:09:20.225 --> 00:09:23.210
+and it will be set to 0 if they are not connected.
+
+00:09:23.210 --> 00:09:25.550
+So for example, 1 and 2 are connected,
+
+00:09:25.550 --> 00:09:27.860
+so at entry 1, row 1,
+
+00:09:27.860 --> 00:09:29.390
+column 2, there is a 1.
+
+00:09:29.390 --> 00:09:33.030
+And also, because 2 is connected to 1 at row 2,
+
+00:09:33.030 --> 00:09:35.070
+column 1, we also have a 1.
+
+00:09:35.070 --> 00:09:38.185
+So this means that adjacency matrices of,
+
+00:09:38.185 --> 00:09:41.750
+uh, undirected graphs are naturally symmetric.
+
+00:09:41.750 --> 00:09:44.014
+If the graph is directed,
+
+00:09:44.014 --> 00:09:48.425
+then the matrix won't be symmetric because 2 links to 1.
+
+00:09:48.425 --> 00:09:49.655
+We have a 1 here,
+
+00:09:49.655 --> 00:09:52.115
+but 1 does not link back to 2,
+
+00:09:52.115 --> 00:09:54.430
+so there is a 0.
+
+00:09:54.430 --> 00:09:57.110
+Um, and in similar way,
+
+00:09:57.110 --> 00:10:00.530
+we can then think of node degrees, um, uh,
+
+00:10:00.530 --> 00:10:03.725
+simply as a summation across a given row or
+
+00:10:03.725 --> 00:10:07.670
+across a given one column of the graph, uh, adjacency matrix.
+
+00:10:07.670 --> 00:10:11.120
+So rather than kind of thinking here how many edges are adjacent,
+
+00:10:11.120 --> 00:10:14.310
+we can just go and sum the- basically,
+
+00:10:14.310 --> 00:10:15.900
+count the number of ones,
+
+00:10:15.900 --> 00:10:19.455
+number of other nodes that this given node is connected to.
+
+00:10:19.455 --> 00:10:22.500
+Um, this is for, um, undirected graphs.
+
+00:10:22.500 --> 00:10:24.090
+For directed graphs, uh,
+
+00:10:24.090 --> 00:10:28.740
+in and out degrees will be sums over columns and sums over rows, uh,
+
+00:10:28.740 --> 00:10:32.080
+of the graph adjacency matrix,
+
+00:10:32.080 --> 00:10:34.680
+as- as I illustrate here, uh,
+
+00:10:34.680 --> 00:10:38.075
+with this, um, illustration.
+
+00:10:38.075 --> 00:10:44.715
+One important consequence of a real-world network is that they are extremely sparse.
+
+00:10:44.715 --> 00:10:48.450
+So this means if you would look at the adjacency matrix,
+
+00:10:48.450 --> 00:10:54.255
+series on adjacency matrix of a real-world network where basically for every, um, row I,
+
+00:10:54.255 --> 00:10:55.920
+column J, if there is an edge,
+
+00:10:55.920 --> 00:10:59.460
+we put a dot and otherwise the cell is empty, uh,
+
+00:10:59.460 --> 00:11:03.405
+you get these types of super sparse matrices where,
+
+00:11:03.405 --> 00:11:07.830
+where there are large parts of the matrix that are empty, that are white.
+
+00:11:07.830 --> 00:11:11.430
+Um, and this has important consequences for properties
+
+00:11:11.430 --> 00:11:14.970
+of these matrices because they are extremely, uh, sparse.
+
+00:11:14.970 --> 00:11:17.250
+To show you an example, right?
+
+00:11:17.250 --> 00:11:20.670
+Uh, if you have a network on n nodes,
+
+00:11:20.670 --> 00:11:23.265
+nodes, then the maximum degree of a node,
+
+00:11:23.265 --> 00:11:26.235
+the number of connections a node has is n minus one
+
+00:11:26.235 --> 00:11:29.340
+because you can connect to every oth- in principle,
+
+00:11:29.340 --> 00:11:32.145
+connect to every other node in the network.
+
+00:11:32.145 --> 00:11:37.935
+So for example, if you are a human and you think about human social network, uh,
+
+00:11:37.935 --> 00:11:40.200
+the maximum degree that you could have,
+
+00:11:40.200 --> 00:11:44.715
+the maximum number of friends you could have is every other human in the world.
+
+00:11:44.715 --> 00:11:48.435
+However, nobody has seven billion friends, right?
+
+00:11:48.435 --> 00:11:51.345
+Our number of friendships is much, much smaller.
+
+00:11:51.345 --> 00:11:55.995
+So this means that, let's say the human social network is extremely sparse,
+
+00:11:55.995 --> 00:11:58.035
+and it turns out that a lot of other,
+
+00:11:58.035 --> 00:12:00.300
+uh, different types of networks,
+
+00:12:00.300 --> 00:12:03.480
+you know, power-grids, uh, Internet connection,
+
+00:12:03.480 --> 00:12:06.269
+science collaborations, email graphs,
+
+00:12:06.269 --> 00:12:09.870
+uh, and so on and so forth are extremely sparse.
+
+00:12:09.870 --> 00:12:11.820
+They have average degree that these, you know,
+
+00:12:11.820 --> 00:12:15.510
+around 10 maybe up to, up to 100.
+
+00:12:15.510 --> 00:12:17.985
+So, uh, what is the consequence?
+
+00:12:17.985 --> 00:12:21.810
+The consequence is that the underlying adjacency matrices,
+
+00:12:21.810 --> 00:12:23.745
+um, are extremely sparse.
+
+00:12:23.745 --> 00:12:27.150
+So we would never represent the matrix as a dense matrix,
+
+00:12:27.150 --> 00:12:31.125
+but we've always represent it as a sparse matrix.
+
+00:12:31.125 --> 00:12:34.425
+There are two other ways to represent graphs.
+
+00:12:34.425 --> 00:12:37.710
+One is simply to represent it as a edge list,
+
+00:12:37.710 --> 00:12:39.660
+simply as a list of edges.
+
+00:12:39.660 --> 00:12:42.795
+Uh, this is a representation that is quite popular, um,
+
+00:12:42.795 --> 00:12:45.570
+in deep learning frameworks because we can simply
+
+00:12:45.570 --> 00:12:48.660
+represent it as a two-dimensional matrix.
+
+00:12:48.660 --> 00:12:51.390
+The problem of this representation is that it is very
+
+00:12:51.390 --> 00:12:54.450
+hard to do any kind of graph manipulation or
+
+00:12:54.450 --> 00:12:56.940
+any kind of analysis of the graph because even
+
+00:12:56.940 --> 00:13:00.300
+computing a degree of a given node is non-trivial,
+
+00:13:00.300 --> 00:13:02.340
+uh, in this case.
+
+00:13:02.340 --> 00:13:04.830
+A much, uh, better, uh,
+
+00:13:04.830 --> 00:13:10.110
+representation for a graph analysis and manipulation is the notion of adjacency list.
+
+00:13:10.110 --> 00:13:13.950
+Um, and adjacency lists are good because they are easier to
+
+00:13:13.950 --> 00:13:17.610
+work with if for large and sparse networks.
+
+00:13:17.610 --> 00:13:19.800
+And adjacency list simply allows us to
+
+00:13:19.800 --> 00:13:22.590
+quickly retrieve al- all the neighbors of a given node.
+
+00:13:22.590 --> 00:13:24.810
+So you can think of it, that for every node,
+
+00:13:24.810 --> 00:13:27.645
+you simply store a list of its neighbors.
+
+00:13:27.645 --> 00:13:30.075
+So a list of nodes that the,
+
+00:13:30.075 --> 00:13:32.325
+that the- a given node is connected to.
+
+00:13:32.325 --> 00:13:34.065
+If the graph is undirected,
+
+00:13:34.065 --> 00:13:36.705
+you could store, uh, neighbors.
+
+00:13:36.705 --> 00:13:37.950
+If the graph is connected,
+
+00:13:37.950 --> 00:13:40.350
+you could store both the outgoing neighbors,
+
+00:13:40.350 --> 00:13:45.780
+as well as, uh, incoming neighbors based on the direction of the edge.
+
+00:13:45.780 --> 00:13:50.175
+And the last important thing I want to mention here is that of course,
+
+00:13:50.175 --> 00:13:54.540
+these graph can- can have attached attributes to them.
+
+00:13:54.540 --> 00:13:57.090
+So nodes address, as well as
+
+00:13:57.090 --> 00:14:01.635
+entire graphs can have attributes or properties attached to them.
+
+00:14:01.635 --> 00:14:04.245
+So for example, an edge can have a weight.
+
+00:14:04.245 --> 00:14:06.105
+How strong is the relationship?
+
+00:14:06.105 --> 00:14:07.875
+Perhaps it can have my ranking.
+
+00:14:07.875 --> 00:14:09.150
+It can have a type.
+
+00:14:09.150 --> 00:14:14.550
+It can have a sign whether this is a friend-based relationship or whether it's animosity,
+
+00:14:14.550 --> 00:14:17.805
+a full distrust, let say based relationships.
+
+00:14:17.805 --> 00:14:21.810
+Um, and edges can have di- many different types of properties,
+
+00:14:21.810 --> 00:14:23.310
+like if it's a phone call, it's,
+
+00:14:23.310 --> 00:14:25.230
+it's duration, for example.
+
+00:14:25.230 --> 00:14:27.900
+Nodes can have properties in- if these are people,
+
+00:14:27.900 --> 00:14:29.820
+it could be age, gender,
+
+00:14:29.820 --> 00:14:32.520
+interests, location, and so on.
+
+00:14:32.520 --> 00:14:34.770
+If a node is a, is a chemical,
+
+00:14:34.770 --> 00:14:37.005
+perhaps it is chemical mass,
+
+00:14:37.005 --> 00:14:40.560
+chemical formula and other properties of the- of
+
+00:14:40.560 --> 00:14:44.400
+the chemical could be represented as attributes of the node.
+
+00:14:44.400 --> 00:14:48.705
+And of course, also entire graphs can have features or, uh,
+
+00:14:48.705 --> 00:14:51.060
+attributes based on, uh,
+
+00:14:51.060 --> 00:14:55.440
+the properties of the underlying object that the graphical structure is modeling.
+
+00:14:55.440 --> 00:14:58.575
+So what this means is that the graphs you will be considering
+
+00:14:58.575 --> 00:15:01.965
+are not just the topology nodes and edges,
+
+00:15:01.965 --> 00:15:05.070
+but it is also the attributes,
+
+00:15:05.070 --> 00:15:07.450
+uh, attached to them.
+
+00:15:07.460 --> 00:15:09.735
+Um, as I mentioned,
+
+00:15:09.735 --> 00:15:12.480
+some of these properties can actually be
+
+00:15:12.480 --> 00:15:15.480
+represented directly in the adjacency matrix as well.
+
+00:15:15.480 --> 00:15:18.090
+So for example, properties of edges like
+
+00:15:18.090 --> 00:15:21.750
+weights can simply be represented in the adjacency matrix, right?
+
+00:15:21.750 --> 00:15:24.355
+Rather than having adjacency matrix to be binary,
+
+00:15:24.355 --> 00:15:28.050
+we can now have adjacency matrix to have real values where
+
+00:15:28.050 --> 00:15:32.100
+the strength of the connection corresponds simply to the value,
+
+00:15:32.100 --> 00:15:33.450
+uh, in that entry.
+
+00:15:33.450 --> 00:15:36.150
+So two and four are more strongly linked,
+
+00:15:36.150 --> 00:15:37.545
+so the value is four,
+
+00:15:37.545 --> 00:15:40.110
+while for example, one and three are linked with
+
+00:15:40.110 --> 00:15:43.845
+a weak connection that has weight only 0.5.
+
+00:15:43.845 --> 00:15:46.440
+Um, as a- um,
+
+00:15:46.440 --> 00:15:49.560
+another important thing is that when we create the graphs is that we also
+
+00:15:49.560 --> 00:15:53.070
+can think about nodes having self-loops.
+
+00:15:53.070 --> 00:15:54.630
+Um, for example, here,
+
+00:15:54.630 --> 00:15:57.150
+node four has a self-loop, uh,
+
+00:15:57.150 --> 00:16:00.660
+and now the degree of node four equals to three.
+
+00:16:00.660 --> 00:16:03.630
+Um, self-loops are simply correspond to
+
+00:16:03.630 --> 00:16:06.900
+the entries on the diagonal of the adjacency matrix.
+
+00:16:06.900 --> 00:16:08.580
+And in some cases,
+
+00:16:08.580 --> 00:16:11.550
+we may actually create a multi-graph where we
+
+00:16:11.550 --> 00:16:15.045
+allow multiple edges between a pair of nodes.
+
+00:16:15.045 --> 00:16:18.210
+Sometimes we can, we can think of a multi-graph as
+
+00:16:18.210 --> 00:16:22.350
+a weighted graph where the entry on the matrix counts the number of edges,
+
+00:16:22.350 --> 00:16:25.770
+but sometimes you want to represent every edge individually,
+
+00:16:25.770 --> 00:16:29.955
+separately because these edges might have different properties,
+
+00:16:29.955 --> 00:16:32.505
+um, and different, um, attributes.
+
+00:16:32.505 --> 00:16:35.025
+Both, um, the self-loops,
+
+00:16:35.025 --> 00:16:39.570
+as well as multi-graphs occur quite frequently in nature.
+
+00:16:39.570 --> 00:16:43.095
+Uh, for example, if you think about phonecalls transactions,
+
+00:16:43.095 --> 00:16:45.930
+there can be multiple transactions between a pair of nodes
+
+00:16:45.930 --> 00:16:49.305
+and we can accurately represent this as a multi-graph.
+
+00:16:49.305 --> 00:16:52.530
+Um, as we have these graphs, I,
+
+00:16:52.530 --> 00:16:56.175
+I also want to talk about the notion of connectivity,
+
+00:16:56.175 --> 00:16:59.865
+in a sense, whether the graph is connected or disconnected.
+
+00:16:59.865 --> 00:17:04.485
+And graph is connected if any pair of nodes in, uh, in this, uh,
+
+00:17:04.485 --> 00:17:10.080
+graph can be, can be connected via a path along the edges of the graph.
+
+00:17:10.080 --> 00:17:12.450
+So for example, this particular graph is
+
+00:17:12.450 --> 00:17:15.375
+connected while this other graph is not connected,
+
+00:17:15.375 --> 00:17:17.805
+it has three connected components.
+
+00:17:17.805 --> 00:17:21.000
+This is one connected component, second connected component,
+
+00:17:21.000 --> 00:17:23.085
+then a third connected component,
+
+00:17:23.085 --> 00:17:26.565
+the node h, which is an isolated node.
+
+00:17:26.565 --> 00:17:31.005
+This is the notion of connectivity for undirected graphs, uh,
+
+00:17:31.005 --> 00:17:34.020
+and what is interesting in this notion is,
+
+00:17:34.020 --> 00:17:35.490
+that when we, um,
+
+00:17:35.490 --> 00:17:37.095
+have graphs that are,
+
+00:17:37.095 --> 00:17:39.600
+for example, disconnect it and look at what is
+
+00:17:39.600 --> 00:17:42.510
+the structure of the underlying adjacency matrix,
+
+00:17:42.510 --> 00:17:45.990
+we will have these block diagonal structure, where, basically,
+
+00:17:45.990 --> 00:17:50.520
+if this is a graph that is composed of two components, then we will have,
+
+00:17:50.520 --> 00:17:55.770
+um, um, block diagonal structure where the edges only go between the,
+
+00:17:55.770 --> 00:17:59.520
+um, nodes inside the same, um, connected component,
+
+00:17:59.520 --> 00:18:02.250
+and there is no edges in the off-diagonal part,
+
+00:18:02.250 --> 00:18:04.950
+which would mean that there is no edge between,
+
+00:18:04.950 --> 00:18:06.645
+uh, red and blue,
+
+00:18:06.645 --> 00:18:08.475
+uh, part of the graph.
+
+00:18:08.475 --> 00:18:13.860
+The notion of connectivity also generalizes to directed graphs.
+
+00:18:13.860 --> 00:18:16.815
+Here, we are talking about two types of connectivity,
+
+00:18:16.815 --> 00:18:19.185
+strong and weak connectivity.
+
+00:18:19.185 --> 00:18:23.519
+A weakly connected directed graph is simply a graph that is connected,
+
+00:18:23.519 --> 00:18:27.390
+uh, in- if we ignore the directions of the edges.
+
+00:18:27.390 --> 00:18:30.645
+A strongly connected graph, um,
+
+00:18:30.645 --> 00:18:33.930
+or a graph is strongly connected if for every pair of
+
+00:18:33.930 --> 00:18:37.740
+nodes there exists a directed path between them.
+
+00:18:37.740 --> 00:18:43.290
+So, um, this means that there has to exist a directed path from, for example,
+
+00:18:43.290 --> 00:18:45.180
+from node A to node B,
+
+00:18:45.180 --> 00:18:48.180
+as well as from node B back to, uh,
+
+00:18:48.180 --> 00:18:51.990
+node A if the graph is strongly connected.
+
+00:18:51.990 --> 00:18:56.400
+What this also means is that we can talk about notion of
+
+00:18:56.400 --> 00:19:01.005
+strongly connected components where strongly connected components are,
+
+00:19:01.005 --> 00:19:03.825
+uh, sets of nodes in the graph, uh,
+
+00:19:03.825 --> 00:19:05.670
+such that every node, uh,
+
+00:19:05.670 --> 00:19:09.870
+in that set can visit each other via the- via a directed path.
+
+00:19:09.870 --> 00:19:12.360
+So for example, in this case here,
+
+00:19:12.360 --> 00:19:14.730
+nodes, uh, A, B,
+
+00:19:14.730 --> 00:19:20.040
+and C form a strongly connected component because they are on a cycle.
+
+00:19:20.040 --> 00:19:24.045
+So we ca- any- from any node we can visit, uh, any other node.
+
+00:19:24.045 --> 00:19:26.445
+Uh, the example here shows, uh,
+
+00:19:26.445 --> 00:19:29.580
+directed graph with two strongly connected component,
+
+00:19:29.580 --> 00:19:33.855
+again, two cycles on, um three nodes.
+
+00:19:33.855 --> 00:19:40.710
+So this concludes the discussion of the- er- the graph representations,
+
+00:19:40.710 --> 00:19:44.820
+um, that- and ways how we can create graphs from real data.
+
+00:19:44.820 --> 00:19:46.530
+Um, in this lecture,
+
+00:19:46.530 --> 00:19:52.155
+we first talked about machine-learning with graphs and various applications in use cases.
+
+00:19:52.155 --> 00:19:54.390
+We talked about node level, edge level,
+
+00:19:54.390 --> 00:19:57.360
+and graph level machine-learning prediction tasks.
+
+00:19:57.360 --> 00:20:01.995
+And then we discussed the choice of a graph representation in terms of directed,
+
+00:20:01.995 --> 00:20:04.755
+undirected graphs, bipartite graphs,
+
+00:20:04.755 --> 00:20:06.945
+weighted, uh, unweighted graphs,
+
+00:20:06.945 --> 00:20:11.295
+adjacency matrices, as well as some definitions from graph theory,
+
+00:20:11.295 --> 00:20:14.535
+like the connectivity, um, of graphs,
+
+00:20:14.535 --> 00:20:16.649
+weak connectivity, strong connectivity,
+
+00:20:16.649 --> 00:20:19.480
+as well as the notion of node degree.
+
+00:20:19.480 --> 00:20:22.020
+Um, thank you very much.
+
