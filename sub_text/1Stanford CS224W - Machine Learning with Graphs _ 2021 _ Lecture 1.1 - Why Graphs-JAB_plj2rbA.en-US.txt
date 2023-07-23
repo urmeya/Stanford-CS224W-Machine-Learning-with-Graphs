@@ -1,0 +1,58 @@
+Machine Learning with Graphs. 
+
+So why graphs? 
+Graphs are a general language for describing and an- analyzing entities with the relations in interactions. This means that rather than thinking of the world or a given domain as a set of isolated datapoints, we really think of it in terms of networks and relations between these entities.
+
+There are many types of data that can naturally be represented as graphs and modeling these graphical relations, these relational structure of the underlying domain allows us to build much more faithful, much more accurate models of the underlying phenomena, underlying data. 
+So for example, we can think of 
+- a computer networks, 
+- disease pathways 
+- networks of particles in physics 
+- networks of organisms in food webs, 
+- infrastructure, 
+- as well as events can all be represented as a graphs. 
+- social networks 
+- economic networks, 
+- communication networks, 
+- say patients between different papers, 
+- Internet as a giant communication network, 
+- how neurons in our brain are connected. 
+
+Again, all these domains are inherently network or graphs. And that representation allows us to capture the relationships between different objects or entities in these different domains. 
+
+And last, we can take knowledge and represent facts as relationships between different entities. 
+We can describe the regulatory mechanisms in our cells as processes governed by the connections between different entities. 
+We can even take scenes from real world and presented them as graphs of relationships between the objects in the scene. These are called scene graphs. 
+We can take computer code software and represent it as a graph of, let's say, calls between different functions or as a structure of the code captures by the abstract syntax tree. 
+We can also naturally take molecules which are composed of nodes of atoms and bonds as a set of graphs where we represent atoms as nodes and their bonds as edges between them. 
+And of course, in computer graphics, we can take three-dimensional shapes and- and represent them as a graphs. 
+So in all these domains, graphical structure is the- is the important part that allows us to model the underlying domain, underlying phenomena in a fateful way. 
+
+So the way we are going to think about graph relational data in this class is that there are essentially two big parts of data that can be represented as graphs. 
+First are what is called natural graphs or networks, where underlying domains can naturally be represented as graphs. For example, social networks, societies are collection of seven billion individuals and connections between them, communications and transactions between electronic devices, phone calls, financial transactions, all naturally form graphs. In biomedicine we have genes, proteins regulating biological processes, and we can represent interactions between these different biological entities with a graph. Connections between neurons in our brains are essentially a network of connections. And if we want to model these domains, really present them as networks. 
+A second example of domains that also have relational structure where we can use graphs to represent that relational structure. So for example, information and knowledge is many times organized and linked. Software can be represented as a graph. We can many times take datapoints and connect similar data points. And this will create our graph a similarity network. And we can take other, um domains that have natural relational structure like molecules, scene graphs, 3D shapes, as well as, you know, in physics, we can take particle-based simulation to simulate how particles are related to each other through and they represent this with the graph. 
+
+So this means that there are many different domains, either as natural graphs or natural networks, as well as other domains that can naturally be modeled as graphs to capture the relational structure. 
+
+How do we take advantage of this relational structure to make better, more accurate predictions. 
+And this is especially important because couplings domains have reached a relational structure which can be presented with a graph. And by explicitly modeling these relationships, we will be able to achieve better performance, build more accurate models, make more accurate predictions. 
+
+And this is especially interesting and important in the age of deep learning, where the- today's deep learning modern toolbox is specialized for simple data types. It is specialized for simple sequences and grids. A sequence is a like text or speech has this linear structure and there has- there have been amazing tools developed to analyze this type of structure. Images can all be resized and have this spatial locality- so they can be represented as fixed size grids or fixed size standards. And again, deep learning methodology has been very good at processing this type of fixed size images. 
+
+However graphs, networks are much harder to process because they are more complex. First, they have arbitrary size and complex topology. There is also no spatial locality as in grids or as in text. In text we know left and right, in grids we have up and down left and right. But in networks, there is no reference point, there is no notion of uh, spatial locality. 
+The second important thing is there is no reference point, there is no fixed node ordering that would allow us uh, to do to do deep learning. And often, these networks are dynamic and have multi-model features. 
+
+How do we develop neural networks that are much more broadly applicable? 
+How do we develop neural networks that are applicable to complex data types like graphs? 
+And really, it is relational data graphs that are the new frontier of deep learning and representation learning research. 
+
+So intuitively, what we would like to do is we would like to do build neural networks, but on the input we'll take uh, our graph and on the output, they will be able to make predictions. 
+And these predictions can be at the level of individual nodes, can be at the level of pairs of nodes or links, or it can be something much more complex like a brand new generated graph or prediction of a property of a given molecule that can be represented as a graph on the input. 
+
+And the question is, how do we design this neural network architecture that will allow us to do this end to end, meaning there will be no human feature engineering needed? 
+
+In traditional machine learning approaches, a lot of effort goes into designing proper features, proper ways to capture the structure of the data so that machine learning models can take advantage of it. 
+We will discuss mostly about representation learning where these feature engineering step is taken away. And basically, as soon as we have our graph we can automatically learn a good representation of the graph so that it can be used for downstream machine learning algorithm. So that a presentation learning is about automatically extracting or learning features in the graph. 
+The way we can think of representation learning is to map nodes of our graph to a d-dimensional embedding, to the d-dimensional vectors, such that similar nodes in the network are embedded close together in the embedding space. So the goal is to learn this function f that will take the nodes and map them into these d-dimensional in the real valued vectors, where this vector will call this representation or a feature representation or an embedding of a given node, an embedding of an entire graph, an embedding of a given link and so on. 
+
+First, we're going to talk about traditional methods for machine learning and graphs like graphlets and graph kernels. We are then going to talk about methods to generate generic node embeddings, methods like DeepWalk and Node2Vec. We are going to spend quite a bit of time talking about graph neural networks and popular graph neural network architectures like graph convolutional neural network, the GraphSage architecture or Graph Attention Network architecture. We are also going to study the expressive power of graph neural networks the theory behind them, and how do we scale them up to very large graphs. Then in the second part of this course, we are also going to talk about heterogeneous graphs, knowledge graphs, and applications to logical reasoning. We're learning about methods like TransE and BetaE. We are also going to talk about how do we build deep generative models for graphs where we can think of the prediction of the model to be an entire newly generated graph. And we are also going to discuss applications to biomedicine various scientific applications, as well as applications to industry in terms of recommender systems, fraud detection, and so on.
